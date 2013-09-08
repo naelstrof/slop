@@ -25,6 +25,15 @@ enum CursorType {
     LowerLeftCorner
 };
 
+class WindowRectangle {
+public:
+    int m_x;
+    int m_y;
+    unsigned int m_width;
+    unsigned int m_height;
+    unsigned int m_border;
+};
+
 class Rectangle {
 public:
             Rectangle( int x, int y, int width, int height, int border, int padding );
@@ -66,7 +75,11 @@ public:
     int                 m_mousey;
     std::vector<bool>   m_mouse;
     bool                mouseDown( unsigned int button );
+    WindowRectangle     m_hoverWindow;
+    Window              m_hoverXWindow;
 private:
+    void                updateHoverWindow();
+    void                updateHoverWindow( Window child );
     bool                m_good;
     std::vector<Cursor> m_cursors;
     std::vector<Rectangle*> m_rects;

@@ -9,6 +9,7 @@ is::XEngine::XEngine() {
     m_good = false;
     m_mousex = -1;
     m_mousey = -1;
+    m_hoverXWindow = None;
 }
 
 is::XEngine::~XEngine() {
@@ -76,6 +77,16 @@ int is::XEngine::grabCursor( is::CursorType type ) {
         printf( "Failed to grab X cursor\n" );
         return 1;
     }
+
+    // Quickly set the mouse position so we don't have to worry about x11 generating an event.
+    Window root, child;
+    int mx, my;
+    int wx, wy;
+    unsigned int mask;
+    XQueryPointer( m_display, m_root, &root, &child, &mx, &my, &wx, &wy, &mask );
+    m_mousex = mx;
+    m_mousex = my;
+    updateHoverWindow( child );
     return 0;
 }
 
@@ -91,7 +102,7 @@ void is::XEngine::tick() {
     if ( !m_good ) {
         return;
     }
-    XFlush( m_display );
+    XSync( m_display, false );
     XEvent event;
     while ( XPending( m_display ) ) {
         XNextEvent( m_display, &event );
@@ -119,8 +130,12 @@ void is::XEngine::tick() {
                 }
                 break;
             }
+            default: break;
         }
     }
+
+    // Since I couldn't get Xlib to send a EnterNotify or LeaveNotify events, we need to query the underlying window every frame.
+    updateHoverWindow();
 }
 
 Cursor is::XEngine::getCursor( is::CursorType type ) {
@@ -153,7 +168,7 @@ void is::XEngine::setCursor( is::CursorType type ) {
     }
     Cursor xfontcursor = getCursor( type );
     XChangeActivePointerGrab( m_display,
-                              ButtonMotionMask | ButtonPressMask | ButtonReleaseMask,
+                              PointerMotionMask | ButtonPressMask | ButtonReleaseMask,
                               xfontcursor, CurrentTime );
 }
 
@@ -181,12 +196,6 @@ is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int p
         m_yoffset += m_height;
         m_height = -m_height;
     }
-    if ( m_width == 0 ) {
-        m_width = 1;
-    }
-    if ( m_height == 0 ) {
-        m_height = 1;
-    }
 
     XAllocNamedColor( xengine->m_display, xengine->m_colormap, "black", &m_forground, &m_forgroundExact );
     XAllocNamedColor( xengine->m_display, xengine->m_colormap, "white", &m_background, &m_backgroundExact );
@@ -200,7 +209,7 @@ is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int p
                               CWSaveUnder | CWOverrideRedirect |
                               CWColormap;
 
-    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x+m_xoffset, m_y+m_yoffset, m_width+m_border*2, m_height+m_border*2,
+    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x-m_border+m_xoffset, m_y-m_border+m_yoffset, m_width+m_border*2, m_height+m_border*2,
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
     XRectangle rect;
@@ -240,12 +249,6 @@ void is::Rectangle::setDim( int w, int h ) {
         m_yoffset += h;
         m_height = -h;
     }
-    if ( m_width == 0 ) {
-        m_width = 1;
-    }
-    if ( m_height == 0 ) {
-        m_height = 1;
-    }
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
     XMoveWindow( xengine->m_display, m_window, m_x-m_border+m_xoffset, m_y-m_border+m_yoffset );
     // Now punch another hole in it.
@@ -263,4 +266,50 @@ void is::Rectangle::setDim( int w, int h ) {
 }
 
 void is::Rectangle::draw() {
+}
+
+void is::XEngine::updateHoverWindow() {
+    Window root, child;
+    int mx, my;
+    int wx, wy;
+    unsigned int mask;
+    XQueryPointer( m_display, m_root, &root, &child, &mx, &my, &wx, &wy, &mask );
+    if ( m_hoverXWindow == child ) {
+        return;
+    }
+    for ( unsigned int i=0; i<m_rects.size(); i++ ) {
+        if ( m_rects.at( i )->m_window == child ) {
+            return;
+        }
+    }
+    m_hoverXWindow = child;
+    if ( child == None ) {
+        return;
+    }
+    unsigned int depth;
+    XGetGeometry( m_display, child, &root,
+                  &(m_hoverWindow.m_x), &(m_hoverWindow.m_y),
+                  &(m_hoverWindow.m_width), &(m_hoverWindow.m_height),
+                  &(m_hoverWindow.m_border), &depth );
+}
+
+void is::XEngine::updateHoverWindow( Window child ) {
+    if ( m_hoverXWindow == child ) {
+        return;
+    }
+    for ( unsigned int i=0; i<m_rects.size(); i++ ) {
+        if ( m_rects.at( i )->m_window == child ) {
+            return;
+        }
+    }
+    m_hoverXWindow = child;
+    if ( child == None ) {
+        return;
+    }
+    unsigned int depth;
+    Window root;
+    XGetGeometry( m_display, child, &root,
+                  &(m_hoverWindow.m_x), &(m_hoverWindow.m_y),
+                  &(m_hoverWindow.m_width), &(m_hoverWindow.m_height),
+                  &(m_hoverWindow.m_border), &depth );
 }
