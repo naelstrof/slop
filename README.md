@@ -9,7 +9,12 @@ features
 * Clicking on a window makes slrn return the dimensions of the window.
 * Clicking and dragging causes a selection rectangle to appear, renders pretty well (compared to scrot). And will return the dimensions of that rectangle in absolute screen coords.
 * On startup it turns your cursor into a crosshair, then adjusts the cursor into angles as you drag the selection rectangle.
-* Supports simple arguments (change selection rectangle border size, x display, padding, click tolerance, etc. )
+* Supports simple arguments:
+    * Change selection rectangle border size.
+    * Select X display.
+    * Set padding size, even to negative padding sizes!
+    * Set click tolerance for if you have a shaky mouse.
+    * Set the color of the selection rectangles to match your theme!
 
 practical applications
 ----------------------
