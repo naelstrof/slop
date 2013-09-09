@@ -1,8 +1,8 @@
 #include "x.hpp"
 
-is::XEngine* xengine = new is::XEngine();
+slrn::XEngine* xengine = new slrn::XEngine();
 
-is::XEngine::XEngine() {
+slrn::XEngine::XEngine() {
     m_display = NULL;
     m_visual = NULL;
     m_screen = NULL;
@@ -12,7 +12,7 @@ is::XEngine::XEngine() {
     m_hoverXWindow = None;
 }
 
-is::XEngine::~XEngine() {
+slrn::XEngine::~XEngine() {
     if ( !m_good ) {
         return;
     }
@@ -27,11 +27,11 @@ is::XEngine::~XEngine() {
     XCloseDisplay( m_display );
 }
 
-void is::XEngine::addRect( Rectangle* rect ) {
+void slrn::XEngine::addRect( Rectangle* rect ) {
     m_rects.push_back( rect );
 }
 
-void is::XEngine::removeRect( Rectangle* rect ) {
+void slrn::XEngine::removeRect( Rectangle* rect ) {
     for ( unsigned int i=0; i<m_rects.size(); i++ ) {
         if ( m_rects.at( i ) == rect ) {
             m_rects.erase( m_rects.begin() + i );
@@ -42,14 +42,14 @@ void is::XEngine::removeRect( Rectangle* rect ) {
     }
 }
 
-bool is::XEngine::mouseDown( unsigned int button ) {
+bool slrn::XEngine::mouseDown( unsigned int button ) {
     if ( button >= m_mouse.size() ) {
         return false;
     }
     return m_mouse.at( button );
 }
 
-int is::XEngine::init( std::string display ) {
+int slrn::XEngine::init( std::string display ) {
     // Initialize display
     m_display = XOpenDisplay( display.c_str() );
     if ( !m_display ) {
@@ -65,7 +65,7 @@ int is::XEngine::init( std::string display ) {
     return 0;
 }
 
-int is::XEngine::grabCursor( is::CursorType type ) {
+int slrn::XEngine::grabCursor( slrn::CursorType type ) {
     if ( !m_good ) {
         return 1;
     }
@@ -74,7 +74,7 @@ int is::XEngine::grabCursor( is::CursorType type ) {
                             PointerMotionMask | ButtonPressMask | ButtonReleaseMask,
                             GrabModeAsync, GrabModeAsync, m_root, xfontcursor, CurrentTime );
     if ( err != GrabSuccess ) {
-        printf( "Failed to grab X cursor\n" );
+        printf( "Failed to grab X cursor.\n" );
         return 1;
     }
 
@@ -90,7 +90,7 @@ int is::XEngine::grabCursor( is::CursorType type ) {
     return 0;
 }
 
-int is::XEngine::releaseCursor() {
+int slrn::XEngine::releaseCursor() {
     if ( !m_good ) {
         return 1;
     }
@@ -98,7 +98,7 @@ int is::XEngine::releaseCursor() {
     return 0;
 }
 
-void is::XEngine::tick() {
+void slrn::XEngine::tick() {
     if ( !m_good ) {
         return;
     }
@@ -138,7 +138,7 @@ void is::XEngine::tick() {
     updateHoverWindow();
 }
 
-Cursor is::XEngine::getCursor( is::CursorType type ) {
+Cursor slrn::XEngine::getCursor( slrn::CursorType type ) {
     int xfontcursor;
     switch ( type ) {
         default:
@@ -162,7 +162,7 @@ Cursor is::XEngine::getCursor( is::CursorType type ) {
     return newcursor;
 }
 
-void is::XEngine::setCursor( is::CursorType type ) {
+void slrn::XEngine::setCursor( slrn::CursorType type ) {
     if ( !m_good ) {
         return;
     }
@@ -172,7 +172,7 @@ void is::XEngine::setCursor( is::CursorType type ) {
                               xfontcursor, CurrentTime );
 }
 
-is::Rectangle::~Rectangle() {
+slrn::Rectangle::~Rectangle() {
     //XFreeGC( xengine->m_display, m_gc );
     if ( m_window == None ) {
         return;
@@ -181,7 +181,7 @@ is::Rectangle::~Rectangle() {
     XDestroyWindow( xengine->m_display, m_window );
 }
 
-is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding ) {
+slrn::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding ) {
     m_xoffset = 0;
     m_yoffset = 0;
     m_x = x;
@@ -221,7 +221,7 @@ is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int p
     XMapWindow( xengine->m_display, m_window );
 }
 
-void is::Rectangle::setPos( int x, int y ) {
+void slrn::Rectangle::setPos( int x, int y ) {
     if ( m_x == x && m_y == y ) {
         return;
     }
@@ -233,7 +233,7 @@ void is::Rectangle::setPos( int x, int y ) {
     XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset, m_y+m_yoffset );
 }
 
-void is::Rectangle::setDim( int w, int h ) {
+void slrn::Rectangle::setDim( int w, int h ) {
     if ( m_width == w && m_height == h ) {
         return;
     }
@@ -258,7 +258,7 @@ void is::Rectangle::setDim( int w, int h ) {
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
 }
 
-void is::XEngine::updateHoverWindow() {
+void slrn::XEngine::updateHoverWindow() {
     Window root, child;
     int mx, my;
     int wx, wy;
@@ -283,7 +283,7 @@ void is::XEngine::updateHoverWindow() {
                   &(m_hoverWindow.m_border), &depth );
 }
 
-void is::XEngine::updateHoverWindow( Window child ) {
+void slrn::XEngine::updateHoverWindow( Window child ) {
     if ( m_hoverXWindow == child ) {
         return;
     }
@@ -305,7 +305,7 @@ void is::XEngine::updateHoverWindow( Window child ) {
 }
 
 // Keeps our rectangle's sizes all positive, so Xlib doesn't throw an exception.
-void is::Rectangle::constrain( int w, int h ) {
+void slrn::Rectangle::constrain( int w, int h ) {
     int pad = m_padding;
     if ( pad < 0 && std::abs( w ) < std::abs( pad )*2 ) {
         pad = 0;

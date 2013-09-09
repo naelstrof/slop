@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-O2 -g
 LDFLAGS=-lX11 -lXext
-SOURCES=main.cpp x.cpp
+SOURCES=main.cpp x.cpp options.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=slrn
 

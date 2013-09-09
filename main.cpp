@@ -1,105 +1,35 @@
 #include <unistd.h>
 #include <cstdio>
 #include "x.hpp"
-
-int borderSize = 10;
-int padding = 0;
-std::string xserver = ":0";
-
-void printHelp() {
-    printf( "Usage: slrn [options]\n" );
-    printf( "Print user selected region to stdout.\n" );
-    printf( "\n" );
-    printf( "options\n" );
-    printf( "    -h, --help                     show this message.\n" );
-    printf( "    -b=INT, --bordersize=INT       set selection rectangle border size.\n" );
-    printf( "    -p=INT, --padding=INT          set padding size for selection.\n" );
-    printf( "    -x=STRING, --xdisplay=STRING   set x display (STRING must be hostname:number.screen_number format)\n" );
-    printf( "examples\n" );
-    printf( "    slrn -b=10 -x=:0 -p=-30\n" );
-}
-
-int parseOptions( int argc, char** argv ) {
-    for ( int i=0; i<argc; i++ ) {
-        std::string arg = argv[i];
-        if ( arg.substr( 0, 3 ) == "-b=" || arg.substr( 0, 13 ) == "--bordersize=" ) {
-            int find = arg.find( "=" );
-            if ( find != arg.npos ) {
-                arg.at( find ) = ' ';
-            }
-            int num = sscanf( arg.c_str(), "%*s %i", &borderSize );
-            if ( borderSize < 0 ) {
-                borderSize = 0;
-            }
-            if ( num != 1 ) {
-                printf( "Error parsing command arguments near %s\n", argv[i] );
-                printf( "Usage: -b=INT or --bordersize=INT\n" );
-                printf( "Example: -b=10 or --bordersize=12\n" );
-                return 1;
-            }
-        } else if ( arg.substr( 0, 3 ) == "-p=" || arg.substr( 0, 10 ) == "--padding=" ) {
-            int find = arg.find( "=" );
-            if ( find != arg.npos ) {
-                arg.at( find ) = ' ';
-            }
-            int num = sscanf( arg.c_str(), "%*s %i", &padding );
-            if ( num != 1 ) {
-                printf( "Error parsing command arguments near %s\n", argv[i] );
-                printf( "Usage: -p=INT or --padding=INT\n" );
-                printf( "Example: -p=0 or --padding=-12\n" );
-                return 1;
-            }
-        } else if ( arg.substr( 0, 3 ) == "-x=" || arg.substr( 0, 11 ) == "--xdisplay=" ) {
-            int find = arg.find( "=" );
-            if ( find != arg.npos ) {
-                arg.at( find ) = ' ';
-            }
-            char* x = new char[ arg.size() ];
-            int num = sscanf( arg.c_str(), "%*s %s", x );
-            if ( num != 1 ) {
-                printf( "Error parsing command arguments near %s\n", argv[i] );
-                printf( "Usage: -x=STRING or --xserver=STRING.\n" );
-                printf( "Example: -x=:0 or --xserver=winston:1.3\n" );
-                delete[] x;
-                return 1;
-            }
-            xserver = x;
-            delete[] x;
-        } else if ( arg == "-h" || arg == "--help" ) {
-            printHelp();
-            return 2;
-        } else {
-            if ( i == 0 ) {
-                continue;
-            }
-            printf( "Error: Unknown argument %s\n", argv[i] );
-            printf( "Try -h or --help for help.\n" );
-            return 1;
-        }
-    }
-    return 0;
-}
+#include "options.hpp"
 
 int main( int argc, char** argv ) {
-    int err = parseOptions( argc, argv );
+    int err = options->parseOptions( argc, argv );
     if ( err ) {
         return err;
     }
     int state = 0;
     bool running = true;
-    is::Rectangle* selection;
-    is::Rectangle* windowselection = NULL;
+    slrn::Rectangle* selection;
+    slrn::Rectangle* windowselection = NULL;
     Window window = None;
+    std::string xdisplay = options->m_xdisplay;
+    int padding = options->m_padding;
+    int borderSize = options->m_borderSize;
+    int tolerance = options->m_tolerance;
 
-    err = xengine->init( xserver.c_str() );
+    // First we set up the x interface and grab the mouse,
+    // if we fail for either we exit immediately.
+    err = xengine->init( xdisplay.c_str() );
     if ( err ) {
         return err;
     }
-    err = xengine->grabCursor( is::Cross );
+    err = xengine->grabCursor( slrn::Cross );
     if ( err ) {
         return err;
     }
     while ( running ) {
+        // "ticking" the xengine makes it process all queued events.
         xengine->tick();
         if ( xengine->mouseDown( 3 ) ) {
             printf( "X=0\n" );
@@ -110,17 +40,21 @@ int main( int argc, char** argv ) {
             state = -1;
             running = false;
         }
+        // Our adorable little state manager will handle what state we're in.
         switch ( state ) {
             default: {
                 break;
             }
             case 0: {
+                // If xengine has found a window we're hovering over (or if it changed)
+                // create a rectangle around it so the user knows he/she can click on it.
                 if ( window != xengine->m_hoverXWindow ) {
+                    // Make sure to delete the old selection rectangle.
                     if ( windowselection ) {
-                        xengine->removeRect( windowselection );
+                        xengine->removeRect( windowselection ); // removeRect also dealloc's the rectangle for us.
                     }
-                    is::WindowRectangle t = xengine->m_hoverWindow;
-                    windowselection = new is::Rectangle( t.m_x - t.m_border,
+                    slrn::WindowRectangle t = xengine->m_hoverWindow;
+                    windowselection = new slrn::Rectangle( t.m_x - t.m_border,
                                                          t.m_y - t.m_border,
                                                          t.m_width + t.m_border,
                                                          t.m_height + t.m_border,
@@ -128,6 +62,8 @@ int main( int argc, char** argv ) {
                     xengine->addRect( windowselection );
                     window = xengine->m_hoverXWindow;
                 }
+                // If the user clicked, remove the old selection rectangle and then
+                // move on to the next state.
                 if ( xengine->mouseDown( 1 ) ) {
                     if ( windowselection ) {
                         xengine->removeRect( windowselection );
@@ -137,46 +73,63 @@ int main( int argc, char** argv ) {
                 break;
             }
             case 1: {
-                selection = new is::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding );
+                // Simply create a new rectangle at the mouse position and move on
+                // to the next state.
+                selection = new slrn::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding );
                 xengine->addRect( selection );
                 state++;
                 break;
             }
             case 2: {
+                // If the user has let go of the mouse button, we'll just
+                // continue to the next state.
                 if ( !xengine->mouseDown( 1 ) ) {
                     state++;
                     break;
                 }
+                // Set the selection rectangle's dimensions to mouse movement.
+                // We use the function setDim since rectangles can't have negative widths,
+                // and because the rectangles have borders and padding to worry about.
                 selection->setDim( xengine->m_mousex - selection->m_x, xengine->m_mousey - selection->m_y );
+                // We also detect which way the user is pulling and set the mouse icon accordingly.
                 bool x = selection->m_flippedx;
                 bool y = selection->m_flippedy;
                 if ( !x && !y ) {
-                    xengine->setCursor( is::LowerRightCorner );
+                    xengine->setCursor( slrn::LowerRightCorner );
                 } else if ( x && !y ) {
-                    xengine->setCursor( is::LowerLeftCorner );
+                    xengine->setCursor( slrn::LowerLeftCorner );
                 } else if ( !x && y ) {
-                    xengine->setCursor( is::UpperRightCorner );
+                    xengine->setCursor( slrn::UpperRightCorner );
                 } else {
-                    xengine->setCursor( is::UpperLeftCorner );
+                    xengine->setCursor( slrn::UpperLeftCorner );
                 }
 
                 break;
             }
             case 3: {
+                // We pull the dimensions and positions from the selection rectangle.
+                // The selection rectangle automatically converts the positions and
+                // dimensions to absolute coordinates when we set them earilier.
                 int x = selection->m_x+selection->m_xoffset;
                 int y = selection->m_y+selection->m_yoffset;
                 int w = selection->m_width;
                 int h = selection->m_height;
+                // Delete the rectangle.
                 xengine->removeRect( selection );
+                // Exit the utility after this state runs once.
                 running = false;
-                if ( w || h || xengine->m_hoverXWindow == None ) {
+                // If the user simply clicked (and thus made the width and height smaller than
+                // our tolerance) or if we're not hovering over a window, just print the selection
+                // rectangle's stuff.
+                if ( w > tolerance || h > tolerance || xengine->m_hoverXWindow == None ) {
                     printf( "X=%i\n", x );
                     printf( "Y=%i\n", y );
                     printf( "W=%i\n", w + 1 );
                     printf( "H=%i\n", h + 1 );
                     break;
                 }
-                is::WindowRectangle t = xengine->m_hoverWindow;
+                // Otherwise lets grab the window's dimensions and use those (with padding).
+                slrn::WindowRectangle t = xengine->m_hoverWindow;
                 x = t.m_x - padding - t.m_border;
                 y = t.m_y - padding - t.m_border;
                 w = t.m_width + t.m_border + padding*2;
@@ -188,9 +141,14 @@ int main( int argc, char** argv ) {
                 break;
             }
         }
-        // No need to max out CPU--
+        // No need to max out CPU
+        // FIXME: This could be adjusted to measure how much time has passed,
+        // we may very well need to max out the CPU if someone has a really- really
+        // bad computer.
         usleep( 1000 );
     }
+    // Clean up global classes.
     delete xengine;
+    delete options;
     return 0;
 }
