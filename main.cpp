@@ -99,10 +99,10 @@ int main( int argc, char** argv ) {
     while ( running ) {
         xengine->tick();
         if ( xengine->mouseDown( 3 ) ) {
-            printf( "X: 0\n" );
-            printf( "Y: 0\n" );
-            printf( "W: 0\n" );
-            printf( "H: 0\n" );
+            printf( "X=0\n" );
+            printf( "Y=0\n" );
+            printf( "W=0\n" );
+            printf( "H=0\n" );
             printf( "User right-clicked. Canceled selection.\n" );
             state = -1;
             running = false;
@@ -117,11 +117,11 @@ int main( int argc, char** argv ) {
                         xengine->removeRect( windowselection );
                     }
                     is::WindowRectangle t = xengine->m_hoverWindow;
-                    windowselection = new is::Rectangle( t.m_x - padding - t.m_border,
-                                                         t.m_y - padding - t.m_border,
-                                                         t.m_width + padding*2 + t.m_border,
-                                                         t.m_height + padding*2 + t.m_border,
-                                                         borderSize, 0 );
+                    windowselection = new is::Rectangle( t.m_x - t.m_border,
+                                                         t.m_y - t.m_border,
+                                                         t.m_width + t.m_border,
+                                                         t.m_height + t.m_border,
+                                                         borderSize, padding );
                     xengine->addRect( windowselection );
                     window = xengine->m_hoverXWindow;
                 }
@@ -134,7 +134,7 @@ int main( int argc, char** argv ) {
                 break;
             }
             case 1: {
-                selection = new is::Rectangle( xengine->m_mousex - padding, xengine->m_mousey - padding, padding, padding, borderSize, 0 );
+                selection = new is::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding );
                 selection->setPos( xengine->m_mousex - padding, xengine->m_mousey - padding );
                 xengine->addRect( selection );
                 state++;
@@ -145,7 +145,7 @@ int main( int argc, char** argv ) {
                     state++;
                     break;
                 }
-                selection->setDim( xengine->m_mousex - selection->m_x + padding, xengine->m_mousey - selection->m_y + padding );
+                selection->setDim( xengine->m_mousex - selection->m_x, xengine->m_mousey - selection->m_y );
                 // x and y offsets can indicate if the selection is inside-out, which lets us know which kind of cursor we need.
                 int x = selection->m_xoffset;
                 int y = selection->m_yoffset;
@@ -169,10 +169,10 @@ int main( int argc, char** argv ) {
                 xengine->removeRect( selection );
                 running = false;
                 if ( w || h || xengine->m_hoverXWindow == None ) {
-                    printf( "X: %i\n", x );
-                    printf( "Y: %i\n", y );
-                    printf( "W: %i\n", w + 1 );
-                    printf( "H: %i\n", h + 1 );
+                    printf( "X=%i\n", x );
+                    printf( "Y=%i\n", y );
+                    printf( "W=%i\n", w + 1 );
+                    printf( "H=%i\n", h + 1 );
                     break;
                 }
                 is::WindowRectangle t = xengine->m_hoverWindow;
@@ -180,10 +180,10 @@ int main( int argc, char** argv ) {
                 y = t.m_y - padding - t.m_border;
                 w = t.m_width + t.m_border + padding*2;
                 h = t.m_height + t.m_border + padding*2;
-                printf( "X: %i\n", x );
-                printf( "Y: %i\n", y );
-                printf( "W: %i\n", w );
-                printf( "H: %i\n", h );
+                printf( "X=%i\n", x );
+                printf( "Y=%i\n", y );
+                printf( "W=%i\n", w );
+                printf( "H=%i\n", h );
                 break;
             }
         }

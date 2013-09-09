@@ -217,13 +217,13 @@ is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int p
                               CWSaveUnder | CWOverrideRedirect |
                               CWColormap;
 
-    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x-m_border+m_xoffset, m_y-m_border+m_yoffset, m_width+m_border*2, m_height+m_border*2,
+    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x-m_border+m_xoffset-m_padding, m_y-m_border+m_yoffset-m_padding, m_width+m_border*2+m_padding*2, m_height+m_border*2+m_padding*2,
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
     XRectangle rect;
     rect.x = rect.y = m_border;
-    rect.width = m_width;
-    rect.height = m_height;
+    rect.width = m_width+m_padding*2;
+    rect.height = m_height+m_padding*2;
 
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
     XMapWindow( xengine->m_display, m_window );
@@ -245,6 +245,8 @@ void is::Rectangle::setDim( int w, int h ) {
     if ( m_width == w && m_height == h ) {
         return;
     }
+    w += m_padding;
+    h += m_padding;
 
     m_xoffset = 0;
     m_yoffset = 0;
@@ -261,6 +263,7 @@ void is::Rectangle::setDim( int w, int h ) {
     if ( m_border == 0 ) {
         return;
     }
+
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
     XMoveWindow( xengine->m_display, m_window, m_x-m_border+m_xoffset, m_y-m_border+m_yoffset );
     // Now punch another hole in it.
