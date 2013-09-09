@@ -40,7 +40,6 @@ public:
             ~Rectangle();
     void    setPos( int x, int y );
     void    setDim( int w, int h );
-    void    draw();
     Window  m_window;
     int     m_x;
     int     m_y;

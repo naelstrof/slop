@@ -174,6 +174,9 @@ void is::XEngine::setCursor( is::CursorType type ) {
 
 is::Rectangle::~Rectangle() {
     //XFreeGC( xengine->m_display, m_gc );
+    if ( m_window == None ) {
+        return;
+    }
     XUnmapWindow( xengine->m_display, m_window );
     XDestroyWindow( xengine->m_display, m_window );
 }
@@ -187,6 +190,11 @@ is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int p
     m_height = height;
     m_border = border;
     m_padding = padding;
+    m_window = None;
+
+    if ( m_border == 0 ) {
+        return;
+    }
 
     if ( m_width < 0 ) {
         m_xoffset += m_width;
@@ -219,8 +227,6 @@ is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int p
 
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
     XMapWindow( xengine->m_display, m_window );
-
-    draw();
 }
 
 void is::Rectangle::setPos( int x, int y ) {
@@ -229,6 +235,9 @@ void is::Rectangle::setPos( int x, int y ) {
     }
     m_x = x;
     m_y = y;
+    if ( m_border == 0 ) {
+        return;
+    }
     XMoveWindow( xengine->m_display, m_window, m_x-m_border+m_xoffset, m_y-m_border+m_yoffset );
 }
 
@@ -249,6 +258,9 @@ void is::Rectangle::setDim( int w, int h ) {
         m_yoffset += h;
         m_height = -h;
     }
+    if ( m_border == 0 ) {
+        return;
+    }
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
     XMoveWindow( xengine->m_display, m_window, m_x-m_border+m_xoffset, m_y-m_border+m_yoffset );
     // Now punch another hole in it.
@@ -262,10 +274,6 @@ void is::Rectangle::setDim( int w, int h ) {
     rect.width = m_width;
     rect.height = m_height;
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
-    draw();
-}
-
-void is::Rectangle::draw() {
 }
 
 void is::XEngine::updateHoverWindow() {

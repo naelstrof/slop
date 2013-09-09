@@ -1,15 +1,101 @@
 #include <unistd.h>
+#include <cstdio>
 #include "x.hpp"
 
+int borderSize = 10;
+int padding = 0;
+std::string xserver = ":0";
+
+void printHelp() {
+    printf( "Usage: slrn [options]\n" );
+    printf( "Print user selected region to stdout.\n" );
+    printf( "\n" );
+    printf( "options\n" );
+    printf( "    -h, --help                     show this message.\n" );
+    printf( "    -b=INT, --bordersize=INT       set selection rectangle border size.\n" );
+    printf( "    -p=INT, --padding=INT          set padding size for selection.\n" );
+    printf( "    -x=STRING, --xdisplay=STRING   set x display (STRING must be hostname:number.screen_number format)\n" );
+    printf( "examples\n" );
+    printf( "    slrn -b=10 -x=:0 -p=-30\n" );
+}
+
+int parseOptions( int argc, char** argv ) {
+    for ( int i=0; i<argc; i++ ) {
+        std::string arg = argv[i];
+        if ( arg.substr( 0, 3 ) == "-b=" || arg.substr( 0, 13 ) == "--bordersize=" ) {
+            int find = arg.find( "=" );
+            if ( find != arg.npos ) {
+                arg.at( find ) = ' ';
+            }
+            int num = sscanf( arg.c_str(), "%*s %i", &borderSize );
+            if ( num != 1 ) {
+                printf( "Error parsing command arguments near %s\n", argv[i] );
+                printf( "Usage: -b=INT or --bordersize=INT\n" );
+                printf( "Example: -b=10 or --bordersize=12\n" );
+                return 1;
+            }
+        } else if ( arg.substr( 0, 3 ) == "-p=" || arg.substr( 0, 10 ) == "--padding=" ) {
+            int find = arg.find( "=" );
+            if ( find != arg.npos ) {
+                arg.at( find ) = ' ';
+            }
+            int num = sscanf( arg.c_str(), "%*s %i", &padding );
+            if ( num != 1 ) {
+                printf( "Error parsing command arguments near %s\n", argv[i] );
+                printf( "Usage: -p=INT or --padding=INT\n" );
+                printf( "Example: -p=0 or --padding=-12\n" );
+                return 1;
+            }
+        } else if ( arg.substr( 0, 3 ) == "-x=" || arg.substr( 0, 11 ) == "--xdisplay=" ) {
+            int find = arg.find( "=" );
+            if ( find != arg.npos ) {
+                arg.at( find ) = ' ';
+            }
+            char* x = new char[ arg.size() ];
+            int num = sscanf( arg.c_str(), "%*s %s", x );
+            if ( num != 1 ) {
+                printf( "Error parsing command arguments near %s\n", argv[i] );
+                printf( "Usage: -x=STRING or --xserver=STRING.\n" );
+                printf( "Example: -x=:0 or --xserver=winston:1.3\n" );
+                delete[] x;
+                return 1;
+            }
+            xserver = x;
+            delete[] x;
+        } else if ( arg == "-h" || arg == "--help" ) {
+            printHelp();
+            return 2;
+        } else {
+            if ( i == 0 ) {
+                continue;
+            }
+            printf( "Error: Unknown argument %s\n", argv[i] );
+            printf( "Try -h or --help for help.\n" );
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int main( int argc, char** argv ) {
+    int err = parseOptions( argc, argv );
+    if ( err ) {
+        return err;
+    }
     int state = 0;
     bool running = true;
     is::Rectangle* selection;
     is::Rectangle* windowselection = NULL;
     Window window = None;
 
-    xengine->init( ":0" );
-    xengine->grabCursor( is::Cross );
+    err = xengine->init( xserver.c_str() );
+    if ( err ) {
+        return err;
+    }
+    err = xengine->grabCursor( is::Cross );
+    if ( err ) {
+        return err;
+    }
     while ( running ) {
         xengine->tick();
         if ( xengine->mouseDown( 3 ) ) {
@@ -31,11 +117,11 @@ int main( int argc, char** argv ) {
                         xengine->removeRect( windowselection );
                     }
                     is::WindowRectangle t = xengine->m_hoverWindow;
-                    windowselection = new is::Rectangle( t.m_x,
-                                                         t.m_y,
-                                                         t.m_width,
-                                                         t.m_height,
-                                                         10, 0 );
+                    windowselection = new is::Rectangle( t.m_x - padding - t.m_border,
+                                                         t.m_y - padding - t.m_border,
+                                                         t.m_width + padding*2 + t.m_border,
+                                                         t.m_height + padding*2 + t.m_border,
+                                                         borderSize, 0 );
                     xengine->addRect( windowselection );
                     window = xengine->m_hoverXWindow;
                 }
@@ -48,8 +134,8 @@ int main( int argc, char** argv ) {
                 break;
             }
             case 1: {
-                selection = new is::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, 10, 0 );
-                selection->setPos( xengine->m_mousex, xengine->m_mousey );
+                selection = new is::Rectangle( xengine->m_mousex - padding, xengine->m_mousey - padding, padding, padding, borderSize, 0 );
+                selection->setPos( xengine->m_mousex - padding, xengine->m_mousey - padding );
                 xengine->addRect( selection );
                 state++;
                 break;
@@ -59,7 +145,7 @@ int main( int argc, char** argv ) {
                     state++;
                     break;
                 }
-                selection->setDim( xengine->m_mousex - selection->m_x, xengine->m_mousey - selection->m_y );
+                selection->setDim( xengine->m_mousex - selection->m_x + padding, xengine->m_mousey - selection->m_y + padding );
                 // x and y offsets can indicate if the selection is inside-out, which lets us know which kind of cursor we need.
                 int x = selection->m_xoffset;
                 int y = selection->m_yoffset;
@@ -90,10 +176,10 @@ int main( int argc, char** argv ) {
                     break;
                 }
                 is::WindowRectangle t = xengine->m_hoverWindow;
-                x = t.m_x;
-                y = t.m_y;
-                w = t.m_width + t.m_border;
-                h = t.m_height + t.m_border;
+                x = t.m_x - padding - t.m_border;
+                y = t.m_y - padding - t.m_border;
+                w = t.m_width + t.m_border + padding*2;
+                h = t.m_height + t.m_border + padding*2;
                 printf( "X: %i\n", x );
                 printf( "Y: %i\n", y );
                 printf( "W: %i\n", w );
