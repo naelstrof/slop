@@ -52,6 +52,8 @@ public:
     int     m_padding;
     XColor  m_forground, m_forgroundExact;
     XColor  m_background, m_backgroundExact;
+    bool    m_flippedx;
+    bool    m_flippedy;
 private:
     void    constrain( int w, int h );
 };

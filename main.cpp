@@ -28,6 +28,9 @@ int parseOptions( int argc, char** argv ) {
                 arg.at( find ) = ' ';
             }
             int num = sscanf( arg.c_str(), "%*s %i", &borderSize );
+            if ( borderSize < 0 ) {
+                borderSize = 0;
+            }
             if ( num != 1 ) {
                 printf( "Error parsing command arguments near %s\n", argv[i] );
                 printf( "Usage: -b=INT or --bordersize=INT\n" );
@@ -135,7 +138,6 @@ int main( int argc, char** argv ) {
             }
             case 1: {
                 selection = new is::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding );
-                selection->setPos( xengine->m_mousex, xengine->m_mousey );
                 xengine->addRect( selection );
                 state++;
                 break;
@@ -146,14 +148,13 @@ int main( int argc, char** argv ) {
                     break;
                 }
                 selection->setDim( xengine->m_mousex - selection->m_x, xengine->m_mousey - selection->m_y );
-                // x and y offsets can indicate if the selection is inside-out, which lets us know which kind of cursor we need.
-                int x = selection->m_xoffset;
-                int y = selection->m_yoffset;
-                if ( x == 0 && y == 0) {
+                bool x = selection->m_flippedx;
+                bool y = selection->m_flippedy;
+                if ( !x && !y ) {
                     xengine->setCursor( is::LowerRightCorner );
-                } else if ( x && y == 0 ) {
+                } else if ( x && !y ) {
                     xengine->setCursor( is::LowerLeftCorner );
-                } else if ( x == 0 && y ) {
+                } else if ( !x && y ) {
                     xengine->setCursor( is::UpperRightCorner );
                 } else {
                     xengine->setCursor( is::UpperLeftCorner );

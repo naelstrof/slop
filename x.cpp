@@ -85,7 +85,7 @@ int is::XEngine::grabCursor( is::CursorType type ) {
     unsigned int mask;
     XQueryPointer( m_display, m_root, &root, &child, &mx, &my, &wx, &wy, &mask );
     m_mousex = mx;
-    m_mousex = my;
+    m_mousey = my;
     updateHoverWindow( child );
     return 0;
 }
@@ -102,7 +102,7 @@ void is::XEngine::tick() {
     if ( !m_good ) {
         return;
     }
-    XSync( m_display, false );
+    XFlush( m_display );
     XEvent event;
     while ( XPending( m_display ) ) {
         XNextEvent( m_display, &event );
@@ -239,6 +239,9 @@ void is::Rectangle::setDim( int w, int h ) {
     }
 
     constrain( w, h );
+    if ( m_border == 0 ) {
+        return;
+    }
 
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
     XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset, m_y+m_yoffset );
@@ -308,9 +311,11 @@ void is::Rectangle::constrain( int w, int h ) {
         pad = 0;
     }
     if ( w < 0 ) {
+        m_flippedx = true;
         m_xoffset = w - pad - m_border;
         m_width = -w + pad*2;
     } else {
+        m_flippedx = false;
         m_xoffset = -pad - m_border;
         m_width = w + pad*2;
     }
@@ -320,9 +325,11 @@ void is::Rectangle::constrain( int w, int h ) {
         pad = 0;
     }
     if ( h < 0 ) {
+        m_flippedy = true;
         m_yoffset = h - pad - m_border;
         m_height = -h + pad*2;
     } else {
+        m_flippedy = false;
         m_yoffset = -pad - m_border;
         m_height = h + pad*2;
     }
