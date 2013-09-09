@@ -28,6 +28,7 @@ slrn::XEngine::~XEngine() {
     XCloseDisplay( m_display );
 }
 
+// We need to keep track of the rectangle windows, so that they don't override our "focus"d windows.
 void slrn::XEngine::addRect( Rectangle* rect ) {
     m_rects.push_back( rect );
 }
@@ -88,6 +89,7 @@ int slrn::XEngine::releaseKeyboard() {
     return 0;
 }
 
+// Grabs the cursor, be wary that setCursor changes the mouse masks.
 int slrn::XEngine::grabCursor( slrn::CursorType type ) {
     if ( !m_good ) {
         return 1;
@@ -111,6 +113,8 @@ int slrn::XEngine::grabCursor( slrn::CursorType type ) {
     XQueryPointer( m_display, m_root, &root, &child, &mx, &my, &wx, &wy, &mask );
     m_mousex = mx;
     m_mousey = my;
+
+    // Oh and while we're at it, make sure we set the window we're hoving over as well.
     updateHoverWindow( child );
     return 0;
 }
@@ -138,6 +142,7 @@ void slrn::XEngine::tick() {
                 break;
             }
             case ButtonPress: {
+                // Our pitiful mouse manager--
                 if ( m_mouse.size() > event.xbutton.button ) {
                     m_mouse.at( event.xbutton.button ) = true;
                 } else {
@@ -156,11 +161,12 @@ void slrn::XEngine::tick() {
                 break;
             }
             // For this particular utility, we only care if a key is pressed.
-            // I'm too lazy to implement a keyhandler for that.
+            // I'm too lazy to implement an actual keyhandler for that.
             case KeyPress: {
                 m_keypressed = true;
                 break;
             }
+            // Since we also don't care if it's released, do nothing! yay
             case KeyRelease: {
                 //m_keypressed = false;
                 break;
@@ -169,10 +175,11 @@ void slrn::XEngine::tick() {
         }
     }
 
-    // Since I couldn't get Xlib to send a EnterNotify or LeaveNotify events, we need to query the underlying window every frame.
+    // Since I couldn't get Xlib to send EnterNotify or LeaveNotify events, we need to query the underlying window every frame.
     updateHoverWindow();
 }
 
+// This converts an enum into a preallocated cursor, the cursor will automatically deallocate itself on ~XEngine
 Cursor slrn::XEngine::getCursor( slrn::CursorType type ) {
     int xfontcursor;
     switch ( type ) {
@@ -197,6 +204,7 @@ Cursor slrn::XEngine::getCursor( slrn::CursorType type ) {
     return newcursor;
 }
 
+// Swaps out the current cursor, bewary that XChangeActivePointerGrab also resets masks, so if you change the mouse masks on grab you need to change them here too.
 void slrn::XEngine::setCursor( slrn::CursorType type ) {
     if ( !m_good ) {
         return;
@@ -228,7 +236,10 @@ slrn::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
     m_padding = padding;
     m_window = None;
 
+    // Convert the width, height, x, and y to coordinates that don't have negative values.
+    // (also adjust for padding and border size.)
     constrain( width, height );
+    // If we don't have a border, we don't exist, so just die.
     if ( m_border == 0 ) {
         return;
     }
@@ -239,18 +250,21 @@ slrn::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
         fprintf( stderr, "Couldn't allocate color of value %f,%f,%f!\n", r, g, b );
     }
     XSetWindowAttributes attributes;
+    // Set up the window so it's our color 
     attributes.background_pixmap = None;
     attributes.background_pixel = m_color.pixel;
-    attributes.save_under = True;
+    // Not actually sure what this does, but it keeps the window from bugging out :u.
     attributes.override_redirect = True;
+    // We must use our color map, because that's where our color is allocated.
     attributes.colormap = xengine->m_colormap;
-    unsigned long valueMask = CWBackPixmap | CWBackPixel |
-                              CWSaveUnder | CWOverrideRedirect |
-                              CWColormap;
+    unsigned long valueMask = CWBackPixmap | CWBackPixel | CWOverrideRedirect | CWColormap;
 
+    // Create the window offset by our generated offsets (see constrain( float, float ))
     m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x+m_xoffset, m_y+m_yoffset, m_width+m_border*2, m_height+m_border*2,
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
+
+    // Now punch a hole into it so it looks like a selection rectangle!
     XRectangle rect;
     rect.x = rect.y = m_border;
     rect.width = m_width;
@@ -266,6 +280,7 @@ void slrn::Rectangle::setPos( int x, int y ) {
     }
     m_x = x;
     m_y = y;
+    // If we don't have a border, we don't exist, so just die.
     if ( m_border == 0 ) {
         return;
     }
@@ -278,19 +293,21 @@ void slrn::Rectangle::setDim( int w, int h ) {
     }
 
     constrain( w, h );
+    // If we don't have a border, we don't exist, so just die.
     if ( m_border == 0 ) {
         return;
     }
 
+    // Change the window size and location to our generated offsets (see constrain( float, float ))
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
     XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset, m_y+m_yoffset );
-    // Now punch another hole in it.
+    // Regenerate our hole
     XRectangle rect;
     rect.x = rect.y = 0;
     rect.width = m_width+m_border*2;
     rect.height = m_height+m_border*2;
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
-    rect;
+    // Then punch out another.
     rect.x = rect.y = m_border;
     rect.width = m_width;
     rect.height = m_height;
@@ -302,10 +319,13 @@ void slrn::XEngine::updateHoverWindow() {
     int mx, my;
     int wx, wy;
     unsigned int mask;
+    // Query the pointer for the child window, the child window is basically the window we're hovering over.
     XQueryPointer( m_display, m_root, &root, &child, &mx, &my, &wx, &wy, &mask );
+    // If we already know that we're hovering over it, do nothing.
     if ( m_hoverXWindow == child ) {
         return;
     }
+    // Make sure we can't select one of our selection rectangles, that's just weird.
     for ( unsigned int i=0; i<m_rects.size(); i++ ) {
         if ( m_rects.at( i )->m_window == child ) {
             return;
@@ -315,6 +335,7 @@ void slrn::XEngine::updateHoverWindow() {
     if ( child == None ) {
         return;
     }
+    // Generate the geometry values so we can use them if needed.
     unsigned int depth;
     XGetGeometry( m_display, child, &root,
                   &(m_hoverWindow.m_x), &(m_hoverWindow.m_y),
@@ -323,6 +344,9 @@ void slrn::XEngine::updateHoverWindow() {
 }
 
 void slrn::XEngine::updateHoverWindow( Window child ) {
+    // Same thing as updateHoverWindow but it uses the specified child.
+    // It's used when we first grab the cursor so it's slightly more effecient
+    // than calling XQueryPointer twice.
     if ( m_hoverXWindow == child ) {
         return;
     }
@@ -344,6 +368,7 @@ void slrn::XEngine::updateHoverWindow( Window child ) {
 }
 
 // Keeps our rectangle's sizes all positive, so Xlib doesn't throw an exception.
+// It also keeps our values in absolute coordinates which is nice.
 void slrn::Rectangle::constrain( int w, int h ) {
     int pad = m_padding;
     if ( pad < 0 && std::abs( w ) < std::abs( pad )*2 ) {
@@ -383,6 +408,7 @@ int slrn::Rectangle::convertColor( float r, float g, float b ) {
     color.red = red;
     color.green = green;
     color.blue = blue;
+    // I don't deallocate this anywhere, I think X handles it ???
     int err = XAllocColor( xengine->m_display, xengine->m_colormap, &color );
     if ( err == BadColor ) {
         return err;
