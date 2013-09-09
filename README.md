@@ -27,6 +27,13 @@ ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
 slrn lets you select a region or window and ffmpeg will record it in the format of your choice!
 Combined with keybinds and a server on your filesystem you can make a really neat and unobtrusive screenshooter.
 
+You can also take images using imagemagick like so:
+```bash
+#!/bin/bash
+eval `slrn`
+import -window root -crop "$W"x"$H"+$X+$Y ~/myimage.png
+```
+
 lets see some action
 --------------------
 Ok. Here's a comparison between 'scrot -s's selection and slrn's:
