@@ -17,7 +17,7 @@ slrn can be used to create a video recording script in only two lines of code.
 ```bash
 #!/bin/bash
 eval `slrn`
-ffmpeg -f x11grab -s "$Wx$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
+ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
 ```
 slrn lets you select a region or window and ffmpeg will record it in the format of your choice!
 Combined with keybinds and a server on your filesystem you can make a really neat and unobtrusive screenshooter.
