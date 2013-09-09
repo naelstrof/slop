@@ -28,9 +28,23 @@ int main( int argc, char** argv ) {
     if ( err ) {
         return err;
     }
+    err = xengine->grabKeyboard();
+    if ( err ) {
+        return err;
+    }
     while ( running ) {
         // "ticking" the xengine makes it process all queued events.
         xengine->tick();
+        // If the user presses any key on the keyboard, exit the application.
+        if ( xengine->m_keypressed ) {
+            printf( "X=0\n" );
+            printf( "Y=0\n" );
+            printf( "W=0\n" );
+            printf( "H=0\n" );
+            fprintf( stderr, "User pressed key. Canceled selection.\n" );
+            state = -1;
+            running = false;
+        }
         if ( xengine->mouseDown( 3 ) ) {
             printf( "X=0\n" );
             printf( "Y=0\n" );
@@ -147,6 +161,8 @@ int main( int argc, char** argv ) {
         // bad computer.
         usleep( 1000 );
     }
+    xengine->releaseCursor();
+    xengine->releaseKeyboard();
     // Clean up global classes.
     delete xengine;
     delete options;

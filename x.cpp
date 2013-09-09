@@ -3,6 +3,7 @@
 slrn::XEngine* xengine = new slrn::XEngine();
 
 slrn::XEngine::XEngine() {
+    m_keypressed = false;
     m_display = NULL;
     m_visual = NULL;
     m_screen = NULL;
@@ -65,6 +66,28 @@ int slrn::XEngine::init( std::string display ) {
     return 0;
 }
 
+int slrn::XEngine::grabKeyboard() {
+    if ( !m_good ) {
+        return 1;
+    }
+    int err = XGrabKeyboard( m_display, m_root, False,
+                             GrabModeAsync, GrabModeAsync, CurrentTime );
+    if ( err != GrabSuccess ) {
+        fprintf( stderr, "Error: Failed to grab X keyboard.\n" );
+        fprintf( stderr, "This can be caused by launching slrn incorrectly.\n" );
+        fprintf( stderr, "gnome-session launches it fine from keyboard binds.\n" );
+        return 1;
+    }
+}
+
+int slrn::XEngine::releaseKeyboard() {
+    if ( !m_good ) {
+        return 1;
+    }
+    XUngrabKeyboard( m_display, CurrentTime );
+    return 0;
+}
+
 int slrn::XEngine::grabCursor( slrn::CursorType type ) {
     if ( !m_good ) {
         return 1;
@@ -75,6 +98,8 @@ int slrn::XEngine::grabCursor( slrn::CursorType type ) {
                             GrabModeAsync, GrabModeAsync, m_root, xfontcursor, CurrentTime );
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Error: Failed to grab X cursor.\n" );
+        fprintf( stderr, "This can be caused by launching slrn incorrectly.\n" );
+        fprintf( stderr, "gnome-session launches it fine from keyboard binds.\n" );
         return 1;
     }
 
@@ -128,6 +153,16 @@ void slrn::XEngine::tick() {
                     m_mouse.resize( event.xbutton.button+2, false );
                     m_mouse.at( event.xbutton.button ) = false;
                 }
+                break;
+            }
+            // For this particular utility, we only care if a key is pressed.
+            // I'm too lazy to implement a keyhandler for that.
+            case KeyPress: {
+                m_keypressed = true;
+                break;
+            }
+            case KeyRelease: {
+                //m_keypressed = false;
                 break;
             }
             default: break;

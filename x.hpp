@@ -65,7 +65,9 @@ public:
     int                 init( std::string display );
     void                tick();
     int                 grabCursor( slrn::CursorType type );
+    int                 grabKeyboard();
     int                 releaseCursor();
+    int                 releaseKeyboard();
     void                setCursor( slrn::CursorType type );
     void                drawRect( int x, int y, unsigned int w, unsigned int h );
     void                addRect( Rectangle* rect );
@@ -81,6 +83,7 @@ public:
     bool                mouseDown( unsigned int button );
     WindowRectangle     m_hoverWindow;
     Window              m_hoverXWindow;
+    bool                m_keypressed;
 private:
     void                updateHoverWindow();
     void                updateHoverWindow( Window child );
