@@ -26,3 +26,12 @@ ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
 ```
 slrn lets you select a region or window and ffmpeg will record it in the format of your choice!
 Combined with keybinds and a server on your filesystem you can make a really neat and unobtrusive screenshooter.
+
+lets see some action
+--------------------
+Ok. Here's a comparison between 'scrot -s's selection and slrn's:
+![scrot](http://farmpolice.com/content/images/scrot_bad.png)
+![slrn](http://farmpolice.com/content/images/slrn_good.png)
+
+You can see scrot leaves garbage lines over the things you're trying to screenshot!
+While slrn not only looks nicer, it's impossible for it to end up in screenshots or recordings because it shuts down before ffmpeg or imagemagick can take a picture.
