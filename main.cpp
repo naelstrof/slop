@@ -135,7 +135,7 @@ int main( int argc, char** argv ) {
             }
             case 1: {
                 selection = new is::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding );
-                selection->setPos( xengine->m_mousex - padding, xengine->m_mousey - padding );
+                selection->setPos( xengine->m_mousex, xengine->m_mousey );
                 xengine->addRect( selection );
                 state++;
                 break;

@@ -192,17 +192,9 @@ is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int p
     m_padding = padding;
     m_window = None;
 
+    constrain( width, height );
     if ( m_border == 0 ) {
         return;
-    }
-
-    if ( m_width < 0 ) {
-        m_xoffset += m_width;
-        m_width = -m_width;
-    }
-    if ( m_height < 0 ) {
-        m_yoffset += m_height;
-        m_height = -m_height;
     }
 
     XAllocNamedColor( xengine->m_display, xengine->m_colormap, "black", &m_forground, &m_forgroundExact );
@@ -217,13 +209,13 @@ is::Rectangle::Rectangle( int x, int y, int width, int height, int border, int p
                               CWSaveUnder | CWOverrideRedirect |
                               CWColormap;
 
-    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x-m_border+m_xoffset-m_padding, m_y-m_border+m_yoffset-m_padding, m_width+m_border*2+m_padding*2, m_height+m_border*2+m_padding*2,
+    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x+m_xoffset, m_y+m_yoffset, m_width+m_border*2, m_height+m_border*2,
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
     XRectangle rect;
     rect.x = rect.y = m_border;
-    rect.width = m_width+m_padding*2;
-    rect.height = m_height+m_padding*2;
+    rect.width = m_width;
+    rect.height = m_height;
 
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
     XMapWindow( xengine->m_display, m_window );
@@ -238,34 +230,18 @@ void is::Rectangle::setPos( int x, int y ) {
     if ( m_border == 0 ) {
         return;
     }
-    XMoveWindow( xengine->m_display, m_window, m_x-m_border+m_xoffset, m_y-m_border+m_yoffset );
+    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset, m_y+m_yoffset );
 }
 
 void is::Rectangle::setDim( int w, int h ) {
     if ( m_width == w && m_height == h ) {
         return;
     }
-    w += m_padding;
-    h += m_padding;
 
-    m_xoffset = 0;
-    m_yoffset = 0;
-    m_width = w;
-    m_height = h;
-    if ( w < 0 ) {
-        m_xoffset += w;
-        m_width = -w;
-    }
-    if ( h < 0 ) {
-        m_yoffset += h;
-        m_height = -h;
-    }
-    if ( m_border == 0 ) {
-        return;
-    }
+    constrain( w, h );
 
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
-    XMoveWindow( xengine->m_display, m_window, m_x-m_border+m_xoffset, m_y-m_border+m_yoffset );
+    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset, m_y+m_yoffset );
     // Now punch another hole in it.
     XRectangle rect;
     rect.x = rect.y = 0;
@@ -323,4 +299,31 @@ void is::XEngine::updateHoverWindow( Window child ) {
                   &(m_hoverWindow.m_x), &(m_hoverWindow.m_y),
                   &(m_hoverWindow.m_width), &(m_hoverWindow.m_height),
                   &(m_hoverWindow.m_border), &depth );
+}
+
+// Keeps our rectangle's sizes all positive, so Xlib doesn't throw an exception.
+void is::Rectangle::constrain( int w, int h ) {
+    int pad = m_padding;
+    if ( pad < 0 && std::abs( w ) < std::abs( pad )*2 ) {
+        pad = 0;
+    }
+    if ( w < 0 ) {
+        m_xoffset = w - pad - m_border;
+        m_width = -w + pad*2;
+    } else {
+        m_xoffset = -pad - m_border;
+        m_width = w + pad*2;
+    }
+
+    pad = m_padding;
+    if ( pad < 0 && std::abs( h ) < std::abs( pad )*2 ) {
+        pad = 0;
+    }
+    if ( h < 0 ) {
+        m_yoffset = h - pad - m_border;
+        m_height = -h + pad*2;
+    } else {
+        m_yoffset = -pad - m_border;
+        m_height = h + pad*2;
+    }
 }

@@ -9,6 +9,7 @@
 #include <X11/cursorfont.h>
 #include <X11/extensions/shape.h>
 
+#include <cmath>
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -51,6 +52,8 @@ public:
     int     m_padding;
     XColor  m_forground, m_forgroundExact;
     XColor  m_background, m_backgroundExact;
+private:
+    void    constrain( int w, int h );
 };
 
 class XEngine {
