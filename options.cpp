@@ -7,6 +7,9 @@ slrn::Options::Options() {
     m_padding = 0;
     m_xdisplay = ":0";
     m_tolerance = 4;
+    m_red = 0;
+    m_green = 0;
+    m_blue = 0;
 }
 
 void slrn::Options::printHelp() {
@@ -19,8 +22,9 @@ void slrn::Options::printHelp() {
     printf( "    -p=INT, --m_padding=INT        set m_padding size for selection.\n" );
     printf( "    -t=INT, --tolerance=INT        if you have a shaky mouse, increasing this value will make slrn detect single clicks better. Rather than interpreting your shaky clicks as region selections.\n" );
     printf( "    -x=STRING, --xdisplay=STRING   set x display (STRING must be hostname:number.screen_number format)\n" );
+    printf( "    -c=COLOR, --color=COLOR        set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
     printf( "examples\n" );
-    printf( "    slrn -b=10 -x=:0 -p=-30 -t=4\n" );
+    printf( "    slrn -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5\n" );
 }
 
 int slrn::Options::parseOptions( int argc, char** argv ) {
@@ -38,6 +42,11 @@ int slrn::Options::parseOptions( int argc, char** argv ) {
             }
         } else if ( matches( arg, "-p=", "--padding=" ) ) {
             int err = parseInt( arg, &m_padding );
+            if ( err ) {
+                return 1;
+            }
+        } else if ( matches( arg, "-c=", "--color=" ) ) {
+            int err = parseColor( arg, &m_red, &m_green, &m_blue );
             if ( err ) {
                 return 1;
             }
@@ -120,5 +129,28 @@ int slrn::Options::parseString( std::string arg, std::string* returnString ) {
     *returnString = y;
     delete[] x;
     delete[] y;
+    return 0;
+}
+
+int slrn::Options::parseColor( std::string arg, float* r, float* g, float* b ) {
+    std::string copy = arg;
+    int find = copy.find( "=" );
+    while( find != copy.npos ) {
+        copy.at( find ) = ' ';
+        find = copy.find( "," );
+    }
+
+    // Just in case we error out, grab the actual argument name into x.
+    char* x = new char[ arg.size() ];
+    int num = sscanf( copy.c_str(), "%s %f %f %f", x, r, g, b );
+    if ( num != 4 ) {
+        fprintf( stderr, "Error parsing command arguments near %s\n", arg.c_str() );
+        fprintf( stderr, "Usage: %s=COLOR\n", x );
+        fprintf( stderr, "Example: %s=0,0,0 or %s=0.7,0.2,1\n", x, x );
+        fprintf( stderr, "Try -h or --help for help.\n" );
+        delete[] x;
+        return 1;
+    }
+    delete[] x;
     return 0;
 }

@@ -17,6 +17,9 @@ int main( int argc, char** argv ) {
     int padding = options->m_padding;
     int borderSize = options->m_borderSize;
     int tolerance = options->m_tolerance;
+    float r = options->m_red;
+    float g = options->m_green;
+    float b = options->m_blue;
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
@@ -72,7 +75,8 @@ int main( int argc, char** argv ) {
                                                          t.m_y - t.m_border,
                                                          t.m_width + t.m_border,
                                                          t.m_height + t.m_border,
-                                                         borderSize, padding );
+                                                         borderSize, padding,
+                                                         r, g, b );
                     xengine->addRect( windowselection );
                     window = xengine->m_hoverXWindow;
                 }
@@ -89,7 +93,7 @@ int main( int argc, char** argv ) {
             case 1: {
                 // Simply create a new rectangle at the mouse position and move on
                 // to the next state.
-                selection = new slrn::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding );
+                selection = new slrn::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding, r, g, b );
                 xengine->addRect( selection );
                 state++;
                 break;

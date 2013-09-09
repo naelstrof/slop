@@ -37,7 +37,7 @@ public:
 
 class Rectangle {
 public:
-            Rectangle( int x, int y, int width, int height, int border, int padding );
+            Rectangle( int x, int y, int width, int height, int border, int padding, float r, float g, float b );
             ~Rectangle();
     void    setPos( int x, int y );
     void    setDim( int w, int h );
@@ -50,11 +50,11 @@ public:
     int     m_height;
     int     m_border;
     int     m_padding;
-    XColor  m_forground, m_forgroundExact;
-    XColor  m_background, m_backgroundExact;
+    XColor  m_color;
     bool    m_flippedx;
     bool    m_flippedy;
 private:
+    int     convertColor( float r, float g, float b );
     void    constrain( int w, int h );
 };
 

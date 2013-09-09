@@ -212,11 +212,12 @@ slrn::Rectangle::~Rectangle() {
     if ( m_window == None ) {
         return;
     }
+    //XFreeColors( xengine->m_display, xengine->m_colormap, m_color.pixel, 1,
     XUnmapWindow( xengine->m_display, m_window );
     XDestroyWindow( xengine->m_display, m_window );
 }
 
-slrn::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding ) {
+slrn::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding, float r, float g, float b ) {
     m_xoffset = 0;
     m_yoffset = 0;
     m_x = x;
@@ -232,11 +233,14 @@ slrn::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
         return;
     }
 
-    XAllocNamedColor( xengine->m_display, xengine->m_colormap, "black", &m_forground, &m_forgroundExact );
-    XAllocNamedColor( xengine->m_display, xengine->m_colormap, "white", &m_background, &m_backgroundExact );
+    // This sets up m_color
+    int err = convertColor( r, g, b );
+    if ( err ) {
+        fprintf( stderr, "Couldn't allocate color of value %f,%f,%f!\n", r, g, b );
+    }
     XSetWindowAttributes attributes;
     attributes.background_pixmap = None;
-    attributes.background_pixel = m_forground.pixel;
+    attributes.background_pixel = m_color.pixel;
     attributes.save_under = True;
     attributes.override_redirect = True;
     attributes.colormap = xengine->m_colormap;
@@ -368,4 +372,21 @@ void slrn::Rectangle::constrain( int w, int h ) {
         m_yoffset = -pad - m_border;
         m_height = h + pad*2;
     }
+}
+
+int slrn::Rectangle::convertColor( float r, float g, float b ) {
+    // Convert float colors to shorts.
+    short red   = short( floor( r * 65535.f ) );
+    short green = short( floor( g * 65535.f ) );
+    short blue  = short( floor( b * 65535.f ) );
+    XColor color;
+    color.red = red;
+    color.green = green;
+    color.blue = blue;
+    int err = XAllocColor( xengine->m_display, xengine->m_colormap, &color );
+    if ( err == BadColor ) {
+        return err;
+    }
+    m_color = color;
+    return 0;
 }
