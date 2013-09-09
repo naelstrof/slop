@@ -61,8 +61,8 @@ int slrn::Options::parseOptions( int argc, char** argv ) {
             if ( i == 0 ) {
                 continue;
             }
-            printf( "Error: Unknown argument %s\n", argv[i] );
-            printf( "Try -h or --help for help.\n" );
+            fprintf( stderr, "Error: Unknown argument %s\n", argv[i] );
+            fprintf( stderr, "Try -h or --help for help.\n" );
             return 1;
         }
     }
@@ -79,10 +79,10 @@ int slrn::Options::parseInt( std::string arg, int* returnInt ) {
     char* x = new char[ arg.size() ];
     int num = sscanf( copy.c_str(), "%s %i", x, returnInt );
     if ( num != 2 ) {
-        printf( "Error parsing command arguments near %s\n", arg.c_str() );
-        printf( "Usage: %s=INT\n", x );
-        printf( "Example: %s=10 or %s=-12\n", x, x );
-        printf( "Try -h or --help for help.\n" );
+        fprintf( stderr, "Error parsing command arguments near %s\n", arg.c_str() );
+        fprintf( stderr, "Usage: %s=INT\n", x );
+        fprintf( stderr, "Example: %s=10 or %s=-12\n", x, x );
+        fprintf( stderr, "Try -h or --help for help.\n" );
         delete[] x;
         return 1;
     }
@@ -109,10 +109,10 @@ int slrn::Options::parseString( std::string arg, std::string* returnString ) {
     char* y = new char[ arg.size() ];
     int num = sscanf( copy.c_str(), "%s %s", x, y );
     if ( num != 2 ) {
-        printf( "Error parsing command arguments near %s\n", arg.c_str() );
-        printf( "Usage: %s=STRING\n", x );
-        printf( "Example: %s=:0 or %s=hostname:0.1\n", x, x );
-        printf( "Try -h or --help for help.\n" );
+        fprintf( stderr, "Error parsing command arguments near %s\n", arg.c_str() );
+        fprintf( stderr, "Usage: %s=STRING\n", x );
+        fprintf( stderr, "Example: %s=:0 or %s=hostname:0.1\n", x, x );
+        fprintf( stderr, "Try -h or --help for help.\n" );
         delete[] x;
         delete[] y;
         return 1;

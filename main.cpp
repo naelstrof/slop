@@ -36,7 +36,7 @@ int main( int argc, char** argv ) {
             printf( "Y=0\n" );
             printf( "W=0\n" );
             printf( "H=0\n" );
-            printf( "User right-clicked. Canceled selection.\n" );
+            fprintf( stderr, "User right-clicked. Canceled selection.\n" );
             state = -1;
             running = false;
         }

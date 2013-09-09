@@ -53,7 +53,7 @@ int slrn::XEngine::init( std::string display ) {
     // Initialize display
     m_display = XOpenDisplay( display.c_str() );
     if ( !m_display ) {
-        printf( "Failed to open X display %s\n", display.c_str() );
+        fprintf( stderr, "Error: Failed to open X display %s\n", display.c_str() );
         return 1;
     }
     m_screen    = ScreenOfDisplay( m_display, DefaultScreen( m_display ) );
@@ -74,7 +74,7 @@ int slrn::XEngine::grabCursor( slrn::CursorType type ) {
                             PointerMotionMask | ButtonPressMask | ButtonReleaseMask,
                             GrabModeAsync, GrabModeAsync, m_root, xfontcursor, CurrentTime );
     if ( err != GrabSuccess ) {
-        printf( "Failed to grab X cursor.\n" );
+        fprintf( stderr, "Error: Failed to grab X cursor.\n" );
         return 1;
     }
 
