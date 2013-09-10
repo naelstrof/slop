@@ -3,7 +3,7 @@ CFLAGS=-O2 -g
 LDFLAGS=-lX11 -lXext
 SOURCES=main.cpp x.cpp options.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=slrn
+EXECUTABLE=slop
 BINDIR="usr/bin"
 
 all: $(SOURCES) $(EXECUTABLE)
@@ -16,4 +16,4 @@ clean:
 
 install: all
 	mkdir -p $(DESTDIR)/$(BINDIR)
-	cp $(CURDIR)/slrn $(DESTDIR)/$(BINDIR)
+	cp $(CURDIR)/slop $(DESTDIR)/$(BINDIR)

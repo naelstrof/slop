@@ -3,7 +3,7 @@
 #include <string>
 #include <cstdio>
 
-namespace slrn {
+namespace slop {
 
 class Options {
 public:
@@ -27,6 +27,6 @@ private:
 
 }
 
-extern slrn::Options* options;
+extern slop::Options* options;
 
 #endif // IS_OPTIONS_H_

@@ -1,8 +1,8 @@
 #include "options.hpp"
 
-slrn::Options* options = new slrn::Options();
+slop::Options* options = new slop::Options();
 
-slrn::Options::Options() {
+slop::Options::Options() {
     m_borderSize = 10;
     m_padding = 0;
     m_xdisplay = ":0";
@@ -12,22 +12,22 @@ slrn::Options::Options() {
     m_blue = 0;
 }
 
-void slrn::Options::printHelp() {
-    printf( "Usage: slrn [options]\n" );
+void slop::Options::printHelp() {
+    printf( "Usage: slop [options]\n" );
     printf( "Print user selected region to stdout.\n" );
     printf( "\n" );
     printf( "options\n" );
     printf( "    -h, --help                     show this message.\n" );
     printf( "    -b=INT, --bordersize=INT       set selection rectangle border size.\n" );
     printf( "    -p=INT, --m_padding=INT        set m_padding size for selection.\n" );
-    printf( "    -t=INT, --tolerance=INT        if you have a shaky mouse, increasing this value will make slrn detect single clicks better. Rather than interpreting your shaky clicks as region selections.\n" );
+    printf( "    -t=INT, --tolerance=INT        if you have a shaky mouse, increasing this value will make slop detect single clicks better. Rather than interpreting your shaky clicks as region selections.\n" );
     printf( "    -x=STRING, --xdisplay=STRING   set x display (STRING must be hostname:number.screen_number format)\n" );
     printf( "    -c=COLOR, --color=COLOR        set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
     printf( "examples\n" );
-    printf( "    slrn -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5\n" );
+    printf( "    slop -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5\n" );
 }
 
-int slrn::Options::parseOptions( int argc, char** argv ) {
+int slop::Options::parseOptions( int argc, char** argv ) {
     // Simple command parsing. Just uses sscanf to read each argument.
     // It looks complicated because you have to have spaces for delimiters for sscanf.
     for ( int i=0; i<argc; i++ ) {
@@ -78,7 +78,7 @@ int slrn::Options::parseOptions( int argc, char** argv ) {
     return 0;
 }
 
-int slrn::Options::parseInt( std::string arg, int* returnInt ) {
+int slop::Options::parseInt( std::string arg, int* returnInt ) {
     std::string copy = arg;
     int find = copy.find( "=" );
     if ( find != copy.npos ) {
@@ -99,7 +99,7 @@ int slrn::Options::parseInt( std::string arg, int* returnInt ) {
     return 0;
 }
 
-bool slrn::Options::matches( std::string arg, std::string shorthand, std::string longhand ) {
+bool slop::Options::matches( std::string arg, std::string shorthand, std::string longhand ) {
     if ( arg.substr( 0, shorthand.size() ) == shorthand ||
          arg.substr( 0, longhand.size() ) == longhand ) {
         return true;
@@ -107,7 +107,7 @@ bool slrn::Options::matches( std::string arg, std::string shorthand, std::string
     return false;
 }
 
-int slrn::Options::parseString( std::string arg, std::string* returnString ) {
+int slop::Options::parseString( std::string arg, std::string* returnString ) {
     std::string copy = arg;
     int find = copy.find( "=" );
     if ( find != copy.npos ) {
@@ -132,7 +132,7 @@ int slrn::Options::parseString( std::string arg, std::string* returnString ) {
     return 0;
 }
 
-int slrn::Options::parseColor( std::string arg, float* r, float* g, float* b ) {
+int slop::Options::parseColor( std::string arg, float* r, float* g, float* b ) {
     std::string copy = arg;
     int find = copy.find( "=" );
     while( find != copy.npos ) {

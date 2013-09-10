@@ -10,8 +10,8 @@ int main( int argc, char** argv ) {
     }
     int state = 0;
     bool running = true;
-    slrn::Rectangle* selection;
-    slrn::Rectangle* windowselection = NULL;
+    slop::Rectangle* selection;
+    slop::Rectangle* windowselection = NULL;
     Window window = None;
     std::string xdisplay = options->m_xdisplay;
     int padding = options->m_padding;
@@ -27,7 +27,7 @@ int main( int argc, char** argv ) {
     if ( err ) {
         return err;
     }
-    err = xengine->grabCursor( slrn::Cross );
+    err = xengine->grabCursor( slop::Cross );
     if ( err ) {
         return err;
     }
@@ -70,8 +70,8 @@ int main( int argc, char** argv ) {
                     if ( windowselection ) {
                         xengine->removeRect( windowselection ); // removeRect also dealloc's the rectangle for us.
                     }
-                    slrn::WindowRectangle t = xengine->m_hoverWindow;
-                    windowselection = new slrn::Rectangle( t.m_x - t.m_border,
+                    slop::WindowRectangle t = xengine->m_hoverWindow;
+                    windowselection = new slop::Rectangle( t.m_x - t.m_border,
                                                          t.m_y - t.m_border,
                                                          t.m_width + t.m_border,
                                                          t.m_height + t.m_border,
@@ -93,7 +93,7 @@ int main( int argc, char** argv ) {
             case 1: {
                 // Simply create a new rectangle at the mouse position and move on
                 // to the next state.
-                selection = new slrn::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding, r, g, b );
+                selection = new slop::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding, r, g, b );
                 xengine->addRect( selection );
                 state++;
                 break;
@@ -113,13 +113,13 @@ int main( int argc, char** argv ) {
                 bool x = selection->m_flippedx;
                 bool y = selection->m_flippedy;
                 if ( !x && !y ) {
-                    xengine->setCursor( slrn::LowerRightCorner );
+                    xengine->setCursor( slop::LowerRightCorner );
                 } else if ( x && !y ) {
-                    xengine->setCursor( slrn::LowerLeftCorner );
+                    xengine->setCursor( slop::LowerLeftCorner );
                 } else if ( !x && y ) {
-                    xengine->setCursor( slrn::UpperRightCorner );
+                    xengine->setCursor( slop::UpperRightCorner );
                 } else {
-                    xengine->setCursor( slrn::UpperLeftCorner );
+                    xengine->setCursor( slop::UpperLeftCorner );
                 }
 
                 break;
@@ -147,7 +147,7 @@ int main( int argc, char** argv ) {
                     break;
                 }
                 // Otherwise lets grab the window's dimensions and use those (with padding).
-                slrn::WindowRectangle t = xengine->m_hoverWindow;
+                slop::WindowRectangle t = xengine->m_hoverWindow;
                 x = t.m_x - padding - t.m_border;
                 y = t.m_y - padding - t.m_border;
                 w = t.m_width + t.m_border + padding*2;

@@ -1,8 +1,8 @@
 #include "x.hpp"
 
-slrn::XEngine* xengine = new slrn::XEngine();
+slop::XEngine* xengine = new slop::XEngine();
 
-slrn::XEngine::XEngine() {
+slop::XEngine::XEngine() {
     m_keypressed = false;
     m_display = NULL;
     m_visual = NULL;
@@ -13,7 +13,7 @@ slrn::XEngine::XEngine() {
     m_hoverXWindow = None;
 }
 
-slrn::XEngine::~XEngine() {
+slop::XEngine::~XEngine() {
     if ( !m_good ) {
         return;
     }
@@ -29,11 +29,11 @@ slrn::XEngine::~XEngine() {
 }
 
 // We need to keep track of the rectangle windows, so that they don't override our "focus"d windows.
-void slrn::XEngine::addRect( Rectangle* rect ) {
+void slop::XEngine::addRect( Rectangle* rect ) {
     m_rects.push_back( rect );
 }
 
-void slrn::XEngine::removeRect( Rectangle* rect ) {
+void slop::XEngine::removeRect( Rectangle* rect ) {
     for ( unsigned int i=0; i<m_rects.size(); i++ ) {
         if ( m_rects.at( i ) == rect ) {
             m_rects.erase( m_rects.begin() + i );
@@ -44,14 +44,14 @@ void slrn::XEngine::removeRect( Rectangle* rect ) {
     }
 }
 
-bool slrn::XEngine::mouseDown( unsigned int button ) {
+bool slop::XEngine::mouseDown( unsigned int button ) {
     if ( button >= m_mouse.size() ) {
         return false;
     }
     return m_mouse.at( button );
 }
 
-int slrn::XEngine::init( std::string display ) {
+int slop::XEngine::init( std::string display ) {
     // Initialize display
     m_display = XOpenDisplay( display.c_str() );
     if ( !m_display ) {
@@ -67,7 +67,7 @@ int slrn::XEngine::init( std::string display ) {
     return 0;
 }
 
-int slrn::XEngine::grabKeyboard() {
+int slop::XEngine::grabKeyboard() {
     if ( !m_good ) {
         return 1;
     }
@@ -75,13 +75,13 @@ int slrn::XEngine::grabKeyboard() {
                              GrabModeAsync, GrabModeAsync, CurrentTime );
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Error: Failed to grab X keyboard.\n" );
-        fprintf( stderr, "This can be caused by launching slrn incorrectly.\n" );
+        fprintf( stderr, "This can be caused by launching slop incorrectly.\n" );
         fprintf( stderr, "gnome-session launches it fine from keyboard binds.\n" );
         return 1;
     }
 }
 
-int slrn::XEngine::releaseKeyboard() {
+int slop::XEngine::releaseKeyboard() {
     if ( !m_good ) {
         return 1;
     }
@@ -90,7 +90,7 @@ int slrn::XEngine::releaseKeyboard() {
 }
 
 // Grabs the cursor, be wary that setCursor changes the mouse masks.
-int slrn::XEngine::grabCursor( slrn::CursorType type ) {
+int slop::XEngine::grabCursor( slop::CursorType type ) {
     if ( !m_good ) {
         return 1;
     }
@@ -100,7 +100,7 @@ int slrn::XEngine::grabCursor( slrn::CursorType type ) {
                             GrabModeAsync, GrabModeAsync, m_root, xfontcursor, CurrentTime );
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Error: Failed to grab X cursor.\n" );
-        fprintf( stderr, "This can be caused by launching slrn incorrectly.\n" );
+        fprintf( stderr, "This can be caused by launching slop incorrectly.\n" );
         fprintf( stderr, "gnome-session launches it fine from keyboard binds.\n" );
         return 1;
     }
@@ -119,7 +119,7 @@ int slrn::XEngine::grabCursor( slrn::CursorType type ) {
     return 0;
 }
 
-int slrn::XEngine::releaseCursor() {
+int slop::XEngine::releaseCursor() {
     if ( !m_good ) {
         return 1;
     }
@@ -127,7 +127,7 @@ int slrn::XEngine::releaseCursor() {
     return 0;
 }
 
-void slrn::XEngine::tick() {
+void slop::XEngine::tick() {
     if ( !m_good ) {
         return;
     }
@@ -180,7 +180,7 @@ void slrn::XEngine::tick() {
 }
 
 // This converts an enum into a preallocated cursor, the cursor will automatically deallocate itself on ~XEngine
-Cursor slrn::XEngine::getCursor( slrn::CursorType type ) {
+Cursor slop::XEngine::getCursor( slop::CursorType type ) {
     int xfontcursor;
     switch ( type ) {
         default:
@@ -205,7 +205,7 @@ Cursor slrn::XEngine::getCursor( slrn::CursorType type ) {
 }
 
 // Swaps out the current cursor, bewary that XChangeActivePointerGrab also resets masks, so if you change the mouse masks on grab you need to change them here too.
-void slrn::XEngine::setCursor( slrn::CursorType type ) {
+void slop::XEngine::setCursor( slop::CursorType type ) {
     if ( !m_good ) {
         return;
     }
@@ -215,7 +215,7 @@ void slrn::XEngine::setCursor( slrn::CursorType type ) {
                               xfontcursor, CurrentTime );
 }
 
-slrn::Rectangle::~Rectangle() {
+slop::Rectangle::~Rectangle() {
     //XFreeGC( xengine->m_display, m_gc );
     if ( m_window == None ) {
         return;
@@ -225,7 +225,7 @@ slrn::Rectangle::~Rectangle() {
     XDestroyWindow( xengine->m_display, m_window );
 }
 
-slrn::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding, float r, float g, float b ) {
+slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding, float r, float g, float b ) {
     m_xoffset = 0;
     m_yoffset = 0;
     m_x = x;
@@ -274,7 +274,7 @@ slrn::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
     XMapWindow( xengine->m_display, m_window );
 }
 
-void slrn::Rectangle::setPos( int x, int y ) {
+void slop::Rectangle::setPos( int x, int y ) {
     if ( m_x == x && m_y == y ) {
         return;
     }
@@ -287,7 +287,7 @@ void slrn::Rectangle::setPos( int x, int y ) {
     XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset, m_y+m_yoffset );
 }
 
-void slrn::Rectangle::setDim( int w, int h ) {
+void slop::Rectangle::setDim( int w, int h ) {
     if ( m_width == w && m_height == h ) {
         return;
     }
@@ -314,7 +314,7 @@ void slrn::Rectangle::setDim( int w, int h ) {
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
 }
 
-void slrn::XEngine::updateHoverWindow() {
+void slop::XEngine::updateHoverWindow() {
     Window root, child;
     int mx, my;
     int wx, wy;
@@ -343,7 +343,7 @@ void slrn::XEngine::updateHoverWindow() {
                   &(m_hoverWindow.m_border), &depth );
 }
 
-void slrn::XEngine::updateHoverWindow( Window child ) {
+void slop::XEngine::updateHoverWindow( Window child ) {
     // Same thing as updateHoverWindow but it uses the specified child.
     // It's used when we first grab the cursor so it's slightly more effecient
     // than calling XQueryPointer twice.
@@ -369,7 +369,7 @@ void slrn::XEngine::updateHoverWindow( Window child ) {
 
 // Keeps our rectangle's sizes all positive, so Xlib doesn't throw an exception.
 // It also keeps our values in absolute coordinates which is nice.
-void slrn::Rectangle::constrain( int w, int h ) {
+void slop::Rectangle::constrain( int w, int h ) {
     int pad = m_padding;
     if ( pad < 0 && std::abs( w ) < std::abs( pad )*2 ) {
         pad = 0;
@@ -399,7 +399,7 @@ void slrn::Rectangle::constrain( int w, int h ) {
     }
 }
 
-int slrn::Rectangle::convertColor( float r, float g, float b ) {
+int slop::Rectangle::convertColor( float r, float g, float b ) {
     // Convert float colors to shorts.
     short red   = short( floor( r * 65535.f ) );
     short green = short( floor( g * 65535.f ) );

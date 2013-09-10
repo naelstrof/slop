@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace slrn {
+namespace slop {
 
 enum CursorType {
     Left,
@@ -64,11 +64,11 @@ public:
                         ~XEngine();
     int                 init( std::string display );
     void                tick();
-    int                 grabCursor( slrn::CursorType type );
+    int                 grabCursor( slop::CursorType type );
     int                 grabKeyboard();
     int                 releaseCursor();
     int                 releaseKeyboard();
-    void                setCursor( slrn::CursorType type );
+    void                setCursor( slop::CursorType type );
     void                drawRect( int x, int y, unsigned int w, unsigned int h );
     void                addRect( Rectangle* rect );
     void                removeRect( Rectangle* rect );
@@ -90,11 +90,11 @@ private:
     bool                m_good;
     std::vector<Cursor> m_cursors;
     std::vector<Rectangle*> m_rects;
-    Cursor              getCursor( slrn::CursorType type );
+    Cursor              getCursor( slop::CursorType type );
 };
 
 }
 
-extern slrn::XEngine* xengine;
+extern slop::XEngine* xengine;
 
 #endif // IS_X_H_
