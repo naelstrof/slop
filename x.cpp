@@ -61,7 +61,8 @@ int slop::XEngine::init( std::string display ) {
     m_screen    = ScreenOfDisplay( m_display, DefaultScreen( m_display ) );
     m_visual    = DefaultVisual  ( m_display, XScreenNumberOfScreen( m_screen ) );
     m_colormap  = DefaultColormap( m_display, XScreenNumberOfScreen( m_screen ) );
-    m_root      = RootWindow     ( m_display, XScreenNumberOfScreen( m_screen ) );
+    //m_root      = RootWindow     ( m_display, XScreenNumberOfScreen( m_screen ) );
+    m_root      = DefaultRootWindow( m_display );
 
     m_good = true;
     return 0;
@@ -71,14 +72,17 @@ int slop::XEngine::grabKeyboard() {
     if ( !m_good ) {
         return 1;
     }
-    int err = XGrabKeyboard( m_display, m_root, False,
+    XGrabKey( m_display, AnyKey, AnyModifier, m_root, False, GrabModeAsync, GrabModeAsync );
+    // For whatever we fail to grab the keyboard 100% of the time if slop is launched in the background.
+    /*int err = XGrabKeyboard( m_display, m_root, False,
                              GrabModeAsync, GrabModeAsync, CurrentTime );
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Error: Failed to grab X keyboard.\n" );
         fprintf( stderr, "This can be caused by launching slop incorrectly.\n" );
         fprintf( stderr, "gnome-session launches it fine from keyboard binds.\n" );
         return 1;
-    }
+    }*/
+    return 0;
 }
 
 int slop::XEngine::releaseKeyboard() {
