@@ -32,7 +32,7 @@ int slop::Options::parseOptions( int argc, char** argv ) {
     // It looks complicated because you have to have spaces for delimiters for sscanf.
     for ( int i=0; i<argc; i++ ) {
         std::string arg = argv[i];
-        if ( matches( arg, "--b=", "--bordersize=" ) ) {
+        if ( matches( arg, "-b=", "--bordersize=" ) ) {
             int err = parseInt( arg, &m_borderSize );
             if ( err ) {
                 return 1;

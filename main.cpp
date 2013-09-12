@@ -10,7 +10,7 @@ int main( int argc, char** argv ) {
     }
     int state = 0;
     bool running = true;
-    slop::Rectangle* selection;
+    slop::Rectangle* selection = NULL;
     slop::Rectangle* windowselection = NULL;
     Window window = None;
     std::string xdisplay = options->m_xdisplay;
@@ -20,7 +20,8 @@ int main( int argc, char** argv ) {
     float r = options->m_red;
     float g = options->m_green;
     float b = options->m_blue;
-    timespec start,time;
+    int cx = 0;
+    int cy = 0;
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
@@ -99,10 +100,9 @@ int main( int argc, char** argv ) {
                 break;
             }
             case 1: {
-                // Simply create a new rectangle at the mouse position and move on
-                // to the next state.
-                selection = new slop::Rectangle( xengine->m_mousex, xengine->m_mousey, 0, 0, borderSize, padding, r, g, b );
-                xengine->addRect( selection );
+                // Set the mouse position of where we clicked, used so that click tolerance doesn't affect the rectangle's position.
+                cx = xengine->m_mousex;
+                cy = xengine->m_mousey;
                 state++;
                 break;
             }
@@ -113,10 +113,19 @@ int main( int argc, char** argv ) {
                     state++;
                     break;
                 }
+                // Check to make sure the user actually wants to drag for a selection before creating a rectangle.
+                int w = xengine->m_mousex - cx;
+                int h = xengine->m_mousey - cy;
+                if ( ( std::abs( w ) > tolerance || std::abs( h ) > tolerance ) && !selection ) {
+                    selection = new slop::Rectangle( cx, cy, 0, 0, borderSize, padding, r, g, b );
+                    xengine->addRect( selection );
+                } else if ( std::abs( w ) <= tolerance && std::abs( h ) <= tolerance ) {
+                    continue;
+                }
                 // Set the selection rectangle's dimensions to mouse movement.
                 // We use the function setDim since rectangles can't have negative widths,
                 // and because the rectangles have borders and padding to worry about.
-                selection->setDim( xengine->m_mousex - selection->m_x, xengine->m_mousey - selection->m_y );
+                selection->setDim( w, h );
                 // We also detect which way the user is pulling and set the mouse icon accordingly.
                 bool x = selection->m_flippedx;
                 bool y = selection->m_flippedy;
@@ -133,26 +142,29 @@ int main( int argc, char** argv ) {
                 break;
             }
             case 3: {
-                // We pull the dimensions and positions from the selection rectangle.
-                // The selection rectangle automatically converts the positions and
-                // dimensions to absolute coordinates when we set them earilier.
-                int x = selection->m_x+selection->m_xoffset;
-                int y = selection->m_y+selection->m_yoffset;
-                int w = selection->m_width;
-                int h = selection->m_height;
-                // Delete the rectangle.
-                xengine->removeRect( selection );
+                int x, y, w, h;
                 // Exit the utility after this state runs once.
                 running = false;
-                // If the user simply clicked (and thus made the width and height smaller than
-                // our tolerance) or if we're not hovering over a window, just print the selection
-                // rectangle's stuff.
-                if ( w > tolerance || h > tolerance || xengine->m_hoverXWindow == None ) {
-                    printf( "X=%i\n", x );
-                    printf( "Y=%i\n", y );
-                    printf( "W=%i\n", w + 1 );
-                    printf( "H=%i\n", h + 1 );
-                    break;
+                if ( selection ) {
+                    // We pull the dimensions and positions from the selection rectangle.
+                    // The selection rectangle automatically converts the positions and
+                    // dimensions to absolute coordinates when we set them earilier.
+                    x = selection->m_x+selection->m_xoffset;
+                    y = selection->m_y+selection->m_yoffset;
+                    w = selection->m_width;
+                    h = selection->m_height;
+                    // Delete the rectangle.
+                    xengine->removeRect( selection );
+                    // If the user simply clicked (and thus made the width and height smaller than
+                    // our tolerance) or if we're not hovering over a window, just print the selection
+                    // rectangle's stuff.
+                    if ( w > tolerance || h > tolerance || xengine->m_hoverXWindow == None ) {
+                        printf( "X=%i\n", x );
+                        printf( "Y=%i\n", y );
+                        printf( "W=%i\n", w + 1 );
+                        printf( "H=%i\n", h + 1 );
+                        break;
+                    }
                 }
                 // Otherwise lets grab the window's dimensions and use those (with padding).
                 slop::WindowRectangle t = xengine->m_hoverWindow;
