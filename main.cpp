@@ -20,6 +20,7 @@ int main( int argc, char** argv ) {
     float r = options->m_red;
     float g = options->m_green;
     float b = options->m_blue;
+    timespec start,time;
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
@@ -35,18 +36,23 @@ int main( int argc, char** argv ) {
     if ( err ) {
         return err;
     }
+    clock_gettime( CLOCK_REALTIME, &start );
     while ( running ) {
+        clock_gettime( CLOCK_REALTIME, &time );
         // "ticking" the xengine makes it process all queued events.
         xengine->tick();
         // If the user presses any key on the keyboard, exit the application.
-        if ( xengine->m_keypressed ) {
-            printf( "X=0\n" );
-            printf( "Y=0\n" );
-            printf( "W=0\n" );
-            printf( "H=0\n" );
-            fprintf( stderr, "User pressed key. Canceled selection.\n" );
-            state = -1;
-            running = false;
+        // Make sure a second has passed before allowing canceling
+        if ( time.tv_sec - start.tv_sec > 1 ) {
+            if ( xengine->m_keypressed ) {
+                printf( "X=0\n" );
+                printf( "Y=0\n" );
+                printf( "W=0\n" );
+                printf( "H=0\n" );
+                fprintf( stderr, "User pressed key. Canceled selection.\n" );
+                state = -1;
+                running = false;
+            }
         }
         if ( xengine->mouseDown( 3 ) ) {
             printf( "X=0\n" );
