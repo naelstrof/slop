@@ -20,6 +20,7 @@ int main( int argc, char** argv ) {
     float r = options->m_red;
     float g = options->m_green;
     float b = options->m_blue;
+    timespec start, time;
     int cx = 0;
     int cy = 0;
 
