@@ -18,8 +18,10 @@ public:
     float       m_green;
     float       m_blue;
     std::string m_xdisplay;
+    float       m_gracetime;
 private:
     int         parseInt( std::string arg, int* returnInt );
+    int         parseFloat( std::string arg, float* returnFloat );
     int         parseString( std::string arg, std::string* returnString );
     int         parseColor( std::string arg, float* r, float* g, float* b );
     bool        matches( std::string arg, std::string shorthand, std::string longhand );

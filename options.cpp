@@ -10,6 +10,7 @@ slop::Options::Options() {
     m_red = 0;
     m_green = 0;
     m_blue = 0;
+    m_gracetime = 0.1;
 }
 
 void slop::Options::printHelp() {
@@ -23,8 +24,9 @@ void slop::Options::printHelp() {
     printf( "    -t=INT, --tolerance=INT        if you have a shaky mouse, increasing this value will make slop detect single clicks better. Rather than interpreting your shaky clicks as region selections.\n" );
     printf( "    -x=STRING, --xdisplay=STRING   set x display (STRING must be hostname:number.screen_number format)\n" );
     printf( "    -c=COLOR, --color=COLOR        set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
+    printf( "    -g=FLOAT, --gracetime=FLOAT    set the amount of time before slop will check for keyboard cancellations in seconds.\n" );
     printf( "examples\n" );
-    printf( "    slop -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5\n" );
+    printf( "    slop -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5 -g=.2\n" );
 }
 
 int slop::Options::parseOptions( int argc, char** argv ) {
@@ -57,6 +59,14 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             }
             if ( m_tolerance < 0 ) {
                 m_tolerance = 0;
+            }
+        } else if ( matches( arg, "-g=", "--gracetime=" ) ) {
+            int err = parseFloat( arg, &m_gracetime );
+            if ( err ) {
+                return 1;
+            }
+            if ( m_gracetime < 0 ) {
+                m_gracetime = 0;
             }
         } else if ( matches( arg, "-x=", "--xdisplay=" ) ) {
             int err = parseString( arg, &m_xdisplay );
@@ -91,6 +101,27 @@ int slop::Options::parseInt( std::string arg, int* returnInt ) {
         fprintf( stderr, "Error parsing command arguments near %s\n", arg.c_str() );
         fprintf( stderr, "Usage: %s=INT\n", x );
         fprintf( stderr, "Example: %s=10 or %s=-12\n", x, x );
+        fprintf( stderr, "Try -h or --help for help.\n" );
+        delete[] x;
+        return 1;
+    }
+    delete[] x;
+    return 0;
+}
+
+int slop::Options::parseFloat( std::string arg, float* returnFloat ) {
+    std::string copy = arg;
+    int find = copy.find( "=" );
+    if ( find != copy.npos ) {
+        copy.at( find ) = ' ';
+    }
+    // Just in case we error out, grab the actual argument name into x.
+    char* x = new char[ arg.size() ];
+    int num = sscanf( copy.c_str(), "%s %f", x, returnFloat );
+    if ( num != 2 ) {
+        fprintf( stderr, "Error parsing command arguments near %s\n", arg.c_str() );
+        fprintf( stderr, "Usage: %s=FLOAT\n", x );
+        fprintf( stderr, "Example: %s=3.14 or %s=-99\n", x, x );
         fprintf( stderr, "Try -h or --help for help.\n" );
         delete[] x;
         return 1;
