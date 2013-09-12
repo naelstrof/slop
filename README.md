@@ -34,6 +34,9 @@ eval `slop`
 import -window root -crop "$W"x"$H"+$X+$Y ~/myimage.png
 ```
 
+You can see my implementation of slop in a screenshooter here:
+https://gist.github.com/naelstrof/6530959
+
 lets see some action
 --------------------
 Ok. Here's a comparison between 'scrot -s's selection and slop's:
