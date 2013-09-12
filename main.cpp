@@ -53,6 +53,8 @@ int main( int argc, char** argv ) {
                 state = -1;
                 running = false;
             }
+        } else {
+            xengine->m_keypressed = false;
         }
         if ( xengine->mouseDown( 3 ) ) {
             printf( "X=0\n" );
