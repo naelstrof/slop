@@ -44,8 +44,10 @@ int main( int argc, char** argv ) {
         // "ticking" the xengine makes it process all queued events.
         xengine->tick();
         // If the user presses any key on the keyboard, exit the application.
-        // Make sure a second has passed before allowing canceling
-        if ( time.tv_sec - start.tv_sec > 1 ) {
+        // Make sure at least a half second has passed before allowing canceling
+        double timei = double( time.tv_sec*1000000000L + time.tv_nsec )/1000000000.f;
+        double starti = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
+        if ( timei - starti > 0.5 ) {
             if ( xengine->m_keypressed ) {
                 printf( "X=0\n" );
                 printf( "Y=0\n" );
