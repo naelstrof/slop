@@ -152,8 +152,8 @@ int main( int argc, char** argv ) {
                     // We pull the dimensions and positions from the selection rectangle.
                     // The selection rectangle automatically converts the positions and
                     // dimensions to absolute coordinates when we set them earilier.
-                    x = selection->m_x+selection->m_xoffset;
-                    y = selection->m_y+selection->m_yoffset;
+                    x = selection->m_x+selection->m_xoffset+borderSize;
+                    y = selection->m_y+selection->m_yoffset+borderSize;
                     w = selection->m_width;
                     h = selection->m_height;
                     // Delete the rectangle.
