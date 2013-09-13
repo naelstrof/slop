@@ -264,7 +264,7 @@ slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
     unsigned long valueMask = CWBackPixmap | CWBackPixel | CWOverrideRedirect | CWColormap;
 
     // Create the window offset by our generated offsets (see constrain( float, float ))
-    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x+m_xoffset, m_y+m_yoffset, m_width+m_border*2, m_height+m_border*2,
+    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x+m_xoffset-m_border, m_y+m_yoffset-m_border, m_width+m_border*2, m_height+m_border*2,
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
 
@@ -288,7 +288,7 @@ void slop::Rectangle::setPos( int x, int y ) {
     if ( m_border == 0 ) {
         return;
     }
-    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset, m_y+m_yoffset );
+    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset-m_border, m_y+m_yoffset-m_border );
 }
 
 void slop::Rectangle::setDim( int w, int h ) {
@@ -304,7 +304,7 @@ void slop::Rectangle::setDim( int w, int h ) {
 
     // Change the window size and location to our generated offsets (see constrain( float, float ))
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
-    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset, m_y+m_yoffset );
+    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset-m_border, m_y+m_yoffset-m_border );
     // Regenerate our hole
     XRectangle rect;
     rect.x = rect.y = 0;
@@ -380,11 +380,11 @@ void slop::Rectangle::constrain( int w, int h ) {
     }
     if ( w < 0 ) {
         m_flippedx = true;
-        m_xoffset = w - pad - m_border;
+        m_xoffset = w - pad;
         m_width = -w + pad*2;
     } else {
         m_flippedx = false;
-        m_xoffset = -pad - m_border;
+        m_xoffset = -pad;
         m_width = w + pad*2;
     }
 
@@ -394,11 +394,11 @@ void slop::Rectangle::constrain( int w, int h ) {
     }
     if ( h < 0 ) {
         m_flippedy = true;
-        m_yoffset = h - pad - m_border;
+        m_yoffset = h - pad;
         m_height = -h + pad*2;
     } else {
         m_flippedy = false;
-        m_yoffset = -pad - m_border;
+        m_yoffset = -pad;
         m_height = h + pad*2;
     }
 }
