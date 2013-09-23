@@ -28,14 +28,26 @@ int main( int argc, char** argv ) {
     // if we fail for either we exit immediately.
     err = xengine->init( xdisplay.c_str() );
     if ( err ) {
+        printf( "X=0\n" );
+        printf( "Y=0\n" );
+        printf( "W=0\n" );
+        printf( "H=0\n" );
         return err;
     }
     err = xengine->grabCursor( slop::Cross );
     if ( err ) {
+        printf( "X=0\n" );
+        printf( "Y=0\n" );
+        printf( "W=0\n" );
+        printf( "H=0\n" );
         return err;
     }
     err = xengine->grabKeyboard();
     if ( err ) {
+        printf( "X=0\n" );
+        printf( "Y=0\n" );
+        printf( "W=0\n" );
+        printf( "H=0\n" );
         return err;
     }
     clock_gettime( CLOCK_REALTIME, &start );
