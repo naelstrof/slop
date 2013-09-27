@@ -11,14 +11,16 @@ slop::Options::Options() {
     m_green = 0;
     m_blue = 0;
     m_gracetime = 0.1;
+    m_keyboard = true;
 }
 
 void slop::Options::printHelp() {
     printf( "Usage: slop [options]\n" );
-    printf( "Print user selected region to stdout.\n" );
+    printf( "Print user selected region to stdout. Pressing keys or right-clicking cancels selection.\n" );
     printf( "\n" );
     printf( "options\n" );
     printf( "    -h, --help                     show this message.\n" );
+    printf( "    -nk, --nokeyboard              don't try to grab the keyboard. This may fix problems with certain window managers.\n" );
     printf( "    -b=INT, --bordersize=INT       set selection rectangle border size.\n" );
     printf( "    -p=INT, --m_padding=INT        set m_padding size for selection.\n" );
     printf( "    -t=INT, --tolerance=INT        if you have a shaky mouse, increasing this value will make slop detect single clicks better. Rather than interpreting your shaky clicks as region selections.\n" );
@@ -73,7 +75,9 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             if ( err ) {
                 return 1;
             }
-        } else if ( arg == "-h" || arg == "--help" ) {
+        } else if ( matches( arg, "-nk", "--nokeyboard" ) ) {
+            m_keyboard = false;
+        } else if ( matches( arg, "-h", "--help" ) ) {
             printHelp();
             return 2;
         } else {

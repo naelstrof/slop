@@ -20,6 +20,7 @@ int main( int argc, char** argv ) {
     float r = options->m_red;
     float g = options->m_green;
     float b = options->m_blue;
+    bool keyboard = options->m_keyboard;
     timespec start, time;
     int cx = 0;
     int cy = 0;
@@ -42,13 +43,15 @@ int main( int argc, char** argv ) {
         printf( "H=0\n" );
         return err;
     }
-    err = xengine->grabKeyboard();
-    if ( err ) {
-        printf( "X=0\n" );
-        printf( "Y=0\n" );
-        printf( "W=0\n" );
-        printf( "H=0\n" );
-        return err;
+    if ( keyboard ) {
+        err = xengine->grabKeyboard();
+        if ( err ) {
+            printf( "X=0\n" );
+            printf( "Y=0\n" );
+            printf( "W=0\n" );
+            printf( "H=0\n" );
+            return err;
+        }
     }
     clock_gettime( CLOCK_REALTIME, &start );
     while ( running ) {

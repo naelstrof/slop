@@ -19,6 +19,7 @@ public:
     float       m_blue;
     std::string m_xdisplay;
     float       m_gracetime;
+    bool        m_keyboard;
 private:
     int         parseInt( std::string arg, int* returnInt );
     int         parseFloat( std::string arg, float* returnFloat );
