@@ -9,11 +9,11 @@ BINDIR="usr/bin"
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
 clean:
 	rm -rf $(OBJECTS) $(EXECUTABLE)
 
 install: all
 	mkdir -p $(DESTDIR)/$(BINDIR)
-	cp $(CURDIR)/slop $(DESTDIR)/$(BINDIR)
+	cp $(CURDIR)/$(EXECUTABLE) $(DESTDIR)/$(BINDIR)
