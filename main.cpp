@@ -179,8 +179,8 @@ int main( int argc, char** argv ) {
                     if ( w > tolerance || h > tolerance || xengine->m_hoverXWindow == None ) {
                         printf( "X=%i\n", x );
                         printf( "Y=%i\n", y );
-                        printf( "W=%i\n", w + 1 );
-                        printf( "H=%i\n", h + 1 );
+                        printf( "W=%i\n", w );
+                        printf( "H=%i\n", h );
                         break;
                     }
                 }
