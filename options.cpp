@@ -20,9 +20,9 @@ void slop::Options::printHelp() {
     printf( "\n" );
     printf( "options\n" );
     printf( "    -h, --help                     show this message.\n" );
-    printf( "    -nk, --nokeyboard              don't try to grab the keyboard. This may fix problems with certain window managers.\n" );
+    printf( "    -nkb, --nokeyboard             don't try to grab the keyboard. This may fix problems with certain window managers.\n" );
     printf( "    -b=INT, --bordersize=INT       set selection rectangle border size.\n" );
-    printf( "    -p=INT, --m_padding=INT        set m_padding size for selection.\n" );
+    printf( "    -p=INT, --padding=INT          set padding size for selection.\n" );
     printf( "    -t=INT, --tolerance=INT        if you have a shaky mouse, increasing this value will make slop detect single clicks better. Rather than interpreting your shaky clicks as region selections.\n" );
     printf( "    -x=STRING, --xdisplay=STRING   set x display (STRING must be hostname:number.screen_number format)\n" );
     printf( "    -c=COLOR, --color=COLOR        set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
@@ -75,7 +75,7 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             if ( err ) {
                 return 1;
             }
-        } else if ( matches( arg, "-nk", "--nokeyboard" ) ) {
+        } else if ( matches( arg, "-nkb", "--nokeyboard" ) ) {
             m_keyboard = false;
         } else if ( matches( arg, "-h", "--help" ) ) {
             printHelp();
@@ -135,9 +135,15 @@ int slop::Options::parseFloat( std::string arg, float* returnFloat ) {
 }
 
 bool slop::Options::matches( std::string arg, std::string shorthand, std::string longhand ) {
-    if ( arg.substr( 0, shorthand.size() ) == shorthand ||
-         arg.substr( 0, longhand.size() ) == longhand ) {
-        return true;
+    if ( arg.substr( 0, shorthand.size() ) == shorthand ) {
+        if ( arg == shorthand || shorthand[shorthand.length()-1] == '=' ) {
+            return true;
+        }
+    }
+    if ( longhand.size() && arg.substr( 0, longhand.size() ) == longhand ) {
+        if ( arg == longhand || longhand[longhand.length()-1] == '=' ) {
+            return true;
+        }
     }
     return false;
 }
