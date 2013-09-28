@@ -208,6 +208,8 @@ int main( int argc, char** argv ) {
     // Clean up global classes.
     delete xengine;
     delete options;
+    // Wait to make sure X11 cleans up our window before we end.
+    usleep( 10000 );
     // If we canceled the selection, return error.
     if ( state == -1 ) {
         return 1;
