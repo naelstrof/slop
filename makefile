@@ -15,5 +15,5 @@ clean:
 	rm -rf $(OBJECTS) $(EXECUTABLE)
 
 install: all
-	mkdir -p $(DESTDIR)/$(BINDIR)
+	mkdir -p $(DESTDIR)$(BINDIR)
 	cp $(CURDIR)/$(EXECUTABLE) $(DESTDIR)$(BINDIR)
