@@ -225,6 +225,9 @@ slop::Rectangle::~Rectangle() {
         return;
     }
     //XFreeColors( xengine->m_display, xengine->m_colormap, m_color.pixel, 1,
+    // Attempt to move window offscreen before trying to remove it.
+    XResizeWindow( xengine->m_display, m_window, 1, 1 );
+    XMoveWindow( xengine->m_display, m_window, 0, 0 );
     XUnmapWindow( xengine->m_display, m_window );
     XDestroyWindow( xengine->m_display, m_window );
 }

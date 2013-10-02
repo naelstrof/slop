@@ -205,11 +205,13 @@ int main( int argc, char** argv ) {
     }
     xengine->releaseCursor();
     xengine->releaseKeyboard();
+    // Try to process any last-second requests.
+    xengine->tick();
     // Clean up global classes.
     delete xengine;
     delete options;
     // Wait to make sure X11 cleans up our window before we end.
-    usleep( 10000 );
+    usleep( 100000 );
     // If we canceled the selection, return error.
     if ( state == -1 ) {
         return 1;
