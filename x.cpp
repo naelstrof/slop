@@ -277,6 +277,11 @@ slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
     rect.width = m_width;
     rect.height = m_height;
 
+    XClassHint classhints;
+    classhints.res_name = "slop";
+    classhints.res_class = "slop";
+    XSetClassHint( xengine->m_display, m_window, &classhints );
+
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
     XMapWindow( xengine->m_display, m_window );
 }
