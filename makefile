@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-O2 -g
+CCFLAGS=-O2 -g
 LDFLAGS=-lX11 -lXext
 SOURCES=main.cpp x.cpp options.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
@@ -10,6 +10,9 @@ all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+
+$(OBJECTS): %.o: %.cpp
+	$(CC) $(CCFLAGS) -o $@ -c $<
 
 clean:
 	rm -rf $(OBJECTS) $(EXECUTABLE)

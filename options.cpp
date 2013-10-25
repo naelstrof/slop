@@ -12,6 +12,7 @@ slop::Options::Options() {
     m_blue = 0;
     m_gracetime = 0.1;
     m_keyboard = true;
+    m_window = true;
 }
 
 void slop::Options::printHelp() {
@@ -27,6 +28,7 @@ void slop::Options::printHelp() {
     printf( "    -x=STRING, --xdisplay=STRING   set x display (STRING must be hostname:number.screen_number format)\n" );
     printf( "    -c=COLOR, --color=COLOR        set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
     printf( "    -g=FLOAT, --gracetime=FLOAT    set the amount of time before slop will check for keyboard cancellations in seconds.\n" );
+    printf( "    -nw, --nowindow                disable automatically selecting a whole window on single-clicks, and instead just select a single pixel.\n" );
     printf( "examples\n" );
     printf( "    slop -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5 -g=.2\n" );
 }
@@ -77,6 +79,8 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             }
         } else if ( matches( arg, "-nkb", "--nokeyboard" ) ) {
             m_keyboard = false;
+        } else if ( matches( arg, "-nw", "--nowindow" ) ) {
+            m_window = false;
         } else if ( matches( arg, "-h", "--help" ) ) {
             printHelp();
             return 2;
