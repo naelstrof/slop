@@ -20,6 +20,7 @@ public:
     std::string m_xdisplay;
     float       m_gracetime;
     bool        m_keyboard;
+    bool        m_window;
 private:
     int         parseInt( std::string arg, int* returnInt );
     int         parseFloat( std::string arg, float* returnFloat );

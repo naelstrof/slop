@@ -92,7 +92,8 @@ int main( int argc, char** argv ) {
             case 0: {
                 // If xengine has found a window we're hovering over (or if it changed)
                 // create a rectangle around it so the user knows he/she can click on it.
-                if ( window != xengine->m_hoverXWindow ) {
+                // --but only if the user wants us to
+                if ( window != xengine->m_hoverXWindow && options->m_window ) {
                     // Make sure to delete the old selection rectangle.
                     if ( windowselection ) {
                         xengine->removeRect( windowselection ); // removeRect also dealloc's the rectangle for us.
@@ -185,11 +186,19 @@ int main( int argc, char** argv ) {
                     }
                 }
                 // Otherwise lets grab the window's dimensions and use those (with padding).
-                slop::WindowRectangle t = xengine->m_hoverWindow;
-                x = t.m_x - padding - t.m_border;
-                y = t.m_y - padding - t.m_border;
-                w = t.m_width + t.m_border + padding*2;
-                h = t.m_height + t.m_border + padding*2;
+                // --but only if the user lets us, if the user doesn't just select a single pixel there.
+                if ( options->m_window ) {
+                    slop::WindowRectangle t = xengine->m_hoverWindow;
+                    x = t.m_x - padding - t.m_border;
+                    y = t.m_y - padding - t.m_border;
+                    w = t.m_width + t.m_border + padding*2;
+                    h = t.m_height + t.m_border + padding*2;
+                } else {
+                    x = cx;
+                    y = cy;
+                    w = 1;
+                    h = 1;
+                }
                 printf( "X=%i\n", x );
                 printf( "Y=%i\n", y );
                 printf( "W=%i\n", w );
