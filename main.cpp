@@ -133,8 +133,8 @@ int main( int argc, char** argv ) {
                     break;
                 }
                 // Check to make sure the user actually wants to drag for a selection before creating a rectangle.
-                int w = xengine->m_mousex - cx;
-                int h = xengine->m_mousey - cy;
+                int w = xengine->m_mousex - cx + 1;
+                int h = xengine->m_mousey - cy + 1;
                 if ( ( std::abs( w ) > tolerance || std::abs( h ) > tolerance ) && !selection ) {
                     selection = new slop::Rectangle( cx, cy, 0, 0, borderSize, padding, r, g, b );
                     xengine->addRect( selection );
