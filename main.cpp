@@ -180,8 +180,8 @@ int main( int argc, char** argv ) {
                     if ( w > tolerance || h > tolerance || xengine->m_hoverXWindow == None ) {
                         printf( "X=%i\n", x );
                         printf( "Y=%i\n", y );
-                        printf( "W=%i\n", w );
-                        printf( "H=%i\n", h );
+                        printf( "W=%i\n", w + 1 );
+                        printf( "H=%i\n", h + 1 );
                         break;
                     }
                 }
@@ -191,8 +191,8 @@ int main( int argc, char** argv ) {
                     slop::WindowRectangle t = xengine->m_hoverWindow;
                     x = t.m_x - padding - t.m_border;
                     y = t.m_y - padding - t.m_border;
-                    w = t.m_width + t.m_border + padding*2;
-                    h = t.m_height + t.m_border + padding*2;
+                    w = t.m_width + t.m_border + padding*2 + 1;
+                    h = t.m_height + t.m_border + padding*2 + 1;
                 } else {
                     x = cx;
                     y = cy;
