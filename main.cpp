@@ -103,8 +103,8 @@ int main( int argc, char** argv ) {
                         xengine->removeRect( windowselection ); // removeRect also dealloc's the rectangle for us.
                     }
                     slop::WindowRectangle t = xengine->m_hoverWindow;
-                    windowselection = new slop::Rectangle( t.m_x - t.m_border,
-                                                         t.m_y - t.m_border,
+                    windowselection = new slop::Rectangle( t.m_x,
+                                                         t.m_y,
                                                          t.m_width + t.m_border * 2,
                                                          t.m_height + t.m_border * 2,
                                                          borderSize, padding,
@@ -209,10 +209,10 @@ int main( int argc, char** argv ) {
                 // --but only if the user lets us, if the user doesn't just select a single pixel there.
                 if ( tolerance > 0 ) {
                     slop::WindowRectangle t = xengine->m_hoverWindow;
-                    x = t.m_x - padding - t.m_border;
-                    y = t.m_y - padding - t.m_border;
-                    w = t.m_width + t.m_border * 2 + padding*2;
-                    h = t.m_height + t.m_border * 2 + padding*2;
+                    x = t.m_x - padding;
+                    y = t.m_y - padding;
+                    w = t.m_width + t.m_border * 2 + padding * 2;
+                    h = t.m_height + t.m_border * 2 + padding * 2;
                 } else {
                     x = cx;
                     y = cy;
