@@ -1,6 +1,6 @@
 CC=g++
 CCFLAGS=-O2 -g
-LDFLAGS=-lX11 -lXext
+LDFLAGS=-lX11 -lXext -lrt
 SOURCES=main.cpp x.cpp options.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=slop
