@@ -7,13 +7,19 @@ static Bool isDestroyNotify( Display* dpy, XEvent* ev, XPointer win ) {
 }
 
 int slop::XEngineErrorHandler( Display* dpy, XErrorEvent* event ) {
-    // Ignore XGrabKeyboard BadAccess errors
+    // Ignore XGrabKeyboard BadAccess errors, we can work without it.
     // 31 = XGrabKeyboard's request code
     if ( event->request_code == 31 && event->error_code == BadAccess ) {
         return 0;
     }
-    // Otherwise call the default error handler
-    //return slop::OldXErrorHandler( dpy, event );
+    // Everything else should be fatal as I don't like undefined behavior.
+    char buffer[1024];
+    XGetErrorText( dpy, event->error_code, buffer, 1024 );
+    fprintf( stderr,
+             "_X Error of failed request:  %s\n_  Major opcode of failed request: % 3d\n_  Serial number of failed request:% 5d\n_  Current serial number in output stream:?????\n",
+             buffer,
+             event->request_code,
+             event->serial );
     exit(1);
 }
 
@@ -303,8 +309,9 @@ slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
     rect.height = m_height;
 
     XClassHint classhints;
-    classhints.res_name = "slop";
-    classhints.res_class = "slop";
+    char name[] = "slop";
+    classhints.res_name = name;
+    classhints.res_class = name;
     XSetClassHint( xengine->m_display, m_window, &classhints );
 
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
