@@ -2,8 +2,21 @@
 
 slop::XEngine* xengine = new slop::XEngine();
 
+static Bool isDestroyNotify( Display* dpy, XEvent* ev, XPointer win ) {
+    return ev->type == DestroyNotify && ev->xdestroywindow.window == *((Window*)win);
+}
+
+int slop::XEngineErrorHandler( Display* dpy, XErrorEvent* event ) {
+    // Ignore XGrabKeyboard BadAccess errors
+    // 31 = XGrabKeyboard's request code
+    if ( event->request_code == 31 && event->error_code == BadAccess ) {
+        return 0;
+    }
+    // Otherwise call the default error handler
+    return slop::OldXErrorHandler( dpy, event );
+}
+
 slop::XEngine::XEngine() {
-    m_keypressed = false;
     m_display = NULL;
     m_visual = NULL;
     m_screen = NULL;
@@ -65,23 +78,33 @@ int slop::XEngine::init( std::string display ) {
     m_root      = DefaultRootWindow( m_display );
 
     m_good = true;
+    slop::OldXErrorHandler = XSetErrorHandler( slop::XEngineErrorHandler );
     return 0;
+}
+
+bool slop::XEngine::anyKeyPressed() {
+    if ( !m_good ) {
+        return false;
+    }
+    // Thanks to SFML for some reliable key state grabbing.
+    // Get the whole keyboard state
+    char keys[ 32 ];
+    XQueryKeymap( m_display, keys );
+    // Each bit indicates a different key, 1 for pressed, 0 otherwise.
+    // Every bit should be 0 if nothing is pressed.
+    for ( unsigned int i = 0; i < 32; i++ ) {
+        if ( keys[ i ] != 0 ) {
+            return true;
+        }
+    }
+    return false;
 }
 
 int slop::XEngine::grabKeyboard() {
     if ( !m_good ) {
         return 1;
     }
-    XGrabKey( m_display, AnyKey, AnyModifier, m_root, False, GrabModeAsync, GrabModeAsync );
-    // For whatever we fail to grab the keyboard 100% of the time if slop is launched in the background.
-    /*int err = XGrabKeyboard( m_display, m_root, False,
-                             GrabModeAsync, GrabModeAsync, CurrentTime );
-    if ( err != GrabSuccess ) {
-        fprintf( stderr, "Error: Failed to grab X keyboard.\n" );
-        fprintf( stderr, "This can be caused by launching slop incorrectly.\n" );
-        fprintf( stderr, "gnome-session launches it fine from keyboard binds.\n" );
-        return 1;
-    }*/
+    XGrabKeyboard( m_display, m_root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
     return 0;
 }
 
@@ -164,15 +187,11 @@ void slop::XEngine::tick() {
                 }
                 break;
             }
-            // For this particular utility, we only care if a key is pressed.
-            // I'm too lazy to implement an actual keyhandler for that.
+            // Due to X11 really hating applications grabbing the keyboard, we use XQueryKeymap to check for downed keys elsewhere.
             case KeyPress: {
-                m_keypressed = true;
                 break;
             }
-            // Since we also don't care if it's released, do nothing! yay
             case KeyRelease: {
-                //m_keypressed = false;
                 break;
             }
             default: break;
@@ -226,10 +245,13 @@ slop::Rectangle::~Rectangle() {
     }
     //XFreeColors( xengine->m_display, xengine->m_colormap, m_color.pixel, 1,
     // Attempt to move window offscreen before trying to remove it.
-    XResizeWindow( xengine->m_display, m_window, 1, 1 );
-    XMoveWindow( xengine->m_display, m_window, 0, 0 );
-    XUnmapWindow( xengine->m_display, m_window );
+    //XResizeWindow( xengine->m_display, m_window, 1, 1 );
+    //XMoveWindow( xengine->m_display, m_window, 0, 0 );
+    //XUnmapWindow( xengine->m_display, m_window );
     XDestroyWindow( xengine->m_display, m_window );
+    XEvent event;
+    // Block until the window is actually completely removed.
+    XIfEvent( xengine->m_display, &event, &isDestroyNotify, (XPointer)&m_window );
 }
 
 slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding, float r, float g, float b ) {
@@ -264,7 +286,9 @@ slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
     attributes.override_redirect = True;
     // We must use our color map, because that's where our color is allocated.
     attributes.colormap = xengine->m_colormap;
-    unsigned long valueMask = CWBackPixmap | CWBackPixel | CWOverrideRedirect | CWColormap;
+    // Make sure we know when we've been successfully destroyed later!
+    attributes.event_mask = StructureNotifyMask;
+    unsigned long valueMask = CWBackPixmap | CWBackPixel | CWOverrideRedirect | CWColormap | CWEventMask;
 
     // Create the window offset by our generated offsets (see constrain( float, float ))
     m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x+m_xoffset-m_border, m_y+m_yoffset-m_border, m_width+m_border*2, m_height+m_border*2,

@@ -67,7 +67,7 @@ int main( int argc, char** argv ) {
         double timei = double( time.tv_sec*1000000000L + time.tv_nsec )/1000000000.f;
         double starti = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
         if ( timei - starti > options->m_gracetime ) {
-            if ( xengine->m_keypressed ) {
+            if ( xengine->anyKeyPressed() && keyboard || xengine->mouseDown( 3 ) ) {
                 printf( "X=0\n" );
                 printf( "Y=0\n" );
                 printf( "W=0\n" );
@@ -76,17 +76,6 @@ int main( int argc, char** argv ) {
                 state = -1;
                 running = false;
             }
-        } else {
-            xengine->m_keypressed = false;
-        }
-        if ( xengine->mouseDown( 3 ) ) {
-            printf( "X=0\n" );
-            printf( "Y=0\n" );
-            printf( "W=0\n" );
-            printf( "H=0\n" );
-            fprintf( stderr, "User right-clicked. Canceled selection.\n" );
-            state = -1;
-            running = false;
         }
         // Our adorable little state manager will handle what state we're in.
         switch ( state ) {
@@ -235,12 +224,10 @@ int main( int argc, char** argv ) {
     xengine->releaseCursor();
     xengine->releaseKeyboard();
     // Try to process any last-second requests.
-    xengine->tick();
+    //xengine->tick();
     // Clean up global classes.
     delete xengine;
     delete options;
-    // Wait to make sure X11 cleans up our window before we end.
-    usleep( 100000 );
     // If we canceled the selection, return error.
     if ( state == -1 ) {
         return 1;

@@ -9,6 +9,7 @@
 #include <X11/cursorfont.h>
 #include <X11/extensions/shape.h>
 
+#include <cstdlib>
 #include <cmath>
 #include <cstdio>
 #include <string>
@@ -65,7 +66,8 @@ public:
     int                 init( std::string display );
     void                tick();
     int                 grabCursor( slop::CursorType type );
-    int                 grabKeyboard();
+    int                grabKeyboard();
+    bool                anyKeyPressed();
     int                 releaseCursor();
     int                 releaseKeyboard();
     void                setCursor( slop::CursorType type );
@@ -92,6 +94,9 @@ private:
     std::vector<Rectangle*> m_rects;
     Cursor              getCursor( slop::CursorType type );
 };
+
+int XEngineErrorHandler( Display* dpy, XErrorEvent* event );
+XErrorHandler OldXErrorHandler;
 
 }
 

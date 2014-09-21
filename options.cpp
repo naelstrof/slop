@@ -10,7 +10,7 @@ slop::Options::Options() {
     m_red = 0;
     m_green = 0;
     m_blue = 0;
-    m_gracetime = 0.1;
+    m_gracetime = 0.3;
     m_keyboard = true;
 }
 
@@ -20,7 +20,7 @@ void slop::Options::printHelp() {
     printf( "\n" );
     printf( "options\n" );
     printf( "    -h, --help                     show this message.\n" );
-    printf( "    -nkb, --nokeyboard             don't try to grab the keyboard. This may fix problems with certain window managers.\n" );
+    printf( "    -nkb, --nokeyboard             disables the ability to cancel selections with the keyboard.\n" );
     printf( "    -b=INT, --bordersize=INT       set selection rectangle border size.\n" );
     printf( "    -p=INT, --padding=INT          set padding size for selection.\n" );
     printf( "    -t=INT, --tolerance=INT        if you have a shaky mouse, increasing this value will make slop detect single clicks better. Rather than interpreting your shaky clicks as region selections. Setting to zero will disable window selections.\n" );
@@ -28,7 +28,7 @@ void slop::Options::printHelp() {
     printf( "    -c=COLOR, --color=COLOR        set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
     printf( "    -g=FLOAT, --gracetime=FLOAT    set the amount of time before slop will check for keyboard cancellations in seconds.\n" );
     printf( "examples\n" );
-    printf( "    slop -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5 -g=.2\n" );
+    printf( "    slop -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5 -g=.3\n" );
 }
 
 int slop::Options::parseOptions( int argc, char** argv ) {
