@@ -13,7 +13,8 @@ int slop::XEngineErrorHandler( Display* dpy, XErrorEvent* event ) {
         return 0;
     }
     // Otherwise call the default error handler
-    return slop::OldXErrorHandler( dpy, event );
+    //return slop::OldXErrorHandler( dpy, event );
+    exit(1);
 }
 
 slop::XEngine::XEngine() {
@@ -78,7 +79,7 @@ int slop::XEngine::init( std::string display ) {
     m_root      = DefaultRootWindow( m_display );
 
     m_good = true;
-    slop::OldXErrorHandler = XSetErrorHandler( slop::XEngineErrorHandler );
+    XSetErrorHandler( slop::XEngineErrorHandler );
     return 0;
 }
 

@@ -96,7 +96,6 @@ private:
 };
 
 int XEngineErrorHandler( Display* dpy, XErrorEvent* event );
-XErrorHandler OldXErrorHandler;
 
 }
 
