@@ -30,7 +30,7 @@ slop::XEngine::XEngine() {
     m_good = false;
     m_mousex = -1;
     m_mousey = -1;
-    m_hoverXWindow = None;
+    m_hoverWindow = None;
 }
 
 slop::XEngine::~XEngine() {
@@ -245,6 +245,43 @@ void slop::XEngine::setCursor( slop::CursorType type ) {
                               xfontcursor, CurrentTime );
 }
 
+void slop::WindowRectangle::setGeometry( Window win, bool decorations ) {
+    Window junk;
+    if ( decorations ) {
+        unsigned int depth;
+        XGetGeometry( xengine->m_display, win, &junk,
+                      &(m_x), &(m_y),
+                      &(m_width), &(m_height),
+                      &(m_border), &depth );
+        // We make sure we include borders, since we want decorations.
+        m_width += m_border * 2;
+        m_height += m_border * 2;
+        m_decorations = true;
+        return;
+    }
+    Window root;
+    Window* children = NULL;
+    unsigned int childcount;
+    // Try to get the first child of the specified window, to avoid decorations.
+    XQueryTree( xengine->m_display, win, &root, &junk, &children, &childcount );
+    if ( childcount == 1 && children ) {
+        win = children[ 0 ];
+        m_decorations = false;
+    } else {
+        //fprintf( stderr, "Warning: slop couldn't determine how to remove decorations, continuing without removing decorations...\n" );
+        m_decorations = true;
+    }
+    XWindowAttributes attr;
+    // We use XGetWindowAttributes to know our root window.
+    XGetWindowAttributes( xengine->m_display, win, &attr );
+    //m_x = attr.x;
+    //m_y = attr.y;
+    m_width = attr.width;
+    m_height = attr.height;
+    m_border = attr.border_width;
+    XTranslateCoordinates( xengine->m_display, win, attr.root, -attr.border_width, -attr.border_width, &(m_x), &(m_y), &junk );
+}
+
 slop::Rectangle::~Rectangle() {
     //XFreeGC( xengine->m_display, m_gc );
     if ( m_window == None ) {
@@ -359,56 +396,38 @@ void slop::Rectangle::setDim( int w, int h ) {
 }
 
 void slop::XEngine::updateHoverWindow() {
-    Window root, child;
+    Window root, hoverwin;
     int mx, my;
     int wx, wy;
     unsigned int mask;
     // Query the pointer for the child window, the child window is basically the window we're hovering over.
-    XQueryPointer( m_display, m_root, &root, &child, &mx, &my, &wx, &wy, &mask );
+    XQueryPointer( m_display, m_root, &root, &hoverwin, &mx, &my, &wx, &wy, &mask );
     // If we already know that we're hovering over it, do nothing.
-    if ( m_hoverXWindow == child ) {
+    if ( m_hoverWindow == hoverwin ) {
         return;
     }
     // Make sure we can't select one of our selection rectangles, that's just weird.
     for ( unsigned int i=0; i<m_rects.size(); i++ ) {
-        if ( m_rects.at( i )->m_window == child ) {
+        if ( m_rects.at( i )->m_window == hoverwin ) {
             return;
         }
     }
-    m_hoverXWindow = child;
-    if ( child == None ) {
-        return;
-    }
-    // Generate the geometry values so we can use them if needed.
-    unsigned int depth;
-    XGetGeometry( m_display, child, &root,
-                  &(m_hoverWindow.m_x), &(m_hoverWindow.m_y),
-                  &(m_hoverWindow.m_width), &(m_hoverWindow.m_height),
-                  &(m_hoverWindow.m_border), &depth );
+    m_hoverWindow = hoverwin;
 }
 
-void slop::XEngine::updateHoverWindow( Window child ) {
+void slop::XEngine::updateHoverWindow( Window hoverwin ) {
     // Same thing as updateHoverWindow but it uses the specified child.
     // It's used when we first grab the cursor so it's slightly more effecient
     // than calling XQueryPointer twice.
-    if ( m_hoverXWindow == child ) {
+    if ( m_hoverWindow == hoverwin ) {
         return;
     }
     for ( unsigned int i=0; i<m_rects.size(); i++ ) {
-        if ( m_rects.at( i )->m_window == child ) {
+        if ( m_rects.at( i )->m_window == hoverwin ) {
             return;
         }
     }
-    m_hoverXWindow = child;
-    if ( child == None ) {
-        return;
-    }
-    unsigned int depth;
-    Window root;
-    XGetGeometry( m_display, child, &root,
-                  &(m_hoverWindow.m_x), &(m_hoverWindow.m_y),
-                  &(m_hoverWindow.m_width), &(m_hoverWindow.m_height),
-                  &(m_hoverWindow.m_border), &depth );
+    m_hoverWindow = hoverwin;
 }
 
 // Keeps our rectangle's sizes all positive, so Xlib doesn't throw an exception.

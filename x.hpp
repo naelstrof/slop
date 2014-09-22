@@ -29,11 +29,13 @@ enum CursorType {
 
 class WindowRectangle {
 public:
-    int m_x;
-    int m_y;
+    int          m_x;
+    int          m_y;
     unsigned int m_width;
     unsigned int m_height;
     unsigned int m_border;
+    bool         m_decorations;
+    void         setGeometry( Window win, bool decorations );
 };
 
 class Rectangle {
@@ -66,7 +68,7 @@ public:
     int                 init( std::string display );
     void                tick();
     int                 grabCursor( slop::CursorType type );
-    int                grabKeyboard();
+    int                 grabKeyboard();
     bool                anyKeyPressed();
     int                 releaseCursor();
     int                 releaseKeyboard();
@@ -83,8 +85,7 @@ public:
     int                 m_mousey;
     std::vector<bool>   m_mouse;
     bool                mouseDown( unsigned int button );
-    WindowRectangle     m_hoverWindow;
-    Window              m_hoverXWindow;
+    Window              m_hoverWindow;
     bool                m_keypressed;
 private:
     void                updateHoverWindow();

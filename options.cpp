@@ -12,23 +12,43 @@ slop::Options::Options() {
     m_blue = 0;
     m_gracetime = 0.3;
     m_keyboard = true;
+    m_decorations = true;
+    m_offsetx = 0;
+    m_offsety = 0;
+    m_offsetw = 0;
+    m_offseth = 0;
 }
 
 void slop::Options::printHelp() {
     printf( "Usage: slop [options]\n" );
     printf( "Print user selected region to stdout. Pressing keys or right-clicking cancels selection.\n" );
     printf( "\n" );
-    printf( "options\n" );
-    printf( "    -h, --help                     show this message.\n" );
-    printf( "    -nkb, --nokeyboard             disables the ability to cancel selections with the keyboard.\n" );
-    printf( "    -b=INT, --bordersize=INT       set selection rectangle border size.\n" );
-    printf( "    -p=INT, --padding=INT          set padding size for selection.\n" );
-    printf( "    -t=INT, --tolerance=INT        if you have a shaky mouse, increasing this value will make slop detect single clicks better. Rather than interpreting your shaky clicks as region selections. Setting to zero will disable window selections.\n" );
-    printf( "    -x=STRING, --xdisplay=STRING   set x display (STRING must be hostname:number.screen_number format)\n" );
-    printf( "    -c=COLOR, --color=COLOR        set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
-    printf( "    -g=FLOAT, --gracetime=FLOAT    set the amount of time before slop will check for keyboard cancellations in seconds.\n" );
-    printf( "examples\n" );
-    printf( "    slop -b=10 -x=:0 -p=-30 -t=4 -c=0.5,0.5,0.5 -g=.3\n" );
+    printf( "Options\n" );
+    printf( "    -h, --help                     Show this message.\n" );
+    printf( "    -nkb, --nokeyboard             Disables the ability to cancel selections with the keyboard.\n" );
+    printf( "    -b=INT, --bordersize=INT       Set selection rectangle border size.\n" );
+    printf( "    -p=INT, --padding=INT          Set padding size for selection.\n" );
+    printf( "    -t=INT, --tolerance=INT        How far in pixels the mouse can move after clicking and still be detected\n" );
+    printf( "                                   as a normal click. Setting to zero will disable window selections.\n" );
+    printf( "    -x=STRING, --xdisplay=STRING   Set x display (STRING must be hostname:number.screen_number format)\n" );
+    printf( "    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
+    printf( "    -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations\n" );
+    printf( "                                   in seconds.\n" );
+    printf( "    -nd, --nodecorations           attempts to remove decorations from window selections.\n" );
+    printf( "    -o=GEOMETRY, --offset=GEOMETRY Offsets window selections, but only if --nodecorations is active and if the\n" );
+    printf( "                                   window's decorations were successfully detected. Has a very specific use of\n" );
+    printf( "                                   removing shadows from Gnome's window selections right now. GEOMETRY is in\n" );
+    printf( "                                   format WxH+X+Y\n" );
+    printf( "\n" );
+    printf( "Examples\n" );
+    printf( "    $ # gray, thick border for maximum visiblity.\n" );
+    printf( "    $ slop -b=20 -c=0.5,0.5,0.5\n" );
+    printf( "\n" );
+    printf( "    $ # Remove window decorations, but include the 28px titlebar. Useful to remove the arbitrarily sized shadows in Gnome where they are included in window geometry for whatever reason.\n" );
+    printf( "    $ slop -nd -o=0x28+0-28\n" );
+    printf( "\n" );
+    printf( "    $ # Disable window selections. Useful for selecting individual pixels.\n" );
+    printf( "    $ slop -t=0\n" );
 }
 
 int slop::Options::parseOptions( int argc, char** argv ) {
@@ -43,6 +63,11 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             }
             if ( m_borderSize < 0 ) {
                 m_borderSize = 0;
+            }
+        } else if ( matches( arg, "-o=", "--offset=" ) ) {
+            int err = parseGeometry( arg, &m_offsetx, &m_offsety, &m_offsetw, &m_offseth );
+            if ( err ) {
+                return 1;
             }
         } else if ( matches( arg, "-p=", "--padding=" ) ) {
             int err = parseInt( arg, &m_padding );
@@ -77,6 +102,8 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             }
         } else if ( matches( arg, "-nkb", "--nokeyboard" ) ) {
             m_keyboard = false;
+        } else if ( matches( arg, "-nd", "--nodecorations" ) ) {
+            m_decorations = false;
         } else if ( matches( arg, "-h", "--help" ) ) {
             printHelp();
             return 2;
@@ -193,5 +220,34 @@ int slop::Options::parseColor( std::string arg, float* r, float* g, float* b ) {
         return 1;
     }
     delete[] x;
+    return 0;
+}
+
+int slop::Options::parseGeometry( std::string arg, int* x, int* y, int* w, int* h ) {
+    std::string copy = arg;
+    // Replace the first =, all x's and +'s with spaces.
+    int find = copy.find( "=" );
+    while( find != copy.npos ) {
+        copy.at( find ) = ' ';
+        find = copy.find( "x" );
+    }
+    find = copy.find( "+" );
+    while( find != copy.npos ) {
+        copy.at( find ) = ' ';
+        find = copy.find( "+" );
+    }
+
+    // Just in case we error out, grab the actual argument name into x.
+    char* foo = new char[ arg.size() ];
+    int num = sscanf( copy.c_str(), "%s %d %d %d %d", foo, w, h, x, y );
+    if ( num != 5 ) {
+        fprintf( stderr, "Error parsing command arguments near %s\n", arg.c_str() );
+        fprintf( stderr, "Usage: %s=GEOMETRY\n", foo );
+        fprintf( stderr, "Example: %s=1920x1080+0+0 or %s=256x256+100+-200\n", foo, foo );
+        fprintf( stderr, "Try -h or --help for help.\n" );
+        delete[] foo;
+        return 1;
+    }
+    delete[] foo;
     return 0;
 }

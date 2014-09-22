@@ -21,6 +21,7 @@ int main( int argc, char** argv ) {
     float g = options->m_green;
     float b = options->m_blue;
     bool keyboard = options->m_keyboard;
+    bool decorations = options->m_decorations;
     timespec start, time;
     int cx = 0;
     int cy = 0;
@@ -86,20 +87,31 @@ int main( int argc, char** argv ) {
                 // If xengine has found a window we're hovering over (or if it changed)
                 // create a rectangle around it so the user knows he/she can click on it.
                 // --but only if the user wants us to
-                if ( window != xengine->m_hoverXWindow && tolerance > 0 ) {
+                if ( window != xengine->m_hoverWindow && tolerance > 0 ) {
                     // Make sure to delete the old selection rectangle.
                     if ( windowselection ) {
                         xengine->removeRect( windowselection ); // removeRect also dealloc's the rectangle for us.
                     }
-                    slop::WindowRectangle t = xengine->m_hoverWindow;
-                    windowselection = new slop::Rectangle( t.m_x,
-                                                         t.m_y,
-                                                         t.m_width + t.m_border * 2,
-                                                         t.m_height + t.m_border * 2,
-                                                         borderSize, padding,
-                                                         r, g, b );
+                    slop::WindowRectangle t;
+                    t.setGeometry( xengine->m_hoverWindow, decorations );
+                    // Make sure we only apply offsets to windows that we've forcibly removed decorations on.
+                    if ( !t.m_decorations ) {
+                        windowselection = new slop::Rectangle( t.m_x + options->m_offsetx,
+                                                               t.m_y + options->m_offsety,
+                                                               t.m_width + options->m_offsetw,
+                                                               t.m_height + options->m_offseth,
+                                                               borderSize, padding,
+                                                               r, g, b );
+                    } else {
+                        windowselection = new slop::Rectangle( t.m_x,
+                                                               t.m_y,
+                                                               t.m_width,
+                                                               t.m_height,
+                                                               borderSize, padding,
+                                                               r, g, b );
+                    }
                     xengine->addRect( windowselection );
-                    window = xengine->m_hoverXWindow;
+                    window = xengine->m_hoverWindow;
                 }
                 // If the user clicked, remove the old selection rectangle and then
                 // move on to the next state.
@@ -186,7 +198,7 @@ int main( int argc, char** argv ) {
                     xengine->removeRect( selection );
                     // if we're not hovering over a window, or our selection is larger than our tolerance
                     // just print the selection.
-                    if ( w >= tolerance || h >= tolerance || xengine->m_hoverXWindow == None ) {
+                    if ( w >= tolerance || h >= tolerance || xengine->m_hoverWindow == None ) {
                         printf( "X=%i\n", x );
                         printf( "Y=%i\n", y );
                         printf( "W=%i\n", w );
@@ -197,11 +209,20 @@ int main( int argc, char** argv ) {
                 // Otherwise lets grab the window's dimensions and use those (with padding).
                 // --but only if the user lets us, if the user doesn't just select a single pixel there.
                 if ( tolerance > 0 ) {
-                    slop::WindowRectangle t = xengine->m_hoverWindow;
-                    x = t.m_x - padding;
-                    y = t.m_y - padding;
-                    w = t.m_width + t.m_border * 2 + padding * 2;
-                    h = t.m_height + t.m_border * 2 + padding * 2;
+                    slop::WindowRectangle t;
+                    t.setGeometry( xengine->m_hoverWindow, decorations );
+                    // Make sure we only apply offsets to windows that we've forcibly removed decorations on.
+                    if ( !t.m_decorations ) {
+                        x = t.m_x - padding + options->m_offsetx;
+                        y = t.m_y - padding + options->m_offsety;
+                        w = t.m_width + padding * 2 + options->m_offsetw;
+                        h = t.m_height + padding * 2 + options->m_offseth;
+                    } else {
+                        x = t.m_x - padding;
+                        y = t.m_y - padding;
+                        w = t.m_width + padding * 2;
+                        h = t.m_height + padding * 2;
+                    }
                 } else {
                     x = cx;
                     y = cy;
