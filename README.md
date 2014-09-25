@@ -32,7 +32,7 @@ You can also take images using imagemagick like so:
 ```bash
 #!/bin/bash
 eval `slop`
-import -window root -crop "$W"x"$H"+$X+$Y ~/myimage.png
+import -window root -crop $G ~/myimage.png
 ```
 
 You can see my implementation of slop in a screenshooter here:
@@ -65,17 +65,14 @@ Options
     -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations
                                    in seconds.
     -nd, --nodecorations           attempts to remove decorations from window selections.
-    -o=GEOMETRY, --offset=GEOMETRY Offsets window selections, but only if --nodecorations is active and if the
-                                   window's decorations were successfully detected. Has a very specific use of
-                                   removing shadows from Gnome's window selections right now. GEOMETRY is in
-                                   format WxH+X+Y
+    -v, --version                  prints version.
 
 Examples
-    $ # gray, thick border for maximum visiblity.
+    $ # Gray, thick border for maximum visiblity.
     $ slop -b=20 -c=0.5,0.5,0.5
 
-    $ # Remove window decorations, but include the 28px titlebar. Useful to remove the arbitrarily sized shadows in Gnome where they are included in window geometry for whatever reason.
-    $ slop -nd -o=0x28+0-28
+    $ # Remove window decorations.
+    $ slop -nd
 
     $ # Disable window selections. Useful for selecting individual pixels.
     $ slop -t=0

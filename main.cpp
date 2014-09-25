@@ -1,7 +1,34 @@
 #include <unistd.h>
 #include <cstdio>
 #include "x.hpp"
+#include "rectangle.hpp"
 #include "options.hpp"
+
+void printSelection( bool cancelled, int x, int y, int w, int h ) {
+    printf( "X=%i\n", x );
+    printf( "Y=%i\n", y );
+    printf( "W=%i\n", w );
+    printf( "H=%i\n", h );
+    printf( "G=%ix%i", w, h );
+    if ( x >= 0 ) {
+        printf( "+%i", x );
+    } else {
+        // Negative is already included
+        printf( "%i", x );
+    }
+    if ( y >= 0 ) {
+        printf( "+%i", y );
+    } else {
+        // Negative is already included
+        printf( "%i", y );
+    }
+    printf( "\n" );
+    if ( cancelled ) {
+        printf( "Cancel=true\n" );
+    } else {
+        printf( "Cancel=false\n" );
+    }
+}
 
 int main( int argc, char** argv ) {
     int err = options->parseOptions( argc, argv );
@@ -11,7 +38,6 @@ int main( int argc, char** argv ) {
     int state = 0;
     bool running = true;
     slop::Rectangle* selection = NULL;
-    slop::Rectangle* windowselection = NULL;
     Window window = None;
     std::string xdisplay = options->m_xdisplay;
     int padding = options->m_padding;
@@ -25,36 +51,27 @@ int main( int argc, char** argv ) {
     timespec start, time;
     int cx = 0;
     int cy = 0;
-    int cxoffset = 0;
-    int cyoffset = 0;
-    int woffset = 0;
-    int hoffset = 0;
+    int xmem = 0;
+    int ymem = 0;
+    int wmem = 0;
+    int hmem = 0;
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
     err = xengine->init( xdisplay.c_str() );
     if ( err ) {
-        printf( "X=0\n" );
-        printf( "Y=0\n" );
-        printf( "W=0\n" );
-        printf( "H=0\n" );
+        printSelection( true, 0, 0, 0, 0 );
         return err;
     }
     err = xengine->grabCursor( slop::Cross );
     if ( err ) {
-        printf( "X=0\n" );
-        printf( "Y=0\n" );
-        printf( "W=0\n" );
-        printf( "H=0\n" );
+        printSelection( true, 0, 0, 0, 0 );
         return err;
     }
     if ( keyboard ) {
         err = xengine->grabKeyboard();
         if ( err ) {
-            printf( "X=0\n" );
-            printf( "Y=0\n" );
-            printf( "W=0\n" );
-            printf( "H=0\n" );
+            printSelection( true, 0, 0, 0, 0 );
             return err;
         }
     }
@@ -69,10 +86,7 @@ int main( int argc, char** argv ) {
         double starti = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
         if ( timei - starti > options->m_gracetime ) {
             if ( xengine->anyKeyPressed() && keyboard || xengine->mouseDown( 3 ) ) {
-                printf( "X=0\n" );
-                printf( "Y=0\n" );
-                printf( "W=0\n" );
-                printf( "H=0\n" );
+                printSelection( true, 0, 0, 0, 0 );
                 fprintf( stderr, "User pressed key. Canceled selection.\n" );
                 state = -1;
                 running = false;
@@ -88,37 +102,23 @@ int main( int argc, char** argv ) {
                 // create a rectangle around it so the user knows he/she can click on it.
                 // --but only if the user wants us to
                 if ( window != xengine->m_hoverWindow && tolerance > 0 ) {
-                    // Make sure to delete the old selection rectangle.
-                    if ( windowselection ) {
-                        xengine->removeRect( windowselection ); // removeRect also dealloc's the rectangle for us.
-                    }
                     slop::WindowRectangle t;
                     t.setGeometry( xengine->m_hoverWindow, decorations );
                     // Make sure we only apply offsets to windows that we've forcibly removed decorations on.
-                    if ( !t.m_decorations ) {
-                        windowselection = new slop::Rectangle( t.m_x + options->m_offsetx,
-                                                               t.m_y + options->m_offsety,
-                                                               t.m_width + options->m_offsetw,
-                                                               t.m_height + options->m_offseth,
-                                                               borderSize, padding,
-                                                               r, g, b );
+                    if ( !selection ) {
+                        selection = new slop::Rectangle( t.m_x,
+                                                         t.m_y,
+                                                         t.m_width,
+                                                         t.m_height,
+                                                         borderSize, padding,
+                                                         r, g, b );
                     } else {
-                        windowselection = new slop::Rectangle( t.m_x,
-                                                               t.m_y,
-                                                               t.m_width,
-                                                               t.m_height,
-                                                               borderSize, padding,
-                                                               r, g, b );
+                        selection->setGeo( t.m_x, t.m_y, t.m_width, t.m_height );
                     }
-                    xengine->addRect( windowselection );
                     window = xengine->m_hoverWindow;
                 }
-                // If the user clicked, remove the old selection rectangle and then
-                // move on to the next state.
+                // If the user clicked we move on to the next state.
                 if ( xengine->mouseDown( 1 ) ) {
-                    if ( windowselection ) {
-                        xengine->removeRect( windowselection );
-                    }
                     state++;
                 }
                 break;
@@ -127,120 +127,85 @@ int main( int argc, char** argv ) {
                 // Set the mouse position of where we clicked, used so that click tolerance doesn't affect the rectangle's position.
                 cx = xengine->m_mousex;
                 cy = xengine->m_mousey;
+                // Also remember where the original selection was
+                if ( selection ) {
+                    xmem = selection->m_x;
+                    ymem = selection->m_y;
+                    wmem = selection->m_width;
+                    hmem = selection->m_height;
+                } else {
+                    xmem = cx;
+                    ymem = cy;
+                }
                 state++;
                 break;
             }
             case 2: {
+                // It's possible that our selection doesn't exist still, lets make sure it actually gets created here.
+                if ( !selection ) {
+                    selection = new slop::Rectangle( cx,
+                                                     cy,
+                                                     xengine->m_mousex - cx,
+                                                     xengine->m_mousey - cy,
+                                                     borderSize, padding,
+                                                     r, g, b );
+                }
                 // If the user has let go of the mouse button, we'll just
                 // continue to the next state.
                 if ( !xengine->mouseDown( 1 ) ) {
                     state++;
                     break;
                 }
-                // Check to make sure the user actually wants to drag for a selection before creating a rectangle.
+                // Check to make sure the user actually wants to drag for a selection before moving things around.
                 int w = xengine->m_mousex - cx;
                 int h = xengine->m_mousey - cy;
-                if ( ( std::abs( w ) >= tolerance || std::abs( h ) >= tolerance ) && !selection ) {
-                    selection = new slop::Rectangle( cx, cy, 0, 0, borderSize, padding, r, g, b );
-                    xengine->addRect( selection );
-                } else if ( !selection ) {
+                if ( ( std::abs( w ) < tolerance && std::abs( h ) < tolerance ) ) {
+                    // We make sure the selection rectangle stays on the window we had selected
+                    selection->setGeo( xmem, ymem, wmem, hmem );
+                    xengine->setCursor( slop::Left );
                     continue;
                 }
                 // We also detect which way the user is pulling and set the mouse icon accordingly.
-                // and offset the rectangle to be accurate, this is because the mouse actually selects a pixel up and to the left.
                 bool x = selection->m_flippedx;
                 bool y = selection->m_flippedy;
-                if ( !x && !y ) {
-                    cxoffset = 0;
-                    cyoffset = 0;
-                    woffset = 1;
-                    hoffset = 1;
+                if ( selection->m_width == 0 && selection->m_height == 0 ) {
+                    xengine->setCursor( slop::Cross );
+                } else if ( !x && !y ) {
                     xengine->setCursor( slop::LowerRightCorner );
                 } else if ( x && !y ) {
-                    cxoffset = 1;
-                    cyoffset = 0;
-                    woffset = -1;
-                    hoffset = 1;
                     xengine->setCursor( slop::LowerLeftCorner );
                 } else if ( !x && y ) {
-                    cxoffset = 0;
-                    cyoffset = 1;
-                    woffset = 1;
-                    hoffset = -1;
                     xengine->setCursor( slop::UpperRightCorner );
-                } else {
-                    cxoffset = 1;
-                    cyoffset = 1;
-                    woffset = -1;
-                    hoffset = -1;
+                } else if ( x && y ) {
                     xengine->setCursor( slop::UpperLeftCorner );
                 }
                 // Set the selection rectangle's dimensions to mouse movement.
                 // We use the function setDim since rectangles can't have negative widths,
                 // and because the rectangles have borders and padding to worry about.
-                selection->setPos( cx + cxoffset, cy + cyoffset );
-                selection->setDim( w + woffset, h + hoffset );
+                selection->setGeo( cx, cy, w, h );
                 break;
             }
             case 3: {
                 int x, y, w, h;
                 // Exit the utility after this state runs once.
                 running = false;
-                if ( selection ) {
-                    // We pull the dimensions and positions from the selection rectangle.
-                    // The selection rectangle automatically converts the positions and
-                    // dimensions to absolute coordinates when we set them earilier.
-                    x = selection->m_x+selection->m_xoffset;
-                    y = selection->m_y+selection->m_yoffset;
-                    w = selection->m_width;
-                    h = selection->m_height;
-                    // Delete the rectangle.
-                    xengine->removeRect( selection );
-                    // if we're not hovering over a window, or our selection is larger than our tolerance
-                    // just print the selection.
-                    if ( w >= tolerance || h >= tolerance || xengine->m_hoverWindow == None ) {
-                        printf( "X=%i\n", x );
-                        printf( "Y=%i\n", y );
-                        printf( "W=%i\n", w );
-                        printf( "H=%i\n", h );
-                        break;
-                    }
-                }
-                // Otherwise lets grab the window's dimensions and use those (with padding).
-                // --but only if the user lets us, if the user doesn't just select a single pixel there.
-                if ( tolerance > 0 ) {
-                    slop::WindowRectangle t;
-                    t.setGeometry( xengine->m_hoverWindow, decorations );
-                    // Make sure we only apply offsets to windows that we've forcibly removed decorations on.
-                    if ( !t.m_decorations ) {
-                        x = t.m_x - padding + options->m_offsetx;
-                        y = t.m_y - padding + options->m_offsety;
-                        w = t.m_width + padding * 2 + options->m_offsetw;
-                        h = t.m_height + padding * 2 + options->m_offseth;
-                    } else {
-                        x = t.m_x - padding;
-                        y = t.m_y - padding;
-                        w = t.m_width + padding * 2;
-                        h = t.m_height + padding * 2;
-                    }
-                } else {
-                    x = cx;
-                    y = cy;
-                    w = 1;
-                    h = 1;
-                }
-                printf( "X=%i\n", x );
-                printf( "Y=%i\n", y );
-                printf( "W=%i\n", w );
-                printf( "H=%i\n", h );
+                // We pull the dimensions and positions from the selection rectangle.
+                // The selection rectangle automatically converts the positions and
+                // dimensions to absolute coordinates when we set them earilier.
+                x = selection->m_x+selection->m_xoffset;
+                y = selection->m_y+selection->m_yoffset;
+                w = selection->m_width;
+                h = selection->m_height;
+                // Delete the rectangle, which will remove it from the screen.
+                delete selection;
+                // Print the selection :)
+                printSelection( false, x, y, w, h );
                 break;
             }
         }
-        // No need to max out CPU
-        // FIXME: This could be adjusted to measure how much time has passed,
-        // we may very well need to max out the CPU if someone has a really- really
-        // bad computer.
-        usleep( 1000 );
+        // This sleep is required because drawing the rectangles is a very expensive task that acts really weird with Xorg when called as fast as possible.
+        // 0.01 seconds
+        usleep( 10000 );
     }
     xengine->releaseCursor();
     xengine->releaseKeyboard();

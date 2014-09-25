@@ -3,6 +3,7 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
+    m_version = "2.0.0";
     m_borderSize = 10;
     m_padding = 0;
     m_xdisplay = ":0";
@@ -10,13 +11,9 @@ slop::Options::Options() {
     m_red = 0;
     m_green = 0;
     m_blue = 0;
-    m_gracetime = 0.3;
+    m_gracetime = 0.4;
     m_keyboard = true;
     m_decorations = true;
-    m_offsetx = 0;
-    m_offsety = 0;
-    m_offsetw = 0;
-    m_offseth = 0;
 }
 
 void slop::Options::printHelp() {
@@ -35,17 +32,14 @@ void slop::Options::printHelp() {
     printf( "    -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations\n" );
     printf( "                                   in seconds.\n" );
     printf( "    -nd, --nodecorations           attempts to remove decorations from window selections.\n" );
-    printf( "    -o=GEOMETRY, --offset=GEOMETRY Offsets window selections, but only if --nodecorations is active and if the\n" );
-    printf( "                                   window's decorations were successfully detected. Has a very specific use of\n" );
-    printf( "                                   removing shadows from Gnome's window selections right now. GEOMETRY is in\n" );
-    printf( "                                   format WxH+X+Y\n" );
+    printf( "    -v, --version                  prints version.\n" );
     printf( "\n" );
     printf( "Examples\n" );
-    printf( "    $ # gray, thick border for maximum visiblity.\n" );
+    printf( "    $ # Gray, thick border for maximum visiblity.\n" );
     printf( "    $ slop -b=20 -c=0.5,0.5,0.5\n" );
     printf( "\n" );
-    printf( "    $ # Remove window decorations, but include the 28px titlebar. Useful to remove the arbitrarily sized shadows in Gnome where they are included in window geometry for whatever reason.\n" );
-    printf( "    $ slop -nd -o=0x28+0-28\n" );
+    printf( "    $ # Remove window decorations.\n" );
+    printf( "    $ slop -nd\n" );
     printf( "\n" );
     printf( "    $ # Disable window selections. Useful for selecting individual pixels.\n" );
     printf( "    $ slop -t=0\n" );
@@ -63,11 +57,6 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             }
             if ( m_borderSize < 0 ) {
                 m_borderSize = 0;
-            }
-        } else if ( matches( arg, "-o=", "--offset=" ) ) {
-            int err = parseGeometry( arg, &m_offsetx, &m_offsety, &m_offsetw, &m_offseth );
-            if ( err ) {
-                return 1;
             }
         } else if ( matches( arg, "-p=", "--padding=" ) ) {
             int err = parseInt( arg, &m_padding );
@@ -106,6 +95,9 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             m_decorations = false;
         } else if ( matches( arg, "-h", "--help" ) ) {
             printHelp();
+            return 2;
+        } else if ( matches( arg, "-v", "--version" ) ) {
+            printf( "slop %s\n", m_version.c_str() );
             return 2;
         } else {
             if ( i == 0 ) {

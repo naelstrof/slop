@@ -11,6 +11,7 @@ public:
     int         parseOptions( int argc, char** argv );
     void        printHelp();
 
+    std::string m_version;
     int         m_borderSize;
     int         m_padding;
     int         m_tolerance;
@@ -21,10 +22,6 @@ public:
     float       m_gracetime;
     bool        m_keyboard;
     bool        m_decorations;
-    int         m_offsetx;
-    int         m_offsety;
-    int         m_offsetw;
-    int         m_offseth;
 private:
     int         parseInt( std::string arg, int* returnInt );
     int         parseFloat( std::string arg, float* returnFloat );
