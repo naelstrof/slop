@@ -85,7 +85,7 @@ int main( int argc, char** argv ) {
         double timei = double( time.tv_sec*1000000000L + time.tv_nsec )/1000000000.f;
         double starti = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
         if ( timei - starti > options->m_gracetime ) {
-            if ( xengine->anyKeyPressed() && keyboard || xengine->mouseDown( 3 ) ) {
+            if ( ( xengine->anyKeyPressed() && keyboard ) || xengine->mouseDown( 3 ) ) {
                 printSelection( true, 0, 0, 0, 0 );
                 fprintf( stderr, "User pressed key. Canceled selection.\n" );
                 state = -1;
