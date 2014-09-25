@@ -1,7 +1,7 @@
 CC=g++
 CCFLAGS=-O2 -g
 LDFLAGS=-lX11 -lXext -lrt
-SOURCES=main.cpp x.cpp options.cpp
+SOURCES=main.cpp x.cpp options.cpp rectangle.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=slop
 BINDIR="/usr/bin"
