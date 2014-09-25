@@ -1,22 +1,23 @@
-CC=g++
-CCFLAGS=-O2 -g
-LDFLAGS=-lX11 -lXext -lrt
-SOURCES=main.cpp x.cpp options.cpp rectangle.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=slop
-BINDIR="/usr/bin"
+CXX ?= g++
+CXXFLAGS ?= -O2 -g
+LDFLAGS += -lX11 -lXext -lrt
+SOURCES = main.cpp x.cpp options.cpp rectangle.cpp
+OBJECTS = $(SOURCES:.cpp=.o)
+EXECUTABLE = slop
+BINDIR = "/usr/bin"
 
-all: $(SOURCES) $(EXECUTABLE)
+all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
-
-$(OBJECTS): %.o: %.cpp
-	$(CC) $(CCFLAGS) -o $@ -c $<
+	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
 clean:
-	rm -rf $(OBJECTS) $(EXECUTABLE)
+	$(RM) $(OBJECTS)
+
+dist-clean: clean
+	$(RM) $(EXECUTABLE)
 
 install: all
 	mkdir -p $(DESTDIR)$(BINDIR)
 	cp $(CURDIR)/$(EXECUTABLE) $(DESTDIR)$(BINDIR)
+
