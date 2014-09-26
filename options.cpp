@@ -3,7 +3,7 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.0.1";
+    m_version = "v2.0.2";
     m_borderSize = 10;
     m_padding = 0;
     m_xdisplay = ":0";
