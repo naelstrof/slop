@@ -70,10 +70,11 @@ int main( int argc, char** argv ) {
     }
     if ( keyboard ) {
         err = xengine->grabKeyboard();
-        if ( err ) {
-            printSelection( true, 0, 0, 0, 0 );
-            return err;
-        }
+        // We shouldn't error out from failing to grab the keyboard.
+        //if ( err ) {
+            //printSelection( true, 0, 0, 0, 0 );
+            //return err;
+        //}
     }
     clock_gettime( CLOCK_REALTIME, &start );
     while ( running ) {
