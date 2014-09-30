@@ -20,6 +20,20 @@ int slop::XEngineErrorHandler( Display* dpy, XErrorEvent* event ) {
     exit(1);
 }
 
+int slop::XEngine::getWidth() {
+    if ( !m_good ) {
+        return -1;
+    }
+    return (int)WidthOfScreen( m_screen );
+}
+
+int slop::XEngine::getHeight() {
+    if ( !m_good ) {
+        return -1;
+    }
+    return (int)HeightOfScreen( m_screen );
+}
+
 slop::XEngine::XEngine() {
     m_display = NULL;
     m_visual = NULL;
@@ -228,6 +242,8 @@ Cursor slop::XEngine::getCursor( slop::CursorType type ) {
         case UpperRightCorner:      xfontcursor = XC_ur_angle; break;
         case LowerLeftCorner:       xfontcursor = XC_ll_angle; break;
         case LowerRightCorner:      xfontcursor = XC_lr_angle; break;
+        case Dot:                   xfontcursor = XC_dot; break;
+        case Box:                   xfontcursor = 40; break;
     }
     Cursor newcursor = 0;
     if ( m_cursors.size() > xfontcursor ) {

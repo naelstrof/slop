@@ -3,17 +3,18 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.0.2";
+    m_version = "v2.0.4";
     m_borderSize = 10;
     m_padding = 0;
     m_xdisplay = ":0";
-    m_tolerance = 4;
+    m_tolerance = 2;
     m_red = 0;
     m_green = 0;
     m_blue = 0;
     m_gracetime = 0.4;
     m_keyboard = true;
     m_decorations = true;
+    m_minimumsize = 0;
 }
 
 void slop::Options::printHelp() {
@@ -32,6 +33,8 @@ void slop::Options::printHelp() {
     printf( "    -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations\n" );
     printf( "                                   in seconds.\n" );
     printf( "    -nd, --nodecorations           attempts to remove decorations from window selections.\n" );
+    printf( "    -m=INT, --minimumsize=INT      sets the minimum output of width or height values, useful to avoid outputting 0\n" );
+    printf( "                                   widths or heights.\n" );
     printf( "    -v, --version                  prints version.\n" );
     printf( "\n" );
     printf( "Examples\n" );
@@ -57,6 +60,11 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             }
             if ( m_borderSize < 0 ) {
                 m_borderSize = 0;
+            }
+        } else if ( matches( arg, "-m=", "--minimumsize=" ) ) {
+            int err = parseInt( arg, &m_minimumsize );
+            if ( err ) {
+                return 1;
             }
         } else if ( matches( arg, "-p=", "--padding=" ) ) {
             int err = parseInt( arg, &m_padding );

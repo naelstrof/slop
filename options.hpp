@@ -15,6 +15,7 @@ public:
     int         m_borderSize;
     int         m_padding;
     int         m_tolerance;
+    int         m_minimumsize;
     float       m_red;
     float       m_green;
     float       m_blue;

@@ -55,6 +55,7 @@ int main( int argc, char** argv ) {
     int ymem = 0;
     int wmem = 0;
     int hmem = 0;
+    int minimumsize = options->m_minimumsize;
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
@@ -112,6 +113,7 @@ int main( int argc, char** argv ) {
                                                          t.m_width,
                                                          t.m_height,
                                                          borderSize, padding,
+                                                         minimumsize, minimumsize,
                                                          r, g, b );
                     } else {
                         selection->setGeo( t.m_x, t.m_y, t.m_width, t.m_height );
@@ -149,6 +151,7 @@ int main( int argc, char** argv ) {
                                                      xengine->m_mousex - cx,
                                                      xengine->m_mousey - cy,
                                                      borderSize, padding,
+                                                     minimumsize, minimumsize,
                                                      r, g, b );
                 }
                 // If the user has let go of the mouse button, we'll just
@@ -179,6 +182,14 @@ int main( int argc, char** argv ) {
                     xengine->setCursor( slop::UpperRightCorner );
                 } else if ( x && y ) {
                     xengine->setCursor( slop::UpperLeftCorner );
+                }
+                // We're 100% accurate, but the mouse can't select the very bottom row or very right column of pixels.
+                // We detect if either are 1 pixel off and attempt to correct it.
+                if ( w == xengine->getWidth() - 1 ) {
+                    w = xengine->getWidth();
+                }
+                if ( h == xengine->getHeight() - 1 ) {
+                    h = xengine->getHeight();
                 }
                 // Set the selection rectangle's dimensions to mouse movement.
                 // We use the function setDim since rectangles can't have negative widths,

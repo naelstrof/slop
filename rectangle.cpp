@@ -16,13 +16,15 @@ slop::Rectangle::~Rectangle() {
     XIfEvent( xengine->m_display, &event, &isDestroyNotify, (XPointer)&m_window );
 }
 
-slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding, float r, float g, float b ) {
+slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding, int minimumwidth, int minimumheight, float r, float g, float b ) {
     m_xoffset = 0;
     m_yoffset = 0;
     m_x = x;
     m_y = y;
     m_width = width;
     m_height = height;
+    m_minimumwidth = minimumwidth;
+    m_minimumheight = minimumheight;
     m_border = border;
     m_padding = padding;
     m_window = None;
@@ -171,6 +173,12 @@ void slop::Rectangle::constrain( int w, int h ) {
         m_flippedy = false;
         m_yoffset = -pad;
         m_height = h + pad * 2;
+    }
+    if ( m_width < m_minimumwidth ) {
+        m_width = m_minimumwidth;
+    }
+    if ( m_height < m_minimumheight ) {
+        m_height = m_minimumheight;
     }
 }
 

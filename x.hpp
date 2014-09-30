@@ -24,7 +24,9 @@ enum CursorType {
     UpperLeftCorner,
     UpperRightCorner,
     LowerRightCorner,
-    LowerLeftCorner
+    LowerLeftCorner,
+    Dot,
+    Box
 };
 
 class WindowRectangle {
@@ -51,6 +53,8 @@ public:
     int                 releaseKeyboard();
     void                setCursor( slop::CursorType type );
     void                drawRect( int x, int y, unsigned int w, unsigned int h );
+    int                 getWidth();
+    int                 getHeight();
     int                 m_mousex;
     int                 m_mousey;
     Display*            m_display;
