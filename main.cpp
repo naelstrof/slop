@@ -185,11 +185,11 @@ int main( int argc, char** argv ) {
                 }
                 // We're 100% accurate, but the mouse can't select the very bottom row or very right column of pixels.
                 // We detect if either are 1 pixel off and attempt to correct it.
-                if ( w == xengine->getWidth() - 1 ) {
-                    w = xengine->getWidth();
+                if ( cx + w == xengine->getWidth() - 1 ) {
+                    w = xengine->getWidth() - cx;
                 }
-                if ( h == xengine->getHeight() - 1 ) {
-                    h = xengine->getHeight();
+                if ( cy + h == xengine->getHeight() - 1 ) {
+                    h = xengine->getHeight() - cy;
                 }
                 // Set the selection rectangle's dimensions to mouse movement.
                 // We use the function setDim since rectangles can't have negative widths,
