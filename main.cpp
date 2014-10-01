@@ -30,6 +30,59 @@ void printSelection( bool cancelled, int x, int y, int w, int h ) {
     }
 }
 
+void constrain( int sx, int sy, int ex, int ey, int padding, int minimumsize, int maximumsize, int* rsx, int* rsy, int* rex, int* rey ) {
+    if ( minimumsize > maximumsize && maximumsize > 0 ) {
+        fprintf( stderr, "Error: minimumsize is greater than maximumsize.\n" );
+        exit( 1 );
+    }
+    int x = std::min( sx, ex );
+    int y = std::min( sy, ey );
+    // We add one to make sure we select the pixel under the mouse.
+    int w = std::max( sx, ex ) - x + 1;
+    int h = std::max( sy, ey ) - y + 1;
+    // Make sure we don't turn inside out...
+    if ( w + padding*2 >= 0 ) {
+        x -= padding;
+        w += padding*2;
+    }
+    if ( h + padding*2 >= 0 ) {
+        y -= padding;
+        h += padding*2;
+    }
+    if ( w < minimumsize ) {
+        int diff = minimumsize - w;
+        w = minimumsize;
+        x -= diff/2;
+    }
+    if ( h < minimumsize ) {
+        int diff = minimumsize - h;
+        h = minimumsize;
+        y -= diff/2;
+    }
+    if ( maximumsize > 0 ) {
+        if ( w > maximumsize ) {
+            int diff = w;
+            w = maximumsize;
+            x += diff/2 - maximumsize/2;
+        }
+        if ( h > maximumsize ) {
+            int diff = h;
+            h = maximumsize;
+            y += diff/2 - maximumsize/2;
+        }
+    }
+    // Center around mouse if we have a fixed size.
+    if ( maximumsize == minimumsize && w == maximumsize && h == maximumsize ) {
+        x = ex - maximumsize/2;
+        y = ey - maximumsize/2;
+        xengine->setCursor( slop::Cross );
+    }
+    *rsx = x;
+    *rsy = y;
+    *rex = x + w;
+    *rey = y + h;
+}
+
 int main( int argc, char** argv ) {
     int err = options->parseOptions( argc, argv );
     if ( err ) {
@@ -56,6 +109,7 @@ int main( int argc, char** argv ) {
     int wmem = 0;
     int hmem = 0;
     int minimumsize = options->m_minimumsize;
+    int maximumsize = options->m_maximumsize;
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
@@ -106,17 +160,18 @@ int main( int argc, char** argv ) {
                 if ( window != xengine->m_hoverWindow && tolerance > 0 ) {
                     slop::WindowRectangle t;
                     t.setGeometry( xengine->m_hoverWindow, decorations );
+                    t.applyPadding( padding );
+                    t.applyMinMaxSize( minimumsize, maximumsize );
                     // Make sure we only apply offsets to windows that we've forcibly removed decorations on.
                     if ( !selection ) {
                         selection = new slop::Rectangle( t.m_x,
                                                          t.m_y,
-                                                         t.m_width,
-                                                         t.m_height,
-                                                         borderSize, padding,
-                                                         minimumsize, minimumsize,
+                                                         t.m_x + t.m_width,
+                                                         t.m_y + t.m_height,
+                                                         borderSize,
                                                          r, g, b );
                     } else {
-                        selection->setGeo( t.m_x, t.m_y, t.m_width, t.m_height );
+                        selection->setGeo( t.m_x, t.m_y, t.m_x + t.m_width, t.m_y + t.m_height );
                     }
                     window = xengine->m_hoverWindow;
                 }
@@ -148,10 +203,10 @@ int main( int argc, char** argv ) {
                 if ( !selection ) {
                     selection = new slop::Rectangle( cx,
                                                      cy,
-                                                     xengine->m_mousex - cx,
-                                                     xengine->m_mousey - cy,
-                                                     borderSize, padding,
-                                                     minimumsize, minimumsize,
+                                                     // We add one because pixels start at 0
+                                                     xengine->m_mousex + 1,
+                                                     xengine->m_mousey + 1,
+                                                     borderSize,
                                                      r, g, b );
                 }
                 // If the user has let go of the mouse button, we'll just
@@ -165,14 +220,14 @@ int main( int argc, char** argv ) {
                 int h = xengine->m_mousey - cy;
                 if ( ( std::abs( w ) < tolerance && std::abs( h ) < tolerance ) ) {
                     // We make sure the selection rectangle stays on the window we had selected
-                    selection->setGeo( xmem, ymem, wmem, hmem );
+                    selection->setGeo( xmem, ymem, xmem + wmem, ymem + hmem );
                     xengine->setCursor( slop::Left );
                     continue;
                 }
                 // We also detect which way the user is pulling and set the mouse icon accordingly.
-                bool x = selection->m_flippedx;
-                bool y = selection->m_flippedy;
-                if ( selection->m_width == 0 && selection->m_height == 0 ) {
+                bool x = cx > xengine->m_mousex;
+                bool y = cy > xengine->m_mousey;
+                if ( selection->m_width <= 1 && selection->m_height <= 1 ) {
                     xengine->setCursor( slop::Cross );
                 } else if ( !x && !y ) {
                     xengine->setCursor( slop::LowerRightCorner );
@@ -183,18 +238,11 @@ int main( int argc, char** argv ) {
                 } else if ( x && y ) {
                     xengine->setCursor( slop::UpperLeftCorner );
                 }
-                // We're 100% accurate, but the mouse can't select the very bottom row or very right column of pixels.
-                // We detect if either are 1 pixel off and attempt to correct it.
-                if ( cx + w == xengine->getWidth() - 1 ) {
-                    w = xengine->getWidth() - cx;
-                }
-                if ( cy + h == xengine->getHeight() - 1 ) {
-                    h = xengine->getHeight() - cy;
-                }
+                // Apply padding and minimum size adjustments.
+                int sx, sy, ex, ey;
+                constrain( cx, cy, xengine->m_mousex, xengine->m_mousey, padding, minimumsize, maximumsize, &sx, &sy, &ex, &ey );
                 // Set the selection rectangle's dimensions to mouse movement.
-                // We use the function setDim since rectangles can't have negative widths,
-                // and because the rectangles have borders and padding to worry about.
-                selection->setGeo( cx, cy, w, h );
+                selection->setGeo( sx, sy, ex, ey );
                 break;
             }
             case 3: {
@@ -204,8 +252,8 @@ int main( int argc, char** argv ) {
                 // We pull the dimensions and positions from the selection rectangle.
                 // The selection rectangle automatically converts the positions and
                 // dimensions to absolute coordinates when we set them earilier.
-                x = selection->m_x+selection->m_xoffset;
-                y = selection->m_y+selection->m_yoffset;
+                x = selection->m_x;
+                y = selection->m_y;
                 w = selection->m_width;
                 h = selection->m_height;
                 // Delete the rectangle, which will remove it from the screen.

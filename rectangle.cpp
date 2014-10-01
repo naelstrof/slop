@@ -14,24 +14,18 @@ slop::Rectangle::~Rectangle() {
     XEvent event;
     // Block until the window is actually completely removed.
     XIfEvent( xengine->m_display, &event, &isDestroyNotify, (XPointer)&m_window );
+    // Sleep for 0.1 seconds in hope that the screen actually cleared the window.
+    usleep( 10000 );
 }
 
-slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int padding, int minimumwidth, int minimumheight, float r, float g, float b ) {
-    m_xoffset = 0;
-    m_yoffset = 0;
-    m_x = x;
-    m_y = y;
-    m_width = width;
-    m_height = height;
-    m_minimumwidth = minimumwidth;
-    m_minimumheight = minimumheight;
+slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, float r, float g, float b ) {
+    m_x = std::min( sx, ex );
+    m_y = std::min( sy, ey );
+    m_width = std::max( sx, ex ) - m_x;
+    m_height = std::max( sy, ey ) - m_y;
     m_border = border;
-    m_padding = padding;
     m_window = None;
 
-    // Convert the width, height, x, and y to coordinates that don't have negative values.
-    // (also adjust for padding and border size.)
-    constrain( width, height );
     // If we don't have a border, we don't exist, so just die.
     if ( m_border == 0 ) {
         return;
@@ -54,8 +48,8 @@ slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
     attributes.event_mask = StructureNotifyMask;
     unsigned long valueMask = CWBackPixmap | CWBackPixel | CWOverrideRedirect | CWColormap | CWEventMask;
 
-    // Create the window offset by our generated offsets (see constrain( float, float ))
-    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x+m_xoffset-m_border, m_y+m_yoffset-m_border, m_width+m_border*2, m_height+m_border*2,
+    // Create the window
+    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x-m_border, m_y-m_border, m_width+m_border*2, m_height+m_border*2,
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
 
@@ -75,63 +69,27 @@ slop::Rectangle::Rectangle( int x, int y, int width, int height, int border, int
     XMapWindow( xengine->m_display, m_window );
 }
 
-void slop::Rectangle::setPos( int x, int y ) {
-    if ( m_x == x && m_y == y ) {
-        return;
-    }
-    m_x = x;
-    m_y = y;
-    // If we don't have a border, we don't exist, so just die.
-    if ( m_border == 0 ) {
-        return;
-    }
-    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset-m_border, m_y+m_yoffset-m_border );
-}
-
-void slop::Rectangle::setDim( int w, int h ) {
-    if ( m_width == w && m_height == h ) {
-        return;
-    }
-
-    constrain( w, h );
-    // If we don't have a border, we don't exist, so just die.
-    if ( m_border == 0 ) {
-        return;
-    }
-
-    // Change the window size and location to our generated offsets (see constrain( float, float ))
-    XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
-    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset-m_border, m_y+m_yoffset-m_border );
-    // Regenerate our hole
-    XRectangle rect;
-    rect.x = rect.y = 0;
-    rect.width = m_width+m_border*2;
-    rect.height = m_height+m_border*2;
-    XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
-    // Then punch out another.
-    rect.x = rect.y = m_border;
-    rect.width = m_width;
-    rect.height = m_height;
-    XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
-}
-
-void slop::Rectangle::setGeo( int x, int y, int w, int h ) {
+void slop::Rectangle::setGeo( int sx, int sy, int ex, int ey ) {
+    int x = std::min( sx, ex );
+    int y = std::min( sy, ey );
+    int w = std::max( sx, ex ) - x;
+    int h = std::max( sy, ey ) - y;
     if ( m_x == x && m_y == y && m_width == w && m_height == h ) {
         return;
     }
 
     m_x = x;
     m_y = y;
-    constrain( w, h );
+    m_width = w;
+    m_height = h;
     // If we don't have a border, we don't exist, so just die.
     if ( m_border == 0 ) {
         return;
     }
 
-    // Change the window size and location to our generated offsets (see constrain( float, float ))
+    // Change the window size
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
-    XMoveWindow( xengine->m_display, m_window, m_x+m_xoffset-m_border, m_y+m_yoffset-m_border );
-    // Regenerate our hole
+    // Fill up our old hole
     XRectangle rect;
     rect.x = rect.y = 0;
     rect.width = m_width+m_border*2;
@@ -142,44 +100,7 @@ void slop::Rectangle::setGeo( int x, int y, int w, int h ) {
     rect.width = m_width;
     rect.height = m_height;
     XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
-}
-
-// Keeps our rectangle's sizes all positive, so Xlib doesn't throw an exception.
-// It also keeps our values in absolute coordinates which is nice.
-void slop::Rectangle::constrain( int w, int h ) {
-    int pad = m_padding;
-    if ( pad < 0 && std::abs( w ) < std::abs( pad ) * 2 ) {
-        pad = 0;
-    }
-    if ( w < 0 ) {
-        m_flippedx = true;
-        m_xoffset = w - pad;
-        m_width = -w + pad * 2;
-    } else {
-        m_flippedx = false;
-        m_xoffset = -pad;
-        m_width = w + pad * 2;
-    }
-
-    pad = m_padding;
-    if ( pad < 0 && std::abs( h ) < std::abs( pad ) * 2 ) {
-        pad = 0;
-    }
-    if ( h < 0 ) {
-        m_flippedy = true;
-        m_yoffset = h - pad;
-        m_height = -h + pad * 2;
-    } else {
-        m_flippedy = false;
-        m_yoffset = -pad;
-        m_height = h + pad * 2;
-    }
-    if ( m_width < m_minimumwidth ) {
-        m_width = m_minimumwidth;
-    }
-    if ( m_height < m_minimumheight ) {
-        m_height = m_minimumheight;
-    }
+    XMoveWindow( xengine->m_display, m_window, m_x-m_border, m_y-m_border );
 }
 
 int slop::Rectangle::convertColor( float r, float g, float b ) {

@@ -3,7 +3,7 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.0.5";
+    m_version = "v2.0.6";
     m_borderSize = 10;
     m_padding = 0;
     m_xdisplay = ":0";
@@ -15,6 +15,7 @@ slop::Options::Options() {
     m_keyboard = true;
     m_decorations = true;
     m_minimumsize = 0;
+    m_maxsize = 0;
 }
 
 void slop::Options::printHelp() {
@@ -33,7 +34,8 @@ void slop::Options::printHelp() {
     printf( "    -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations\n" );
     printf( "                                   in seconds.\n" );
     printf( "    -nd, --nodecorations           attempts to remove decorations from window selections.\n" );
-    printf( "    -m=INT, --minimumsize=INT      sets the minimum output of width or height values, useful to avoid outputting 0\n" );
+    printf( "    -min=INT, --minimumsize=INT    sets the minimum output of width or height values, useful to avoid outputting 0\n" );
+    printf( "    -max=INT, --maxsize=INT        sets the maximum output of width or height values.\n" );
     printf( "                                   widths or heights.\n" );
     printf( "    -v, --version                  prints version.\n" );
     printf( "\n" );
@@ -61,8 +63,13 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             if ( m_borderSize < 0 ) {
                 m_borderSize = 0;
             }
-        } else if ( matches( arg, "-m=", "--minimumsize=" ) ) {
+        } else if ( matches( arg, "-min=", "--minimumsize=" ) ) {
             int err = parseInt( arg, &m_minimumsize );
+            if ( err ) {
+                return 1;
+            }
+        } else if ( matches( arg, "-max=", "--minimumsize=" ) ) {
+            int err = parseInt( arg, &m_maximumsize );
             if ( err ) {
                 return 1;
             }
@@ -115,6 +122,10 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             fprintf( stderr, "Try -h or --help for help.\n" );
             return 1;
         }
+    }
+    if ( m_minimumsize > m_maximumsize && m_maximumsize > 0 ) {
+        fprintf( stderr, "Error: minimumsize is greater than maximumsize.\n" );
+        return 1;
     }
     return 0;
 }

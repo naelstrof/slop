@@ -38,6 +38,8 @@ public:
     unsigned int m_border;
     bool         m_decorations;
     void         setGeometry( Window win, bool decorations );
+    void         applyPadding( int padding );
+    void         applyMinMaxSize( int minimumsize, int maximumsize );
 };
 
 class XEngine {

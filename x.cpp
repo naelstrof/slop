@@ -268,6 +268,48 @@ void slop::XEngine::setCursor( slop::CursorType type ) {
                               xfontcursor, CurrentTime );
 }
 
+void slop::WindowRectangle::applyPadding( int padding ) {
+    if ( m_width + padding*2 >= 0 ) {
+        m_x -= padding;
+        m_width += padding*2;
+    }
+    if ( m_height + padding*2 >= 0 ) {
+        m_y -= padding;
+        m_height += padding*2;
+    }
+}
+
+void slop::WindowRectangle::applyMinMaxSize( int minimumsize, int maximumsize ) {
+    if ( minimumsize > maximumsize && maximumsize > 0 ) {
+        fprintf( stderr, "Error: minimumsize is greater than maximumsize.\n" );
+        exit( 1 );
+    }
+    if ( m_width < minimumsize ) {
+        int diff = minimumsize - m_width;
+        m_width = minimumsize;
+        m_x -= diff/2;
+    }
+    if ( m_height < minimumsize ) {
+        int diff = minimumsize - m_height;
+        m_height = minimumsize;
+        m_y -= diff/2;
+    }
+    if ( maximumsize > 0 ) {
+        if ( m_width > maximumsize ) {
+            int diff = m_width;
+            m_width = maximumsize;
+            // Center in the center of the window
+            m_x += diff/2 - maximumsize/2;
+        }
+        if ( m_height > maximumsize ) {
+            int diff = m_height;
+            m_height = maximumsize;
+            // Center in the center of the window
+            m_y += diff/2 - maximumsize/2;
+        }
+    }
+}
+
 void slop::WindowRectangle::setGeometry( Window win, bool decorations ) {
     if ( decorations ) {
         Window root, parent, test, junk;

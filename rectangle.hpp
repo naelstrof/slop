@@ -20,7 +20,7 @@ namespace slop {
 
 class Rectangle {
 public:
-            Rectangle( int x, int y, int width, int height, int border, int padding, int minimumwidth, int minimumheight, float r, float g, float b );
+            Rectangle( int sx, int sy, int ex, int ey, int border, float r, float g, float b );
             ~Rectangle();
     void    setPos( int x, int y );
     void    setDim( int w, int h );
@@ -29,16 +29,9 @@ public:
     XColor  m_color;
     int     m_x;
     int     m_y;
-    int     m_xoffset;
-    int     m_yoffset;
-    int     m_minimumwidth;
-    int     m_minimumheight;
     int     m_width;
     int     m_height;
     int     m_border;
-    int     m_padding;
-    bool    m_flippedx;
-    bool    m_flippedy;
 private:
     int     convertColor( float r, float g, float b );
     void    constrain( int w, int h );

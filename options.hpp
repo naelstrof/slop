@@ -16,6 +16,8 @@ public:
     int         m_padding;
     int         m_tolerance;
     int         m_minimumsize;
+    int         m_maximumsize;
+    int         m_maxsize;
     float       m_red;
     float       m_green;
     float       m_blue;
