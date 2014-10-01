@@ -3,7 +3,7 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.0.6";
+    m_version = "v2.0.7";
     m_borderSize = 10;
     m_padding = 0;
     m_xdisplay = ":0";
@@ -35,7 +35,7 @@ void slop::Options::printHelp() {
     printf( "                                   in seconds.\n" );
     printf( "    -nd, --nodecorations           attempts to remove decorations from window selections.\n" );
     printf( "    -min=INT, --minimumsize=INT    sets the minimum output of width or height values, useful to avoid outputting 0\n" );
-    printf( "    -max=INT, --maxsize=INT        sets the maximum output of width or height values.\n" );
+    printf( "    -max=INT, --maximumsize=INT    sets the maximum output of width or height values.\n" );
     printf( "                                   widths or heights.\n" );
     printf( "    -v, --version                  prints version.\n" );
     printf( "\n" );
@@ -68,7 +68,7 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             if ( err ) {
                 return 1;
             }
-        } else if ( matches( arg, "-max=", "--minimumsize=" ) ) {
+        } else if ( matches( arg, "-max=", "--maximumsize=" ) ) {
             int err = parseInt( arg, &m_maximumsize );
             if ( err ) {
                 return 1;
