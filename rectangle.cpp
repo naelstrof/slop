@@ -18,7 +18,7 @@ slop::Rectangle::~Rectangle() {
     usleep( 10000 );
 }
 
-slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, float r, float g, float b ) {
+slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, float r, float g, float b, float a ) {
     m_x = std::min( sx, ex );
     m_y = std::min( sy, ey );
     m_width = std::max( sx, ex ) - m_x;
@@ -40,6 +40,7 @@ slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, float r,
     // Set up the window so it's our color 
     attributes.background_pixmap = None;
     attributes.background_pixel = m_color.pixel;
+    attributes.border_pixel = m_color.pixel;
     // Not actually sure what this does, but it keeps the window from bugging out :u.
     attributes.override_redirect = True;
     // We must use our color map, because that's where our color is allocated.
@@ -52,6 +53,12 @@ slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, float r,
     m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x-m_border, m_y-m_border, m_width+m_border*2, m_height+m_border*2,
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
+
+    if ( a < 1 ) {
+        unsigned int cardinal_alpha = (unsigned int) (a * (unsigned int)-1) ;
+        XChangeProperty( xengine->m_display, m_window, XInternAtom( xengine->m_display, "_NET_WM_WINDOW_OPACITY", 0),
+                         XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&cardinal_alpha, 1 );
+    }
 
     // Now punch a hole into it so it looks like a selection rectangle!
     XRectangle rect;

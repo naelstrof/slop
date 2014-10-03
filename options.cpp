@@ -3,7 +3,7 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.0.7";
+    m_version = "v2.0.8";
     m_borderSize = 10;
     m_padding = 0;
     m_xdisplay = ":0";
@@ -11,6 +11,7 @@ slop::Options::Options() {
     m_red = 0;
     m_green = 0;
     m_blue = 0;
+    m_alpha = 1;
     m_gracetime = 0.4;
     m_keyboard = true;
     m_decorations = true;
@@ -30,7 +31,7 @@ void slop::Options::printHelp() {
     printf( "    -t=INT, --tolerance=INT        How far in pixels the mouse can move after clicking and still be detected\n" );
     printf( "                                   as a normal click. Setting to zero will disable window selections.\n" );
     printf( "    -x=STRING, --xdisplay=STRING   Set x display (STRING must be hostname:number.screen_number format)\n" );
-    printf( "    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT\n" );
+    printf( "    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT,FLOAT\n" );
     printf( "    -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations\n" );
     printf( "                                   in seconds.\n" );
     printf( "    -nd, --nodecorations           attempts to remove decorations from window selections.\n" );
@@ -40,8 +41,8 @@ void slop::Options::printHelp() {
     printf( "    -v, --version                  prints version.\n" );
     printf( "\n" );
     printf( "Examples\n" );
-    printf( "    $ # Gray, thick border for maximum visiblity.\n" );
-    printf( "    $ slop -b=20 -c=0.5,0.5,0.5\n" );
+    printf( "    $ # Gray, thick, transparent border for maximum visiblity.\n" );
+    printf( "    $ slop -b=20 -c=0.5,0.5,0.5,0.8\n" );
     printf( "\n" );
     printf( "    $ # Remove window decorations.\n" );
     printf( "    $ slop -nd\n" );
@@ -79,7 +80,7 @@ int slop::Options::parseOptions( int argc, char** argv ) {
                 return 1;
             }
         } else if ( matches( arg, "-c=", "--color=" ) ) {
-            int err = parseColor( arg, &m_red, &m_green, &m_blue );
+            int err = parseColor( arg, &m_red, &m_green, &m_blue, &m_alpha );
             if ( err ) {
                 return 1;
             }
@@ -211,7 +212,7 @@ int slop::Options::parseString( std::string arg, std::string* returnString ) {
     return 0;
 }
 
-int slop::Options::parseColor( std::string arg, float* r, float* g, float* b ) {
+int slop::Options::parseColor( std::string arg, float* r, float* g, float* b, float* a ) {
     std::string copy = arg;
     int find = copy.find( "=" );
     while( find != copy.npos ) {
@@ -221,11 +222,13 @@ int slop::Options::parseColor( std::string arg, float* r, float* g, float* b ) {
 
     // Just in case we error out, grab the actual argument name into x.
     char* x = new char[ arg.size() ];
-    int num = sscanf( copy.c_str(), "%s %f %f %f", x, r, g, b );
-    if ( num != 4 ) {
+    // Just in case we didn't include an alpha value
+    *a = 1;
+    int num = sscanf( copy.c_str(), "%s %f %f %f %f", x, r, g, b, a );
+    if ( num != 4 && num != 5 ) {
         fprintf( stderr, "Error parsing command arguments near %s\n", arg.c_str() );
         fprintf( stderr, "Usage: %s=COLOR\n", x );
-        fprintf( stderr, "Example: %s=0,0,0 or %s=0.7,0.2,1\n", x, x );
+        fprintf( stderr, "Example: %s=0,0,0 or %s=0.7,0.2,1,0.5 or %s=1,1,1,0.8\n", x, x, x );
         fprintf( stderr, "Try -h or --help for help.\n" );
         delete[] x;
         return 1;

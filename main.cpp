@@ -99,6 +99,7 @@ int main( int argc, char** argv ) {
     float r = options->m_red;
     float g = options->m_green;
     float b = options->m_blue;
+    float a = options->m_alpha;
     bool keyboard = options->m_keyboard;
     bool decorations = options->m_decorations;
     timespec start, time;
@@ -169,7 +170,7 @@ int main( int argc, char** argv ) {
                                                          t.m_x + t.m_width,
                                                          t.m_y + t.m_height,
                                                          borderSize,
-                                                         r, g, b );
+                                                         r, g, b, a );
                     } else {
                         selection->setGeo( t.m_x, t.m_y, t.m_x + t.m_width, t.m_y + t.m_height );
                     }
@@ -207,7 +208,7 @@ int main( int argc, char** argv ) {
                                                      xengine->m_mousex + 1,
                                                      xengine->m_mousey + 1,
                                                      borderSize,
-                                                     r, g, b );
+                                                     r, g, b, a );
                 }
                 // If the user has let go of the mouse button, we'll just
                 // continue to the next state.

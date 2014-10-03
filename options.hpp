@@ -21,6 +21,7 @@ public:
     float       m_red;
     float       m_green;
     float       m_blue;
+    float       m_alpha;
     std::string m_xdisplay;
     float       m_gracetime;
     bool        m_keyboard;
@@ -30,7 +31,7 @@ private:
     int         parseFloat( std::string arg, float* returnFloat );
     int         parseString( std::string arg, std::string* returnString );
     int         parseGeometry( std::string arg, int* x, int* y, int* w, int* h );
-    int         parseColor( std::string arg, float* r, float* g, float* b );
+    int         parseColor( std::string arg, float* r, float* g, float* b, float* a );
     bool        matches( std::string arg, std::string shorthand, std::string longhand );
 };
 

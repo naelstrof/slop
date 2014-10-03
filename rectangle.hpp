@@ -9,6 +9,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/extensions/shape.h>
+#include <X11/Xatom.h>
 
 #include <cstdlib>
 #include <cmath>
@@ -20,7 +21,7 @@ namespace slop {
 
 class Rectangle {
 public:
-            Rectangle( int sx, int sy, int ex, int ey, int border, float r, float g, float b );
+            Rectangle( int sx, int sy, int ex, int ey, int border, float r, float g, float b, float a );
             ~Rectangle();
     void    setPos( int x, int y );
     void    setDim( int w, int h );

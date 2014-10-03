@@ -61,15 +61,18 @@ Options
     -t=INT, --tolerance=INT        How far in pixels the mouse can move after clicking and still be detected
                                    as a normal click. Setting to zero will disable window selections.
     -x=STRING, --xdisplay=STRING   Set x display (STRING must be hostname:number.screen_number format)
-    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT
+    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT,FLOAT
     -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations
                                    in seconds.
     -nd, --nodecorations           attempts to remove decorations from window selections.
+    -min=INT, --minimumsize=INT    sets the minimum output of width or height values, useful to avoid outputting 0
+    -max=INT, --maximumsize=INT    sets the maximum output of width or height values.
+                                   widths or heights.
     -v, --version                  prints version.
 
 Examples
-    $ # Gray, thick border for maximum visiblity.
-    $ slop -b=20 -c=0.5,0.5,0.5
+    $ # Gray, thick, transparent border for maximum visiblity.
+    $ slop -b=20 -c=0.5,0.5,0.5,0.8
 
     $ # Remove window decorations.
     $ slop -nd
