@@ -9,12 +9,8 @@ slop::Rectangle::~Rectangle() {
         return;
     }
     // Try to erase the window before destroying it.
-    XRectangle rect;
-    rect.x = 0;
-    rect.y = 0;
-    rect.width = 0;
-    rect.height = 0;
-    XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
+    XSetWindowBackground( xengine->m_display, m_window, 0 );
+    XClearWindow( xengine->m_display, m_window );
     // Sleep for 0.1 seconds in hope that the rectangle was erased.
     usleep( 10000 );
     // Free up our color.
