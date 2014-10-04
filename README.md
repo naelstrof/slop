@@ -67,8 +67,8 @@ Options
                                    in seconds.
     -nd, --nodecorations           Attempts to remove decorations from window selections.
     -min=INT, --minimumsize=INT    Sets the minimum output of width or height values, useful to avoid outputting 0
-    -max=INT, --maximumsize=INT    Sets the maximum output of width or height values.
                                    widths or heights.
+    -max=INT, --maximumsize=INT    Sets the maximum output of width or height values.
     -hi, --highlight               Instead of outlining the selection, slop highlights it. Only useful when
                                    used with a --color with an alpha under 1.
     -v, --version                  prints version.
