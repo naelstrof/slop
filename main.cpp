@@ -75,7 +75,6 @@ void constrain( int sx, int sy, int ex, int ey, int padding, int minimumsize, in
     if ( maximumsize == minimumsize && w == maximumsize && h == maximumsize ) {
         x = ex - maximumsize/2;
         y = ey - maximumsize/2;
-        xengine->setCursor( slop::Cross );
     }
     *rsx = x;
     *rsy = y;
@@ -231,7 +230,7 @@ int main( int argc, char** argv ) {
                 // We also detect which way the user is pulling and set the mouse icon accordingly.
                 bool x = cx > xengine->m_mousex;
                 bool y = cy > xengine->m_mousey;
-                if ( selection->m_width <= 1 && selection->m_height <= 1 ) {
+                if ( selection->m_width <= 1 && selection->m_height <= 1 || minimumsize == maximumsize ) {
                     xengine->setCursor( slop::Cross );
                 } else if ( !x && !y ) {
                     xengine->setCursor( slop::LowerRightCorner );
