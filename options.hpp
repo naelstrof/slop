@@ -26,6 +26,7 @@ public:
     float       m_gracetime;
     bool        m_keyboard;
     bool        m_decorations;
+    bool        m_highlight;
 private:
     int         parseInt( std::string arg, int* returnInt );
     int         parseFloat( std::string arg, float* returnFloat );

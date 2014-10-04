@@ -3,7 +3,8 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.0.8";
+    m_version = "v2.0.9";
+    m_highlight = false;
     m_borderSize = 10;
     m_padding = 0;
     m_xdisplay = ":0";
@@ -31,13 +32,16 @@ void slop::Options::printHelp() {
     printf( "    -t=INT, --tolerance=INT        How far in pixels the mouse can move after clicking and still be detected\n" );
     printf( "                                   as a normal click. Setting to zero will disable window selections.\n" );
     printf( "    -x=STRING, --xdisplay=STRING   Set x display (STRING must be hostname:number.screen_number format)\n" );
-    printf( "    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT,FLOAT\n" );
+    printf( "    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT,FLOAT.\n" );
+    printf( "                                   takes RGBA or RGB.\n" );
     printf( "    -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations\n" );
     printf( "                                   in seconds.\n" );
-    printf( "    -nd, --nodecorations           attempts to remove decorations from window selections.\n" );
-    printf( "    -min=INT, --minimumsize=INT    sets the minimum output of width or height values, useful to avoid outputting 0\n" );
-    printf( "    -max=INT, --maximumsize=INT    sets the maximum output of width or height values.\n" );
+    printf( "    -nd, --nodecorations           Attempts to remove decorations from window selections.\n" );
+    printf( "    -min=INT, --minimumsize=INT    Sets the minimum output of width or height values, useful to avoid outputting 0\n" );
+    printf( "    -max=INT, --maximumsize=INT    Sets the maximum output of width or height values.\n" );
     printf( "                                   widths or heights.\n" );
+    printf( "    -hi, --highlight               Instead of outlining the selection, slop highlights it. Only useful when\n" );
+    printf( "                                   used with a --color with an alpha under 1.\n" );
     printf( "    -v, --version                  prints version.\n" );
     printf( "\n" );
     printf( "Examples\n" );
@@ -49,6 +53,9 @@ void slop::Options::printHelp() {
     printf( "\n" );
     printf( "    $ # Disable window selections. Useful for selecting individual pixels.\n" );
     printf( "    $ slop -t=0\n" );
+    printf( "\n" );
+    printf( "    $ # Classic Windows XP selection.\n" );
+    printf( "    $ slop -hi -c=0.2,0.4,0.5,0.4\n" );
 }
 
 int slop::Options::parseOptions( int argc, char** argv ) {
@@ -109,6 +116,8 @@ int slop::Options::parseOptions( int argc, char** argv ) {
             m_keyboard = false;
         } else if ( matches( arg, "-nd", "--nodecorations" ) ) {
             m_decorations = false;
+        } else if ( matches( arg, "-hi", "--highlight" ) ) {
+            m_highlight = true;
         } else if ( matches( arg, "-h", "--help" ) ) {
             printHelp();
             return 2;

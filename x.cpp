@@ -107,7 +107,7 @@ int slop::XEngine::grabKeyboard() {
     int err = XGrabKeyboard( m_display, m_root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Warning: Failed to grab X keyboard.\n" );
-        fprintf( stderr, "         This happens when something's already grabbed your keybaord.\n" );
+        fprintf( stderr, "         This happens when something has already grabbed your keybaord.\n" );
         fprintf( stderr, "         slop should still run properly though.\n" );
         return 1;
     }

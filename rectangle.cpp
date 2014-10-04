@@ -18,17 +18,22 @@ slop::Rectangle::~Rectangle() {
     usleep( 10000 );
 }
 
-slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, float r, float g, float b, float a ) {
+slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, bool highlight, float r, float g, float b, float a ) {
     m_x = std::min( sx, ex );
     m_y = std::min( sy, ey );
     m_width = std::max( sx, ex ) - m_x;
     m_height = std::max( sy, ey ) - m_y;
     m_border = border;
     m_window = None;
+    m_highlight = highlight;
 
     // If we don't have a border, we don't exist, so just die.
     if ( m_border == 0 ) {
         return;
+    }
+
+    if ( m_highlight ) {
+        m_border = 0;
     }
 
     // This sets up m_color
@@ -60,19 +65,25 @@ slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, float r,
                          XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&cardinal_alpha, 1 );
     }
 
-    // Now punch a hole into it so it looks like a selection rectangle!
-    XRectangle rect;
-    rect.x = rect.y = m_border;
-    rect.width = m_width;
-    rect.height = m_height;
-
     XClassHint classhints;
     char name[] = "slop";
     classhints.res_name = name;
     classhints.res_class = name;
     XSetClassHint( xengine->m_display, m_window, &classhints );
 
-    XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
+    // Now punch a hole into it so it looks like a selection rectangle, but only if we're not highlighting.
+    if ( !m_highlight ) {
+        XRectangle rect;
+        rect.x = rect.y = m_border;
+        rect.width = m_width;
+        rect.height = m_height;
+
+        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
+    }
+    // Make it so all input falls through
+    XRectangle rect;
+    rect.x = rect.y = rect.width = rect.height = 0;
+    XShapeCombineRectangles( xengine->m_display, m_window, ShapeInput, 0, 0, &rect, 1, ShapeSet, 0);
     XMapWindow( xengine->m_display, m_window );
 }
 
@@ -89,24 +100,25 @@ void slop::Rectangle::setGeo( int sx, int sy, int ex, int ey ) {
     m_y = y;
     m_width = w;
     m_height = h;
-    // If we don't have a border, we don't exist, so just die.
-    if ( m_border == 0 ) {
-        return;
-    }
 
     // Change the window size
     XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
-    // Fill up our old hole
-    XRectangle rect;
-    rect.x = rect.y = 0;
-    rect.width = m_width+m_border*2;
-    rect.height = m_height+m_border*2;
-    XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
-    // Then punch out another.
-    rect.x = rect.y = m_border;
-    rect.width = m_width;
-    rect.height = m_height;
-    XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
+    if ( m_border > 0 ) {
+        // Fill up our old hole
+        XRectangle rect;
+        rect.x = rect.y = 0;
+        rect.width = m_width+m_border*2;
+        rect.height = m_height+m_border*2;
+        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
+        // Then punch out another.
+        rect.x = rect.y = m_border;
+        rect.width = m_width;
+        rect.height = m_height;
+        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
+        // Then make it so all input falls through.
+        rect.x = rect.y = rect.width = rect.height = 0;
+        XShapeCombineRectangles( xengine->m_display, m_window, ShapeInput, 0, 0, &rect, 1, ShapeSet, 0);
+    }
     XMoveWindow( xengine->m_display, m_window, m_x-m_border, m_y-m_border );
 }
 

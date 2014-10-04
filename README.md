@@ -61,13 +61,16 @@ Options
     -t=INT, --tolerance=INT        How far in pixels the mouse can move after clicking and still be detected
                                    as a normal click. Setting to zero will disable window selections.
     -x=STRING, --xdisplay=STRING   Set x display (STRING must be hostname:number.screen_number format)
-    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT,FLOAT
+    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT,FLOAT.
+                                   takes RGBA or RGB.
     -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations
                                    in seconds.
-    -nd, --nodecorations           attempts to remove decorations from window selections.
-    -min=INT, --minimumsize=INT    sets the minimum output of width or height values, useful to avoid outputting 0
-    -max=INT, --maximumsize=INT    sets the maximum output of width or height values.
+    -nd, --nodecorations           Attempts to remove decorations from window selections.
+    -min=INT, --minimumsize=INT    Sets the minimum output of width or height values, useful to avoid outputting 0
+    -max=INT, --maximumsize=INT    Sets the maximum output of width or height values.
                                    widths or heights.
+    -hi, --highlight               Instead of outlining the selection, slop highlights it. Only useful when
+                                   used with a --color with an alpha under 1.
     -v, --version                  prints version.
 
 Examples
@@ -79,4 +82,7 @@ Examples
 
     $ # Disable window selections. Useful for selecting individual pixels.
     $ slop -t=0
+
+    $ # Classic Windows XP selection.
+    $ slop -hi -c=0.2,0.4,0.5,0.4
 ```

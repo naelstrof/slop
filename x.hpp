@@ -9,6 +9,7 @@
 #include <X11/cursorfont.h>
 #include <X11/extensions/shape.h>
 
+#include <cstring>
 #include <cstdlib>
 #include <cmath>
 #include <cstdio>
