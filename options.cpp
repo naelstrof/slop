@@ -3,7 +3,7 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.1.0";
+    m_version = "v2.1.1";
     m_highlight = false;
     m_borderSize = 10;
     m_padding = 0;
@@ -55,7 +55,7 @@ void slop::Options::printHelp() {
     printf( "    $ slop -t=0\n" );
     printf( "\n" );
     printf( "    $ # Classic Windows XP selection.\n" );
-    printf( "    $ slop -hi -c=0.2,0.4,0.5,0.4\n" );
+    printf( "    $ slop -hi -c=0.3,0.4,0.6,0.4\n" );
 }
 
 int slop::Options::parseOptions( int argc, char** argv ) {

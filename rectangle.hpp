@@ -35,7 +35,7 @@ public:
     int     m_border;
     bool    m_highlight;
 private:
-    int     convertColor( float r, float g, float b );
+    XColor  convertColor( float r, float g, float b );
     void    constrain( int w, int h );
 };
 

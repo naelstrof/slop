@@ -203,11 +203,12 @@ int main( int argc, char** argv ) {
             case 2: {
                 // It's possible that our selection doesn't exist still, lets make sure it actually gets created here.
                 if ( !selection ) {
-                    selection = new slop::Rectangle( cx,
-                                                     cy,
-                                                     // We add one because pixels start at 0
-                                                     xengine->m_mousex + 1,
-                                                     xengine->m_mousey + 1,
+                    int sx, sy, ex, ey;
+                    constrain( cx, cy, xengine->m_mousex, xengine->m_mousey, padding, minimumsize, maximumsize, &sx, &sy, &ex, &ey );
+                    selection = new slop::Rectangle( sx,
+                                                     sy,
+                                                     ex,
+                                                     ey,
                                                      borderSize,
                                                      highlight,
                                                      r, g, b, a );

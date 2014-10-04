@@ -8,6 +8,15 @@ slop::Rectangle::~Rectangle() {
     if ( m_window == None ) {
         return;
     }
+    // Try to erase the window before destroying it.
+    XRectangle rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.width = 0;
+    rect.height = 0;
+    XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
+    // Sleep for 0.1 seconds in hope that the rectangle was erased.
+    usleep( 10000 );
     // Free up our color.
     XFreeColors( xengine->m_display, xengine->m_colormap, &m_color.pixel, 1, 0 );
     XDestroyWindow( xengine->m_display, m_window );
@@ -36,30 +45,24 @@ slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, bool hig
         m_border = 0;
     }
 
-    // This sets up m_color
-    int err = convertColor( r, g, b );
-    if ( err ) {
-        fprintf( stderr, "Couldn't allocate color of value %f,%f,%f!\n", r, g, b );
-    }
+    m_color = convertColor( r, g, b );
     XSetWindowAttributes attributes;
     // Set up the window so it's our color 
-    attributes.background_pixmap = None;
     attributes.background_pixel = m_color.pixel;
-    attributes.border_pixel = m_color.pixel;
-    // Not actually sure what this does, but it keeps the window from bugging out :u.
+    // Disable window decorations.
     attributes.override_redirect = True;
-    // We must use our color map, because that's where our color is allocated.
-    attributes.colormap = xengine->m_colormap;
     // Make sure we know when we've been successfully destroyed later!
     attributes.event_mask = StructureNotifyMask;
-    unsigned long valueMask = CWBackPixmap | CWBackPixel | CWOverrideRedirect | CWColormap | CWEventMask;
+    unsigned long valueMask = CWBackPixel | CWOverrideRedirect | CWEventMask;
 
     // Create the window
-    m_window = XCreateWindow( xengine->m_display, xengine->m_root, m_x-m_border, m_y-m_border, m_width+m_border*2, m_height+m_border*2,
+    m_window = XCreateWindow( xengine->m_display, xengine->m_root, 0, 0, WidthOfScreen( xengine->m_screen ), HeightOfScreen( xengine->m_screen ),
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
 
+
     if ( a < 1 ) {
+        // Change the window opacity
         unsigned int cardinal_alpha = (unsigned int) (a * (unsigned int)-1) ;
         XChangeProperty( xengine->m_display, m_window, XInternAtom( xengine->m_display, "_NET_WM_WINDOW_OPACITY", 0),
                          XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&cardinal_alpha, 1 );
@@ -73,12 +76,35 @@ slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, bool hig
 
     // Now punch a hole into it so it looks like a selection rectangle, but only if we're not highlighting.
     if ( !m_highlight ) {
+        XRectangle rects[4];
+        // Left
+        rects[0].x = m_x-m_border;
+        rects[0].y = m_y-m_border;
+        rects[0].width = m_border;
+        rects[0].height = m_height+m_border*2;
+        // Top
+        rects[1].x = m_x;
+        rects[1].y = m_y-m_border;
+        rects[1].width = m_width+m_border;
+        rects[1].height = m_border;
+        // Right
+        rects[2].x = m_x+m_width;
+        rects[2].y = m_y-m_border;
+        rects[2].width = m_border;
+        rects[2].height = m_height+m_border*2;
+        // Bottom
+        rects[3].x = m_x;
+        rects[3].y = m_y+m_height;
+        rects[3].width = m_width+m_border;
+        rects[3].height = m_border;
+        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, rects, 4, ShapeSet, 0);
+    } else {
         XRectangle rect;
-        rect.x = rect.y = m_border;
+        rect.x = m_x;
+        rect.y = m_y;
         rect.width = m_width;
         rect.height = m_height;
-
-        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
+        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
     }
     // Make it so all input falls through
     XRectangle rect;
@@ -92,37 +118,46 @@ void slop::Rectangle::setGeo( int sx, int sy, int ex, int ey ) {
     int y = std::min( sy, ey );
     int w = std::max( sx, ex ) - x;
     int h = std::max( sy, ey ) - y;
-    if ( m_x == x && m_y == y && m_width == w && m_height == h ) {
-        return;
-    }
 
+    // Only resize or move if we have to, because they're oddly expensive.
     m_x = x;
     m_y = y;
     m_width = w;
     m_height = h;
-
-    // Change the window size
-    XResizeWindow( xengine->m_display, m_window, m_width+m_border*2, m_height+m_border*2 );
     if ( m_border > 0 ) {
-        // Fill up our old hole
+        XRectangle rects[4];
+        // Left
+        rects[0].x = m_x-m_border;
+        rects[0].y = m_y-m_border;
+        rects[0].width = m_border;
+        rects[0].height = m_height+m_border*2;
+        // Top
+        rects[1].x = m_x;
+        rects[1].y = m_y-m_border;
+        rects[1].width = m_width+m_border;
+        rects[1].height = m_border;
+        // Right
+        rects[2].x = m_x+m_width;
+        rects[2].y = m_y-m_border;
+        rects[2].width = m_border;
+        rects[2].height = m_height+m_border*2;
+        // Bottom
+        rects[3].x = m_x;
+        rects[3].y = m_y+m_height;
+        rects[3].width = m_width+m_border;
+        rects[3].height = m_border;
+        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, rects, 4, ShapeSet, 0);
+    } else {
         XRectangle rect;
-        rect.x = rect.y = 0;
-        rect.width = m_width+m_border*2;
-        rect.height = m_height+m_border*2;
-        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
-        // Then punch out another.
-        rect.x = rect.y = m_border;
+        rect.x = m_x;
+        rect.y = m_y;
         rect.width = m_width;
         rect.height = m_height;
-        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSubtract, 0);
-        // Then make it so all input falls through.
-        rect.x = rect.y = rect.width = rect.height = 0;
-        XShapeCombineRectangles( xengine->m_display, m_window, ShapeInput, 0, 0, &rect, 1, ShapeSet, 0);
+        XShapeCombineRectangles( xengine->m_display, m_window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
     }
-    XMoveWindow( xengine->m_display, m_window, m_x-m_border, m_y-m_border );
 }
 
-int slop::Rectangle::convertColor( float r, float g, float b ) {
+XColor slop::Rectangle::convertColor( float r, float g, float b ) {
     // Convert float colors to shorts.
     short red   = short( floor( r * 65535.f ) );
     short green = short( floor( g * 65535.f ) );
@@ -133,8 +168,7 @@ int slop::Rectangle::convertColor( float r, float g, float b ) {
     color.blue = blue;
     int err = XAllocColor( xengine->m_display, xengine->m_colormap, &color );
     if ( err == BadColor ) {
-        return err;
+        fprintf( stderr, "Couldn't allocate color of value %f,%f,%f!\n", r, g, b );
     }
-    m_color = color;
-    return 0;
+    return color;
 }

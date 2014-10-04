@@ -140,7 +140,7 @@ int slop::XEngine::grabCursor( slop::CursorType type ) {
     }
     int xfontcursor = getCursor( type );
     int err = XGrabPointer( m_display, m_root, True,
-                            PointerMotionMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask,
+                            PointerMotionMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask,
                             GrabModeAsync, GrabModeAsync, None, xfontcursor, CurrentTime );
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Error: Failed to grab X cursor.\n" );
@@ -178,7 +178,6 @@ void slop::XEngine::tick() {
     if ( !m_good ) {
         return;
     }
-    XFlush( m_display );
     XEvent event;
     while ( XPending( m_display ) ) {
         XNextEvent( m_display, &event );
@@ -206,9 +205,6 @@ void slop::XEngine::tick() {
                 }
                 break;
             }
-            case LeaveNotify: {
-                break;
-            }
             case ButtonRelease: {
                 if ( m_mouse.size() > event.xbutton.button ) {
                     m_mouse.at( event.xbutton.button ) = false;
@@ -216,13 +212,6 @@ void slop::XEngine::tick() {
                     m_mouse.resize( event.xbutton.button+2, false );
                     m_mouse.at( event.xbutton.button ) = false;
                 }
-                break;
-            }
-            // Due to X11 really hating applications grabbing the keyboard, we use XQueryKeymap to check for downed keys elsewhere.
-            case KeyPress: {
-                break;
-            }
-            case KeyRelease: {
                 break;
             }
             default: break;
