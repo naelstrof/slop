@@ -3,7 +3,7 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.1.1";
+    m_version = "v2.1.2";
     m_highlight = false;
     m_borderSize = 10;
     m_padding = 0;
@@ -38,8 +38,8 @@ void slop::Options::printHelp() {
     printf( "                                   in seconds.\n" );
     printf( "    -nd, --nodecorations           Attempts to remove decorations from window selections.\n" );
     printf( "    -min=INT, --minimumsize=INT    Sets the minimum output of width or height values, useful to avoid outputting 0\n" );
-    printf( "    -max=INT, --maximumsize=INT    Sets the maximum output of width or height values.\n" );
     printf( "                                   widths or heights.\n" );
+    printf( "    -max=INT, --maximumsize=INT    Sets the maximum output of width or height values.\n" );
     printf( "    -hi, --highlight               Instead of outlining the selection, slop highlights it. Only useful when\n" );
     printf( "                                   used with a --color with an alpha under 1.\n" );
     printf( "    -v, --version                  prints version.\n" );
