@@ -278,6 +278,8 @@ int main( int argc, char** argv ) {
     // Clean up global classes.
     delete xengine;
     delete options;
+    // Sleep for 0.05 seconds to ensure everything was cleaned up. (Without this, slop's window often shows up in screenshots.)
+    usleep( 50000 );
     // If we canceled the selection, return error.
     if ( state == -1 ) {
         return 1;
