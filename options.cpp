@@ -3,15 +3,15 @@
 slop::Options* options = new slop::Options();
 
 slop::Options::Options() {
-    m_version = "v2.1.3";
+    m_version = "v2.1.4";
     m_highlight = false;
-    m_borderSize = 10;
+    m_borderSize = 5;
     m_padding = 0;
     m_xdisplay = ":0";
     m_tolerance = 2;
-    m_red = 0;
-    m_green = 0;
-    m_blue = 0;
+    m_red = 0.5;
+    m_green = 0.5;
+    m_blue = 0.5;
     m_alpha = 1;
     m_gracetime = 0.4;
     m_keyboard = true;

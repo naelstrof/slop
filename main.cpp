@@ -4,7 +4,7 @@
 #include "rectangle.hpp"
 #include "options.hpp"
 
-void printSelection( bool cancelled, int x, int y, int w, int h ) {
+void printSelection( bool cancelled, int x, int y, int w, int h, int window ) {
     printf( "X=%i\n", x );
     printf( "Y=%i\n", y );
     printf( "W=%i\n", w );
@@ -23,6 +23,7 @@ void printSelection( bool cancelled, int x, int y, int w, int h ) {
         printf( "%i", y );
     }
     printf( "\n" );
+    printf( "ID=%i\n", window );
     if ( cancelled ) {
         printf( "Cancel=true\n" );
     } else {
@@ -91,6 +92,7 @@ int main( int argc, char** argv ) {
     bool running = true;
     slop::Rectangle* selection = NULL;
     Window window = None;
+    Window windowmemory = None;
     std::string xdisplay = options->m_xdisplay;
     int padding = options->m_padding;
     int borderSize = options->m_borderSize;
@@ -116,12 +118,12 @@ int main( int argc, char** argv ) {
     // if we fail for either we exit immediately.
     err = xengine->init( xdisplay.c_str() );
     if ( err ) {
-        printSelection( true, 0, 0, 0, 0 );
+        printSelection( true, 0, 0, 0, 0, None );
         return err;
     }
     err = xengine->grabCursor( slop::Cross );
     if ( err ) {
-        printSelection( true, 0, 0, 0, 0 );
+        printSelection( true, 0, 0, 0, 0, None );
         return err;
     }
     if ( keyboard ) {
@@ -143,7 +145,7 @@ int main( int argc, char** argv ) {
         double starti = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
         if ( timei - starti > options->m_gracetime ) {
             if ( ( xengine->anyKeyPressed() && keyboard ) || xengine->mouseDown( 3 ) ) {
-                printSelection( true, 0, 0, 0, 0 );
+                printSelection( true, 0, 0, 0, 0, None );
                 fprintf( stderr, "User pressed key. Canceled selection.\n" );
                 state = -1;
                 running = false;
@@ -213,6 +215,7 @@ int main( int argc, char** argv ) {
                                                      highlight,
                                                      r, g, b, a );
                 }
+                windowmemory = window;
                 // If the user has let go of the mouse button, we'll just
                 // continue to the next state.
                 if ( !xengine->mouseDown( 1 ) ) {
@@ -226,12 +229,17 @@ int main( int argc, char** argv ) {
                     // We make sure the selection rectangle stays on the window we had selected
                     selection->setGeo( xmem, ymem, xmem + wmem, ymem + hmem );
                     xengine->setCursor( slop::Left );
+                    // Make sure
+                    window = windowmemory;
                     continue;
                 }
+                // If we're not selecting a window.
+                windowmemory = window;
+                window = None;
                 // We also detect which way the user is pulling and set the mouse icon accordingly.
                 bool x = cx > xengine->m_mousex;
                 bool y = cy > xengine->m_mousey;
-                if ( selection->m_width <= 1 && selection->m_height <= 1 || minimumsize == maximumsize ) {
+                if ( selection->m_width <= 1 && selection->m_height <= 1 || ( minimumsize == maximumsize && minimumsize != 0 && maximumsize != 0 ) ) {
                     xengine->setCursor( slop::Cross );
                 } else if ( !x && !y ) {
                     xengine->setCursor( slop::LowerRightCorner );
@@ -263,7 +271,7 @@ int main( int argc, char** argv ) {
                 // Delete the rectangle, which will remove it from the screen.
                 delete selection;
                 // Print the selection :)
-                printSelection( false, x, y, w, h );
+                printSelection( false, x, y, w, h, window );
                 break;
             }
         }

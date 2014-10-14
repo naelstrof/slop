@@ -14,7 +14,7 @@ features
     * Select X display.
     * Set padding size, even negative padding sizes!
     * Set click tolerance for if you have a shaky mouse.
-    * Set the color of the selection rectangles to match your theme!
+    * Set the color of the selection rectangles to match your theme! (Even supports transparency!)
     * Remove window decorations from selections.
 
 practical applications
@@ -34,6 +34,7 @@ You can also take images using imagemagick like so:
 eval `slop`
 import -window root -crop $G ~/myimage.png
 ```
+If you don't like ImageMagick's import: Check out [maim](https://github.com/naelstrof/maim) for a better screenshot utility.
 
 You can see my implementation of slop in a screenshooter here:
 https://gist.github.com/naelstrof/6530959
@@ -41,11 +42,11 @@ https://gist.github.com/naelstrof/6530959
 lets see some action
 --------------------
 Ok. Here's a comparison between 'scrot -s's selection and slop's:
-![scrotbad](http://farmpolice.com/content/images/scrot_bad.png)
-![slopgood](http://farmpolice.com/content/images/slrn_good.png)
+![scrotbad](http://farmpolice.com/content/images/2014-10-14-12:08:24.png)
+![slopgood](http://farmpolice.com/content/images/2014-10-14-12:14:51.png)
 
 You can see scrot leaves garbage lines over the things you're trying to screenshot!
-While slop not only looks nicer, it's impossible for it to end up in screenshots or recordings because it waits for DestroyNotify events before completely shutting down. Only after the window is completely destroyed can ffmpeg or imagemagick take a picture.
+While slop not only looks nicer, it's impossible for it to end up in screenshots or recordings because it waits for DestroyNotify events before completely shutting down. Only after the window is completely destroyed can anything take a screenshot.
 
 help
 ----
