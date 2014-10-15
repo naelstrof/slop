@@ -2,7 +2,7 @@
 #include <cstdio>
 #include "x.hpp"
 #include "rectangle.hpp"
-#include "options.hpp"
+#include "cmdline.h"
 
 void printSelection( bool cancelled, int x, int y, int w, int h, int window ) {
     printf( "X=%i\n", x );
@@ -29,6 +29,24 @@ void printSelection( bool cancelled, int x, int y, int w, int h, int window ) {
     } else {
         printf( "Cancel=false\n" );
     }
+}
+
+int parseColor( std::string arg, float* r, float* g, float* b, float* a ) {
+    std::string copy = arg;
+    int find = copy.find( "," );
+    while( find != copy.npos ) {
+        copy.at( find ) = ' ';
+        find = copy.find( "," );
+    }
+
+    // Just in case we didn't include an alpha value
+    *a = 1;
+    int num = sscanf( copy.c_str(), "%f %f %f %f", r, g, b, a );
+    if ( num != 3 && num != 4 ) {
+        fprintf( stderr, "Error parsing color %s\n", arg.c_str() );
+        return 1;
+    }
+    return 0;
 }
 
 void constrain( int sx, int sy, int ex, int ey, int padding, int minimumsize, int maximumsize, int* rsx, int* rsy, int* rex, int* rey ) {
@@ -84,7 +102,8 @@ void constrain( int sx, int sy, int ex, int ey, int padding, int minimumsize, in
 }
 
 int main( int argc, char** argv ) {
-    int err = options->parseOptions( argc, argv );
+    gengetopt_args_info options;
+    int err = cmdline_parser( argc, argv, &options );
     if ( err ) {
         return err;
     }
@@ -93,17 +112,16 @@ int main( int argc, char** argv ) {
     slop::Rectangle* selection = NULL;
     Window window = None;
     Window windowmemory = None;
-    std::string xdisplay = options->m_xdisplay;
-    int padding = options->m_padding;
-    int borderSize = options->m_borderSize;
-    int tolerance = options->m_tolerance;
-    float r = options->m_red;
-    float g = options->m_green;
-    float b = options->m_blue;
-    float a = options->m_alpha;
-    bool highlight = options->m_highlight;
-    bool keyboard = options->m_keyboard;
-    bool decorations = options->m_decorations;
+    std::string xdisplay = options.xdisplay_arg;
+    int padding = options.padding_arg;
+    int borderSize = options.bordersize_arg;
+    int tolerance = options.tolerance_arg;
+    float r, g, b, a;
+    parseColor( options.color_arg, &r, &g, &b, &a );
+    float gracetime = atof( options.gracetime_arg );
+    bool highlight = options.highlight_flag;
+    bool keyboard = !options.nokeyboard_flag;
+    bool decorations = !options.nodecorations_flag;
     timespec start, time;
     int cx = 0;
     int cy = 0;
@@ -111,8 +129,8 @@ int main( int argc, char** argv ) {
     int ymem = 0;
     int wmem = 0;
     int hmem = 0;
-    int minimumsize = options->m_minimumsize;
-    int maximumsize = options->m_maximumsize;
+    int minimumsize = options.min_arg;
+    int maximumsize = options.max_arg;
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
@@ -128,11 +146,9 @@ int main( int argc, char** argv ) {
     }
     if ( keyboard ) {
         err = xengine->grabKeyboard();
-        // We shouldn't error out from failing to grab the keyboard.
-        //if ( err ) {
-            //printSelection( true, 0, 0, 0, 0 );
-            //return err;
-        //}
+        if ( err ) {
+            fprintf( stderr, "Warning: Failed to grab the keyboard. This is non-fatal, keyboard presses might fall through to other applications.\n" );
+        }
     }
     clock_gettime( CLOCK_REALTIME, &start );
     while ( running ) {
@@ -140,10 +156,10 @@ int main( int argc, char** argv ) {
         // "ticking" the xengine makes it process all queued events.
         xengine->tick();
         // If the user presses any key on the keyboard, exit the application.
-        // Make sure at least options->m_gracetime has passed before allowing canceling
+        // Make sure at least gracetime has passed before allowing canceling
         double timei = double( time.tv_sec*1000000000L + time.tv_nsec )/1000000000.f;
         double starti = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
-        if ( timei - starti > options->m_gracetime ) {
+        if ( timei - starti > gracetime ) {
             if ( ( xengine->anyKeyPressed() && keyboard ) || xengine->mouseDown( 3 ) ) {
                 printSelection( true, 0, 0, 0, 0, None );
                 fprintf( stderr, "User pressed key. Canceled selection.\n" );
@@ -285,7 +301,6 @@ int main( int argc, char** argv ) {
     //xengine->tick();
     // Clean up global classes.
     delete xengine;
-    delete options;
     // Sleep for 0.05 seconds to ensure everything was cleaned up. (Without this, slop's window often shows up in screenshots.)
     usleep( 50000 );
     // If we canceled the selection, return error.

@@ -51,39 +51,63 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 help
 ----
 ```text
-Usage: slop [options]
-Print user selected region to stdout. Pressing keys or right-clicking cancels selection.
+slop v3.1.3
 
+Copyright (C) 2014 Dalton Nell, GPLv3
+
+Usage: slop [options]
+
+slop (Select Operation) is an application that queries for a selection from the
+user and prints the region to stdout.
+
+  -h, --help                    Print help and exit
+  -V, --version                 Print version and exit
 Options
-    -h, --help                     Show this message.
-    -nkb, --nokeyboard             Disables the ability to cancel selections with the keyboard.
-    -b=INT, --bordersize=INT       Set selection rectangle border size.
-    -p=INT, --padding=INT          Set padding size for selection.
-    -t=INT, --tolerance=INT        How far in pixels the mouse can move after clicking and still be detected
-                                   as a normal click. Setting to zero will disable window selections.
-    -x=STRING, --xdisplay=STRING   Set x display (STRING must be hostname:number.screen_number format)
-    -c=COLOR, --color=COLOR        Set selection rectangle color, COLOR is in format FLOAT,FLOAT,FLOAT,FLOAT.
-                                   takes RGBA or RGB.
-    -g=FLOAT, --gracetime=FLOAT    Set the amount of time before slop will check for keyboard cancellations
-                                   in seconds.
-    -nd, --nodecorations           Attempts to remove decorations from window selections.
-    -min=INT, --minimumsize=INT    Sets the minimum output of width or height values, useful to avoid outputting 0
-                                   widths or heights.
-    -max=INT, --maximumsize=INT    Sets the maximum output of width or height values.
-    -hi, --highlight               Instead of outlining the selection, slop highlights it. Only useful when
-                                   used with a --color with an alpha under 1.
-    -v, --version                  prints version.
+      --xdisplay=hostname:number.screen_number
+                                Sets the x display.  (default=`:0')
+      --nokeyboard              Disables the ability to cancel selections with
+                                  the keyboard.  (default=off)
+  -b, --bordersize=INT          Set the selection rectangle's thickness. Does
+                                  nothing when --highlight is enabled.
+                                  (default=`5')
+  -p, --padding=INT             Set the padding size of the selection. Can be
+                                  negative.  (default=`0')
+  -t, --tolerance=INT           How far in pixels the mouse can move after
+                                  clicking and still be detected as a normal
+                                  click instead of a click and drag. Setting
+                                  this to 0 will disable window selections.
+                                  (default=`2')
+  -g, --gracetime=FLOAT         Set the amount of time before slop will check
+                                  for keyboard cancellations in seconds.
+                                  (default=`0.4')
+  -c, --color=FLOAT,FLOAT,FLOAT,FLOAT
+                                Set the selection rectangle's color. Supports
+                                  RGB or RGBA values.
+                                  (default=`0.5,0.5,0.5,1')
+  -n, --nodecorations           Attempt to select child windows in order to
+                                  avoid window decorations.  (default=off)
+      --min=INT                 Set the minimum output of width or height
+                                  values. This is useful to avoid outputting 0.
+                                  Setting min and max to the same value
+                                  disables drag selections.  (default=`0')
+      --max=INT                 Set the maximum output of width or height
+                                  values. Setting min and max to the same value
+                                  disables drag selections.  (default=`0')
+  -l, --highlight               Instead of outlining selections, slop
+                                  highlights it. This is only useful when
+                                  --color is set to a transparent color.
+                                  (default=off)
 
 Examples
     $ # Gray, thick, transparent border for maximum visiblity.
-    $ slop -b=20 -c=0.5,0.5,0.5,0.8
+    $ slop -b 20 -c 0.5,0.5,0.5,0.8
 
     $ # Remove window decorations.
-    $ slop -nd
+    $ slop --nodecorations
 
     $ # Disable window selections. Useful for selecting individual pixels.
-    $ slop -t=0
+    $ slop -t 0
 
     $ # Classic Windows XP selection.
-    $ slop -hi -c=0.2,0.4,0.5,0.4
+    $ slop -l -c 0.3,0.4,0.6,0.4
 ```

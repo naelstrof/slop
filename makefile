@@ -1,8 +1,8 @@
 CXX ?= g++
 CXXFLAGS ?= -O2 -g
 LDFLAGS += -lX11 -lXext -lrt
-SOURCES = main.cpp x.cpp options.cpp rectangle.cpp
-OBJECTS = $(SOURCES:.cpp=.o)
+SOURCES = main.cpp x.cpp cmdline.c rectangle.cpp
+OBJECTS = main.o x.o cmdline.o rectangle.o
 EXECUTABLE = slop
 BINDIR = "/usr/bin"
 
