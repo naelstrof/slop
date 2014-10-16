@@ -48,6 +48,16 @@ Ok. Here's a comparison between 'scrot -s's selection and slop's:
 You can see scrot leaves garbage lines over the things you're trying to screenshot!
 While slop not only looks nicer, it's impossible for it to end up in screenshots or recordings because it waits for DestroyNotify events before completely shutting down. Only after the window is completely destroyed can anything take a screenshot.
 
+how to install
+--------------
+You really should use your package manager when possible, you never know what kind of garbage applications will dump everywhere. For example you can install slop on Arch Linux by installing it from the AUR: [slop-git](https://aur.archlinux.org/packages/slop-git/).
+
+However slop just installs a single binary to /usr/bin. If that's ok with you-- you can install it with:
+```bash
+make && sudo make install
+```
+Make sure to check out and install [maim](https://github.com/naelstrof/maim) too if you want a proper screenshot utility.
+
 help
 ----
 ```text
