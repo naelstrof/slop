@@ -31,7 +31,7 @@ extern "C" {
 
 #ifndef CMDLINE_PARSER_VERSION
 /** @brief the program version */
-#define CMDLINE_PARSER_VERSION "v3.1.3"
+#define CMDLINE_PARSER_VERSION "v3.1.4"
 #endif
 
 /** @brief Where the command line options are stored */

@@ -131,6 +131,7 @@ int main( int argc, char** argv ) {
     int hmem = 0;
     int minimumsize = options.min_arg;
     int maximumsize = options.max_arg;
+    cmdline_parser_free( &options );
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.

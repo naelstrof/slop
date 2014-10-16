@@ -131,6 +131,7 @@ void slop::XEngine::selectAllInputs( Window win, long event_mask) {
         XSelectInput( m_display, children[ i ], event_mask );
         selectAllInputs( children[ i ], event_mask );
     }
+    free( children );
 }
 
 // Grabs the cursor, be wary that setCursor changes the mouse masks.
@@ -308,12 +309,14 @@ void slop::WindowRectangle::setGeometry( Window win, bool decorations ) {
         // Try to find the actual decorations.
         test = win;
         int status = XQueryTree( xengine->m_display, test, &root, &parent, &childlist, &ujunk);
+        free( childlist );
         while( parent != root ) {
             if ( !parent || !status ) {
                 break;
             }
             test = parent;
             status = XQueryTree( xengine->m_display, test, &root, &parent, &childlist, &ujunk);
+            free( childlist );
         }
         // Once found, proceed normally.
         if ( test && parent == root && status ) {
