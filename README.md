@@ -1,10 +1,8 @@
-slop
-====
+# slop
 
 slop (Select Operation) is an application that querys for a selection from the user and prints the region to stdout. It grabs the mouse and turns it into a crosshair, lets the user click and drag to make a selection (or click on a window) while drawing a pretty box around it, then finally prints the selection's dimensions to stdout.
 
-features
---------
+## Features
 * Hovering over a window will cause a selection rectangle to appear over it.
 * Clicking on a window makes slop return the dimensions of the window.
 * Clicking and dragging causes a selection rectangle to appear, renders pretty well (compared to scrot). And will return the dimensions of that rectangle in absolute screen coords.
@@ -17,8 +15,7 @@ features
     * Set the color of the selection rectangles to match your theme! (Even supports transparency!)
     * Remove window decorations from selections.
 
-practical applications
-----------------------
+## Practical applications
 slop can be used to create a video recording script in only two lines of code.
 ```bash
 #!/bin/bash
@@ -39,8 +36,7 @@ If you don't like ImageMagick's import: Check out [maim](https://github.com/nael
 You can see my implementation of slop in a screenshooter here:
 https://gist.github.com/naelstrof/6530959
 
-lets see some action
---------------------
+## Lets see some action
 Ok. Here's a comparison between 'scrot -s's selection and slop's:
 ![scrotbad](http://farmpolice.com/content/images/2014-10-14-12:08:24.png)
 ![slopgood](http://farmpolice.com/content/images/2014-10-14-12:14:51.png)
@@ -48,20 +44,30 @@ Ok. Here's a comparison between 'scrot -s's selection and slop's:
 You can see scrot leaves garbage lines over the things you're trying to screenshot!
 While slop not only looks nicer, it's impossible for it to end up in screenshots or recordings because it waits for DestroyNotify events before completely shutting down. Only after the window is completely destroyed can anything take a screenshot.
 
-how to install
---------------
-You really should use your package manager when possible, you never know what kind of garbage applications will dump everywhere. For example you can install slop on Arch Linux by installing it from the AUR: [slop-git](https://aur.archlinux.org/packages/slop-git/).
+## how to install
 
-However slop just installs a single binary to /usr/bin. If that's ok with you-- you can install it with:
+### Install using your Package Manager (preferred)
+
+* [Arch Linux AUR (slop-git)](https://aur.archlinux.org/packages/slop-git/)
+* Please make a package for slop on your favorite system, and make a pull request to add it to this list.
+
+
+### Install using Make
+
+Note: Dependencies should be installed first: libXext, and glibc.
+
 ```bash
+git clone https://github.com/naelstrof/slop.git
+cd slop
 make && sudo make install
 ```
+
 Make sure to check out and install [maim](https://github.com/naelstrof/maim) too if you want a proper screenshot utility.
 
 help
 ----
 ```text
-slop v3.1.3
+slop v3.1.4
 
 Copyright (C) 2014 Dalton Nell, GPLv3
 
