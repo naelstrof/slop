@@ -29,7 +29,7 @@ const char *gengetopt_args_info_purpose = "";
 
 const char *gengetopt_args_info_usage = "Usage: slop [options]";
 
-const char *gengetopt_args_info_versiontext = "Copyright (C) 2014 Dalton Nell, GPLv3";
+const char *gengetopt_args_info_versiontext = "Copyright (C) 2014 Dalton Nell, Slop Contributors\n(https://github.com/naelstrof/slop/graphs/contributors)";
 
 const char *gengetopt_args_info_description = "slop (Select Operation) is an application that queries for a selection from the\nuser and prints the region to stdout.";
 

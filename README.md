@@ -69,7 +69,7 @@ help
 ```text
 slop v3.1.4
 
-Copyright (C) 2014 Dalton Nell, GPLv3
+Copyright (C) 2014 Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors)
 
 Usage: slop [options]
 

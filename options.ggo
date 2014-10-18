@@ -2,7 +2,7 @@ package "slop"
 version "v3.1.4"
 usage "slop [options]"
 description "slop (Select Operation) is an application that queries for a selection from the user and prints the region to stdout."
-versiontext "Copyright (C) 2014 Dalton Nell, GPLv3"
+versiontext "Copyright (C) 2014 Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors)"
 
 text "Options"
 
