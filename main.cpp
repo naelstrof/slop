@@ -213,7 +213,9 @@ int main( int argc, char** argv ) {
                     } else {
                         selection->setGeo( t.m_x, t.m_y, t.m_x + t.m_width, t.m_y + t.m_height );
                     }
-                    window = xengine->m_hoverWindow;
+                    //window = xengine->m_hoverWindow;
+                    // Since WindowRectangle can select different windows depending on click location...
+                    window = t.getWindow();
                 }
                 // If the user clicked we move on to the next state.
                 if ( xengine->mouseDown( 1 ) ) {

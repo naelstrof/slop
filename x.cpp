@@ -288,6 +288,10 @@ void slop::WindowRectangle::applyPadding( int padding ) {
     }
 }
 
+Window slop::WindowRectangle::getWindow() {
+    return m_window;
+}
+
 void slop::WindowRectangle::applyMinMaxSize( int minimumsize, int maximumsize ) {
     if ( minimumsize > maximumsize && maximumsize > 0 ) {
         fprintf( stderr, "Error: minimumsize is greater than maximumsize.\n" );
@@ -337,6 +341,8 @@ void slop::WindowRectangle::setGeometry( Window win, bool decorations ) {
             status = XQueryTree( xengine->m_display, test, &root, &parent, &childlist, &ujunk);
             free( childlist );
         }
+        // test contains the window we're screenshotting.
+        m_window = test;
         // Once found, proceed normally.
         if ( test && parent == root && status ) {
             XWindowAttributes attr;
@@ -362,4 +368,5 @@ void slop::WindowRectangle::setGeometry( Window win, bool decorations ) {
     m_height = attr.height;
     m_border = attr.border_width;
     XTranslateCoordinates( xengine->m_display, win, attr.root, -attr.border_width, -attr.border_width, &(m_x), &(m_y), &junk );
+    m_window = win;
 }

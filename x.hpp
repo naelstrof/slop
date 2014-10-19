@@ -56,7 +56,9 @@ public:
     unsigned int m_width;
     unsigned int m_height;
     unsigned int m_border;
+    Window       m_window;
     bool         m_decorations;
+    Window       getWindow();
     void         setGeometry( Window win, bool decorations );
     void         applyPadding( int padding );
     void         applyMinMaxSize( int minimumsize, int maximumsize );
