@@ -36,6 +36,20 @@ If you don't like ImageMagick's import: Check out [maim](https://github.com/nael
 You can see my implementation of slop in a screenshooter here:
 https://gist.github.com/naelstrof/6530959
 
+For those of you who don't want eval to be an integral part of slop (Could be dangerous if I were evil!): You can change the output format and parse it manually like so:
+```bash
+#!/bin/bash
+slopoutput=$(slop -f "%x %y %w %h %g $i")
+X=$(echo $slopoutput | awk '{print $1}')
+Y=$(echo $slopoutput | awk '{print $2}')
+W=$(echo $slopoutput | awk '{print $3}')
+H=$(echo $slopoutput | awk '{print $4}')
+G=$(echo $slopoutput | awk '{print $5}')
+ID=$(echo $slopoutput | awk '{print $6}')
+maim -g $G -i $ID
+ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
+```
+
 ## Lets see some action
 Ok. Here's a comparison between 'scrot -s's selection and slop's:
 ![scrotbad](http://farmpolice.com/content/images/2014-10-14-12:08:24.png)
@@ -67,9 +81,10 @@ Make sure to check out and install [maim](https://github.com/naelstrof/maim) too
 help
 ----
 ```text
-slop v3.1.5
+slop v3.1.7
 
-Copyright (C) 2014 Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors)
+Copyright (C) 2014 Dalton Nell, Slop Contributors
+(https://github.com/naelstrof/slop/graphs/contributors)
 
 Usage: slop [options]
 
@@ -113,6 +128,9 @@ Options
                                   highlights it. This is only useful when
                                   --color is set to a transparent color.
                                   (default=off)
+  -f, --format=STRING           Set the output format string. Format specifiers
+                                  are %x, %y, %w, %h, %i, %g, and %c.
+                                  (default=`X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n')
 
 Examples
     $ # Gray, thick, transparent border for maximum visiblity.
@@ -126,4 +144,11 @@ Examples
 
     $ # Classic Windows XP selection.
     $ slop -l -c 0.3,0.4,0.6,0.4
+
+    $ # Change output format to use safer parsing
+    $ slopoutput=$(slop -f "%x %y %w %h")
+    $ X=$(echo $slopoutput | awk '{print $1}')
+    $ Y=$(echo $slopoutput | awk '{print $2}')
+    $ W=$(echo $slopoutput | awk '{print $3}')
+    $ H=$(echo $slopoutput | awk '{print $4}')
 ```

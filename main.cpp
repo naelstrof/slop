@@ -19,35 +19,77 @@
  */
 #include <unistd.h>
 #include <cstdio>
+#include <sstream>
 #include "x.hpp"
 #include "rectangle.hpp"
 #include "cmdline.h"
 
-void printSelection( bool cancelled, int x, int y, int w, int h, int window ) {
-    printf( "X=%i\n", x );
-    printf( "Y=%i\n", y );
-    printf( "W=%i\n", w );
-    printf( "H=%i\n", h );
-    printf( "G=%ix%i", w, h );
-    if ( x >= 0 ) {
-        printf( "+%i", x );
-    } else {
-        // Negative is already included
-        printf( "%i", x );
+int printSelection( std::string format, bool cancelled, int x, int y, int w, int h, int window ) {
+    size_t pos = 0;
+    while ( ( pos = format.find( "%", pos ) ) != std::string::npos ) {
+        if ( pos + 1 > format.size() ) {
+            fprintf( stderr, "Format error: %% found at the end of format string.\n", format[ pos + 1 ] );
+            return 1;
+        }
+        std::stringstream foo;
+        switch( format[ pos + 1 ] ) {
+            case '%':
+                format.replace( pos, 2, "%" );
+                pos += 1;
+                break;
+            case 'x':
+            case 'X':
+                foo << x;
+                format.replace( pos, 2, foo.str() );
+                break;
+            case 'y':
+            case 'Y':
+                foo << y;
+                format.replace( pos, 2, foo.str() );
+                break;
+            case 'w':
+            case 'W':
+                foo << w;
+                format.replace( pos, 2, foo.str() );
+                break;
+            case 'h':
+            case 'H':
+                foo << h;
+                format.replace( pos, 2, foo.str() );
+                break;
+            case 'g':
+            case 'G':
+                foo << w << 'x' << h << '+' << x << '+' << y;
+                format.replace( pos, 2, foo.str() );
+                break;
+            case 'i':
+            case 'I':
+                foo << window;
+                format.replace( pos, 2, foo.str() );
+                break;
+            case 'c':
+            case 'C':
+                format.replace( pos, 2, cancelled ? "true" : "false" );
+                break;
+            default:
+                fprintf( stderr, "Format error: %%%c is an unknown replacement identifier.\n", format[ pos + 1 ] );
+                fprintf( stderr, "Valid replacements: %%x, %%y, %%w, %%h, %%i, %%c, %%.\n" );
+                return 1;
+                break;
+        }
     }
-    if ( y >= 0 ) {
-        printf( "+%i", y );
-    } else {
-        // Negative is already included
-        printf( "%i", y );
+    pos = 0;
+    while ( ( pos = format.find( "\\", pos ) ) != std::string::npos ) {
+        if ( pos + 1 > format.size() ) {
+            break;
+        }
+        if ( format[ pos + 1 ] == 'n' ) {
+            format.replace( pos, 2, "\n" );
+        }
+        pos = pos + 1;
     }
-    printf( "\n" );
-    printf( "ID=%i\n", window );
-    if ( cancelled ) {
-        printf( "Cancel=true\n" );
-    } else {
-        printf( "Cancel=false\n" );
-    }
+    printf( "%s", format.c_str() );
+    return 0;
 }
 
 int parseColor( std::string arg, float* r, float* g, float* b, float* a ) {
@@ -150,18 +192,19 @@ int main( int argc, char** argv ) {
     int hmem = 0;
     int minimumsize = options.min_arg;
     int maximumsize = options.max_arg;
+    std::string format = options.format_arg;
     cmdline_parser_free( &options );
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
     err = xengine->init( xdisplay.c_str() );
     if ( err ) {
-        printSelection( true, 0, 0, 0, 0, None );
+        printSelection( format, true, 0, 0, 0, 0, None );
         return err;
     }
     err = xengine->grabCursor( slop::Cross );
     if ( err ) {
-        printSelection( true, 0, 0, 0, 0, None );
+        printSelection( format, true, 0, 0, 0, 0, None );
         return err;
     }
     if ( keyboard ) {
@@ -181,7 +224,7 @@ int main( int argc, char** argv ) {
         double starti = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
         if ( timei - starti > gracetime ) {
             if ( ( xengine->anyKeyPressed() && keyboard ) || xengine->mouseDown( 3 ) ) {
-                printSelection( true, 0, 0, 0, 0, None );
+                printSelection( format, true, 0, 0, 0, 0, None );
                 fprintf( stderr, "User pressed key. Canceled selection.\n" );
                 state = -1;
                 running = false;
@@ -309,7 +352,7 @@ int main( int argc, char** argv ) {
                 // Delete the rectangle, which will remove it from the screen.
                 delete selection;
                 // Print the selection :)
-                printSelection( false, x, y, w, h, window );
+                printSelection( format, false, x, y, w, h, window );
                 break;
             }
         }

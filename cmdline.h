@@ -31,7 +31,7 @@ extern "C" {
 
 #ifndef CMDLINE_PARSER_VERSION
 /** @brief the program version */
-#define CMDLINE_PARSER_VERSION "v3.1.5"
+#define CMDLINE_PARSER_VERSION "v3.1.7"
 #endif
 
 /** @brief Where the command line options are stored */
@@ -69,6 +69,9 @@ struct gengetopt_args_info
   const char *max_help; /**< @brief Set the maximum output of width or height values. Setting min and max to the same value disables drag selections. help description.  */
   int highlight_flag;	/**< @brief Instead of outlining selections, slop highlights it. This is only useful when --color is set to a transparent color. (default=off).  */
   const char *highlight_help; /**< @brief Instead of outlining selections, slop highlights it. This is only useful when --color is set to a transparent color. help description.  */
+  char * format_arg;	/**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. (default='REPLACEME').  */
+  char * format_orig;	/**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. original value given at command line.  */
+  const char *format_help; /**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. help description.  */
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
@@ -83,6 +86,7 @@ struct gengetopt_args_info
   unsigned int min_given ;	/**< @brief Whether min was given.  */
   unsigned int max_given ;	/**< @brief Whether max was given.  */
   unsigned int highlight_given ;	/**< @brief Whether highlight was given.  */
+  unsigned int format_given ;	/**< @brief Whether format was given.  */
 
 } ;
 

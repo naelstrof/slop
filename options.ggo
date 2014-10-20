@@ -1,5 +1,5 @@
 package "slop"
-version "v3.1.5"
+version "v3.1.7"
 usage "slop [options]"
 description "slop (Select Operation) is an application that queries for a selection from the user and prints the region to stdout."
 versiontext "Copyright (C) 2014 Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors)"
@@ -61,6 +61,11 @@ option "highlight" l "Instead of outlining selections, slop highlights it. This 
     flag
     off
 
+option "format" f "Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c."
+    string
+    default="REPLACEME"
+    optional
+
 text "\nExamples\n"
 text "    $ # Gray, thick, transparent border for maximum visiblity.\n"
 text "    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n"
@@ -73,3 +78,10 @@ text "    $ slop -t 0\n"
 text "\n"
 text "    $ # Classic Windows XP selection.\n"
 text "    $ slop -l -c 0.3,0.4,0.6,0.4\n"
+text "\n"
+text "    $ # Change output format to use safer parsing\n"
+text "    $ slopoutput=$(slop -f \"%x %y %w %h\")\n"
+text "    $ X=$(echo $slopoutput | awk '{print $1}')\n"
+text "    $ Y=$(echo $slopoutput | awk '{print $2}')\n"
+text "    $ W=$(echo $slopoutput | awk '{print $3}')\n"
+text "    $ H=$(echo $slopoutput | awk '{print $4}')\n"
