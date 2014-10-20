@@ -26,7 +26,7 @@ int slop::XEngineErrorHandler( Display* dpy, XErrorEvent* event ) {
     // 31 = XGrabKeyboard's request code
     if ( event->request_code == 31 && event->error_code == BadAccess ) {
         fprintf( stderr, "_X Error \"BadAccess\" for XGrabKeyboard ignored...\n" );
-        return 0;
+        return EXIT_SUCCESS;
     }
     // Everything else should be fatal as I don't like undefined behavior.
     char buffer[1024];
@@ -39,21 +39,22 @@ int slop::XEngineErrorHandler( Display* dpy, XErrorEvent* event ) {
     exit(1);
 }
 
-int slop::XEngine::getWidth() {
+unsigned int slop::XEngine::getWidth() {
     if ( !m_good ) {
         return -1;
     }
-    return (int)WidthOfScreen( m_screen );
+    return WidthOfScreen( m_screen );
 }
 
-int slop::XEngine::getHeight() {
+unsigned int slop::XEngine::getHeight() {
     if ( !m_good ) {
         return -1;
     }
-    return (int)HeightOfScreen( m_screen );
+    return HeightOfScreen( m_screen );
 }
 
 slop::XEngine::XEngine() {
+    m_keypressed = false;
     m_display = NULL;
     m_visual = NULL;
     m_screen = NULL;
@@ -87,7 +88,7 @@ int slop::XEngine::init( std::string display ) {
     m_display = XOpenDisplay( display.c_str() );
     if ( !m_display ) {
         fprintf( stderr, "Error: Failed to open X display %s\n", display.c_str() );
-        return 1;
+        return EXIT_FAILURE;
     }
     m_screen    = ScreenOfDisplay( m_display, DefaultScreen( m_display ) );
     m_visual    = DefaultVisual  ( m_display, XScreenNumberOfScreen( m_screen ) );
@@ -98,7 +99,7 @@ int slop::XEngine::init( std::string display ) {
     m_good = true;
     XSetErrorHandler( slop::XEngineErrorHandler );
     selectAllInputs( m_root, EnterWindowMask );
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 bool slop::XEngine::anyKeyPressed() {
@@ -121,24 +122,24 @@ bool slop::XEngine::anyKeyPressed() {
 
 int slop::XEngine::grabKeyboard() {
     if ( !m_good ) {
-        return 1;
+        return EXIT_FAILURE;
     }
     int err = XGrabKeyboard( m_display, m_root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Warning: Failed to grab X keyboard.\n" );
         fprintf( stderr, "         This happens when something has already grabbed your keybaord.\n" );
         fprintf( stderr, "         slop should still run properly though.\n" );
-        return 1;
+        return EXIT_FAILURE;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int slop::XEngine::releaseKeyboard() {
     if ( !m_good ) {
-        return 1;
+        return EXIT_FAILURE;
     }
     XUngrabKeyboard( m_display, CurrentTime );
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void slop::XEngine::selectAllInputs( Window win, long event_mask) {
@@ -156,7 +157,7 @@ void slop::XEngine::selectAllInputs( Window win, long event_mask) {
 // Grabs the cursor, be wary that setCursor changes the mouse masks.
 int slop::XEngine::grabCursor( slop::CursorType type ) {
     if ( !m_good ) {
-        return 1;
+        return EXIT_FAILURE;
     }
     int xfontcursor = getCursor( type );
     int err = XGrabPointer( m_display, m_root, True,
@@ -165,7 +166,7 @@ int slop::XEngine::grabCursor( slop::CursorType type ) {
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Error: Failed to grab X cursor.\n" );
         fprintf( stderr, "       This can be caused by launching slop weirdly.\n" );
-        return 1;
+        return EXIT_FAILURE;
     }
     // Quickly set the mouse position so we don't have to worry about x11 generating an event.
     Window root, child;
@@ -183,15 +184,15 @@ int slop::XEngine::grabCursor( slop::CursorType type ) {
         XQueryPointer( m_display, child, &root, &test, &mx, &my, &wx, &wy, &mask );
     }
     m_hoverWindow = child;
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int slop::XEngine::releaseCursor() {
     if ( !m_good ) {
-        return 1;
+        return EXIT_FAILURE;
     }
     XUngrabPointer( m_display, CurrentTime );
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void slop::XEngine::tick() {
@@ -255,7 +256,7 @@ Cursor slop::XEngine::getCursor( slop::CursorType type ) {
         case Box:                   xfontcursor = 40; break;
     }
     Cursor newcursor = 0;
-    if ( m_cursors.size() > xfontcursor ) {
+    if ( m_cursors.size() > (unsigned int)xfontcursor ) {
         newcursor = m_cursors.at( xfontcursor );
     }
     if ( !newcursor ) {
@@ -278,11 +279,11 @@ void slop::XEngine::setCursor( slop::CursorType type ) {
 }
 
 void slop::WindowRectangle::applyPadding( int padding ) {
-    if ( m_width + padding*2 >= 0 ) {
+    if ( (int)m_width + padding*2 >= 0 ) {
         m_x -= padding;
         m_width += padding*2;
     }
-    if ( m_height + padding*2 >= 0 ) {
+    if ( (int)m_height + padding*2 >= 0 ) {
         m_y -= padding;
         m_height += padding*2;
     }
@@ -292,7 +293,7 @@ Window slop::WindowRectangle::getWindow() {
     return m_window;
 }
 
-void slop::WindowRectangle::applyMinMaxSize( int minimumsize, int maximumsize ) {
+void slop::WindowRectangle::applyMinMaxSize( unsigned int minimumsize, unsigned int maximumsize ) {
     if ( minimumsize > maximumsize && maximumsize > 0 ) {
         fprintf( stderr, "Error: minimumsize is greater than maximumsize.\n" );
         exit( 1 );
@@ -328,7 +329,6 @@ void slop::WindowRectangle::setGeometry( Window win, bool decorations ) {
         Window root, parent, test, junk;
         Window* childlist;
         unsigned int ujunk;
-        unsigned int depth;
         // Try to find the actual decorations.
         test = win;
         int status = XQueryTree( xengine->m_display, test, &root, &parent, &childlist, &ujunk);

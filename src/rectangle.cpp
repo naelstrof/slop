@@ -71,7 +71,7 @@ slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, bool hig
     unsigned long valueMask = CWBackPixel | CWOverrideRedirect | CWEventMask;
 
     // Create the window
-    m_window = XCreateWindow( xengine->m_display, xengine->m_root, 0, 0, WidthOfScreen( xengine->m_screen ), HeightOfScreen( xengine->m_screen ),
+    m_window = XCreateWindow( xengine->m_display, xengine->m_root, 0, 0, xengine->getWidth(), xengine->getHeight(),
                               0, CopyFromParent, InputOutput,
                               CopyFromParent, valueMask, &attributes );
 

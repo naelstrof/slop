@@ -28,8 +28,8 @@ int printSelection( std::string format, bool cancelled, int x, int y, int w, int
     size_t pos = 0;
     while ( ( pos = format.find( "%", pos ) ) != std::string::npos ) {
         if ( pos + 1 > format.size() ) {
-            fprintf( stderr, "Format error: %% found at the end of format string.\n", format[ pos + 1 ] );
-            return 1;
+            fprintf( stderr, "Format error: %% found at the end of format string.\n" );
+            return EXIT_FAILURE;
         }
         std::stringstream foo;
         switch( format[ pos + 1 ] ) {
@@ -74,7 +74,7 @@ int printSelection( std::string format, bool cancelled, int x, int y, int w, int
             default:
                 fprintf( stderr, "Format error: %%%c is an unknown replacement identifier.\n", format[ pos + 1 ] );
                 fprintf( stderr, "Valid replacements: %%x, %%y, %%w, %%h, %%i, %%c, %%.\n" );
-                return 1;
+                return EXIT_FAILURE;
                 break;
         }
     }
@@ -89,13 +89,13 @@ int printSelection( std::string format, bool cancelled, int x, int y, int w, int
         pos = pos + 1;
     }
     printf( "%s", format.c_str() );
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int parseColor( std::string arg, float* r, float* g, float* b, float* a ) {
     std::string copy = arg;
     int find = copy.find( "," );
-    while( find != copy.npos ) {
+    while( find != (int)copy.npos ) {
         copy.at( find ) = ' ';
         find = copy.find( "," );
     }
@@ -105,9 +105,9 @@ int parseColor( std::string arg, float* r, float* g, float* b, float* a ) {
     int num = sscanf( copy.c_str(), "%f %f %f %f", r, g, b, a );
     if ( num != 3 && num != 4 ) {
         fprintf( stderr, "Error parsing color %s\n", arg.c_str() );
-        return 1;
+        return EXIT_FAILURE;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void constrain( int sx, int sy, int ex, int ey, int padding, int minimumsize, int maximumsize, int* rsx, int* rsy, int* rex, int* rey ) {
@@ -162,11 +162,11 @@ void constrain( int sx, int sy, int ex, int ey, int padding, int minimumsize, in
     *rey = y + h;
 }
 
-int main( int argc, char** argv ) {
+int app( int argc, char** argv ) {
     gengetopt_args_info options;
     int err = cmdline_parser( argc, argv, &options );
-    if ( err ) {
-        return err;
+    if ( err != EXIT_SUCCESS ) {
+        return EXIT_FAILURE;
     }
     int state = 0;
     bool running = true;
@@ -198,14 +198,14 @@ int main( int argc, char** argv ) {
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
     err = xengine->init( xdisplay.c_str() );
-    if ( err ) {
+    if ( err != EXIT_SUCCESS ) {
         printSelection( format, true, 0, 0, 0, 0, None );
-        return err;
+        return EXIT_FAILURE;
     }
     err = xengine->grabCursor( slop::Cross );
-    if ( err ) {
+    if ( err != EXIT_SUCCESS ) {
         printSelection( format, true, 0, 0, 0, 0, None );
-        return err;
+        return EXIT_FAILURE;
     }
     if ( keyboard ) {
         err = xengine->grabKeyboard();
@@ -320,7 +320,7 @@ int main( int argc, char** argv ) {
                 // We also detect which way the user is pulling and set the mouse icon accordingly.
                 bool x = cx > xengine->m_mousex;
                 bool y = cy > xengine->m_mousey;
-                if ( selection->m_width <= 1 && selection->m_height <= 1 || ( minimumsize == maximumsize && minimumsize != 0 && maximumsize != 0 ) ) {
+                if ( ( selection->m_width <= 1 && selection->m_height <= 1 ) || ( minimumsize == maximumsize && minimumsize != 0 && maximumsize != 0 ) ) {
                     xengine->setCursor( slop::Cross );
                 } else if ( !x && !y ) {
                     xengine->setCursor( slop::LowerRightCorner );
@@ -370,7 +370,18 @@ int main( int argc, char** argv ) {
     usleep( 50000 );
     // If we canceled the selection, return error.
     if ( state == -1 ) {
-        return 1;
+        return EXIT_FAILURE;
     }
-    return 0;
+    return EXIT_SUCCESS;
+}
+
+int main( int argc, char** argv ) {
+    int exitvalue = EXIT_SUCCESS;
+    try {
+        exitvalue = app( argc, argv );
+    } catch( std::exception* exception ) {
+        fprintf( stderr, "Unhandled Exception Thrown: %s\n", exception->what() );
+        exit( EXIT_FAILURE );
+    }
+    return exitvalue;
 }

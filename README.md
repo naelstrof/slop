@@ -60,19 +60,20 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 
 ## how to install
 
-### Install using your Package Manager (preferred)
+### Install using your Package Manager (Preferred)
 
 * [Arch Linux AUR (slop-git)](https://aur.archlinux.org/packages/slop-git/)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
 
 
-### Install using Make
+### Install using CMake (Requires CMake)
 
-Note: Dependencies should be installed first: libXext, and glibc.
+Note: Dependencies should be installed first: libXext.
 
 ```bash
 git clone https://github.com/naelstrof/slop.git
 cd slop
+cmake ./
 make && sudo make install
 ```
 
@@ -81,7 +82,7 @@ Make sure to check out and install [maim](https://github.com/naelstrof/maim) too
 help
 ----
 ```text
-slop v3.1.7
+slop v3.1.8
 
 Copyright (C) 2014 Dalton Nell, Slop Contributors
 (https://github.com/naelstrof/slop/graphs/contributors)

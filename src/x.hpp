@@ -61,7 +61,7 @@ public:
     Window       getWindow();
     void         setGeometry( Window win, bool decorations );
     void         applyPadding( int padding );
-    void         applyMinMaxSize( int minimumsize, int maximumsize );
+    void         applyMinMaxSize( unsigned int minimumsize, unsigned int maximumsize );
 };
 
 class XEngine {
@@ -77,8 +77,8 @@ public:
     int                 releaseKeyboard();
     void                setCursor( slop::CursorType type );
     void                drawRect( int x, int y, unsigned int w, unsigned int h );
-    int                 getWidth();
-    int                 getHeight();
+    unsigned int        getWidth();
+    unsigned int        getHeight();
     int                 m_mousex;
     int                 m_mousey;
     Display*            m_display;
