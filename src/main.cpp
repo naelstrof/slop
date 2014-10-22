@@ -104,7 +104,6 @@ int parseColor( std::string arg, float* r, float* g, float* b, float* a ) {
     *a = 1;
     int num = sscanf( copy.c_str(), "%f %f %f %f", r, g, b, a );
     if ( num != 3 && num != 4 ) {
-        fprintf( stderr, "Error parsing color %s\n", arg.c_str() );
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -178,8 +177,17 @@ int app( int argc, char** argv ) {
     int borderSize = options.bordersize_arg;
     int tolerance = options.tolerance_arg;
     float r, g, b, a;
-    parseColor( options.color_arg, &r, &g, &b, &a );
-    float gracetime = atof( options.gracetime_arg );
+    err = parseColor( options.color_arg, &r, &g, &b, &a );
+    if ( err != EXIT_SUCCESS ) {
+        fprintf( stderr, "Error parsing color %s\n", options.color_arg );
+        return EXIT_FAILURE;
+    }
+    float gracetime;
+    err = sscanf( options.gracetime_arg, "%f", &gracetime );
+    if ( err != 1 ) {
+        fprintf( stderr, "Error parsing %s as a float for gracetime!\n", options.gracetime_arg );
+        return EXIT_FAILURE;
+    }
     bool highlight = options.highlight_flag;
     bool keyboard = !options.nokeyboard_flag;
     bool decorations = !options.nodecorations_flag;
@@ -376,12 +384,16 @@ int app( int argc, char** argv ) {
 }
 
 int main( int argc, char** argv ) {
-    int exitvalue = EXIT_SUCCESS;
     try {
-        exitvalue = app( argc, argv );
-    } catch( std::exception* exception ) {
-        fprintf( stderr, "Unhandled Exception Thrown: %s\n", exception->what() );
-        exit( EXIT_FAILURE );
+        return app( argc, argv );
+    } catch( std::bad_alloc const& exception ) {
+        fprintf( stderr, "Couldn't allocate enough memory! No space left in RAM." );
+        return EXIT_FAILURE;
+    } catch( std::exception const& exception ) {
+        fprintf( stderr, "Unhandled Exception Thrown: %s\n", exception.what() );
+        return EXIT_FAILURE;
+    } catch( ... ) {
+        fprintf( stderr, "Unknown Exception Thrown!\n" );
+        return EXIT_FAILURE;
     }
-    return exitvalue;
 }
