@@ -62,7 +62,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 
 ### Install using your Package Manager (Preferred)
 
-* [Arch Linux AUR (slop-git)](https://aur.archlinux.org/packages/slop-git/)
+* [Arch Linux: community/slop](https://www.archlinux.org/packages/community/x86_64/slop/)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
 
 
