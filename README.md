@@ -82,7 +82,7 @@ Make sure to check out and install [maim](https://github.com/naelstrof/maim) too
 help
 ----
 ```text
-slop v3.1.9
+slop v3.1.10
 
 Copyright (C) 2014 Dalton Nell, Slop Contributors
 (https://github.com/naelstrof/slop/graphs/contributors)
@@ -152,4 +152,13 @@ Examples
     $ Y=$(echo $slopoutput | awk '{print $2}')
     $ W=$(echo $slopoutput | awk '{print $3}')
     $ H=$(echo $slopoutput | awk '{print $4}')
+
+Tips
+    * You can use the arrow keys to move the starting point of a
+drag-selection, just in case you missed it by a few pixels.
+    * If you don't like a selection: you can cancel it by right-clicking
+regardless of which options are enabled or disabled for slop.
+    * If slop doesn't seem to select a window accurately, the problem could be
+because of decorations getting in the way. Try enabling the --nodecorations
+flag.
 ```

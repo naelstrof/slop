@@ -85,3 +85,8 @@ text "    $ X=$(echo $slopoutput | awk '{print $1}')\n"
 text "    $ Y=$(echo $slopoutput | awk '{print $2}')\n"
 text "    $ W=$(echo $slopoutput | awk '{print $3}')\n"
 text "    $ H=$(echo $slopoutput | awk '{print $4}')\n"
+
+text "\nTips\n"
+text "    * You can use the arrow keys to move the starting point of a drag-selection, just in case you missed it by a few pixels.\n"
+text "    * If you don't like a selection: you can cancel it by right-clicking regardless of which options are enabled or disabled for slop.\n"
+text "    * If slop doesn't seem to select a window accurately, the problem could be because of decorations getting in the way. Try enabling the --nodecorations flag.\n"

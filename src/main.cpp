@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <cstdio>
 #include <sstream>
+
 #include "x.hpp"
 #include "rectangle.hpp"
 #include "cmdline.h"
@@ -161,6 +162,23 @@ void constrain( int sx, int sy, int ex, int ey, int padding, int minimumsize, in
     *rey = y + h;
 }
 
+// Some complicated key detection to replicate key repeating
+bool keyRepeat( KeySym key, double curtime, double repeatdelay, double* time, bool* memory ) {
+    if ( xengine->keyPressed( key ) != *memory ) {
+        if ( xengine->keyPressed( key ) ) {
+            *memory = true;
+            *time = curtime;
+            return true;
+        } else {
+            *memory = false;
+        }
+    }
+    if ( xengine->keyPressed( key ) && curtime - *time > repeatdelay ) {
+        return true;
+    }
+    return false;
+}
+
 int app( int argc, char** argv ) {
     gengetopt_args_info options;
     int err = cmdline_parser( argc, argv, &options );
@@ -192,6 +210,8 @@ int app( int argc, char** argv ) {
     bool keyboard = !options.nokeyboard_flag;
     bool decorations = !options.nodecorations_flag;
     timespec start, time;
+    int xoffset = 0;
+    int yoffset = 0;
     int cx = 0;
     int cy = 0;
     int xmem = 0;
@@ -200,6 +220,12 @@ int app( int argc, char** argv ) {
     int hmem = 0;
     int minimumsize = options.min_arg;
     int maximumsize = options.max_arg;
+    bool pressedMemory[4];
+    double pressedTime[4];
+    for ( int i=0;i<4;i++ ) {
+        pressedMemory[ i ] = false;
+        pressedTime[ i ] = 0;
+    }
     std::string format = options.format_arg;
     cmdline_parser_free( &options );
 
@@ -228,10 +254,35 @@ int app( int argc, char** argv ) {
         xengine->tick();
         // If the user presses any key on the keyboard, exit the application.
         // Make sure at least gracetime has passed before allowing canceling
-        double timei = double( time.tv_sec*1000000000L + time.tv_nsec )/1000000000.f;
-        double starti = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
-        if ( timei - starti > gracetime ) {
-            if ( ( xengine->anyKeyPressed() && keyboard ) || xengine->mouseDown( 3 ) ) {
+        double curtime = double( time.tv_sec*1000000000L + time.tv_nsec )/1000000000.f;
+        double starttime = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
+        if ( curtime - starttime > gracetime ) {
+            if ( keyRepeat( XK_Up, curtime, 0.5, &pressedTime[ 0 ], &pressedMemory[ 0 ] ) ) {
+                yoffset -= 1;
+            }
+            if ( keyRepeat( XK_Down, curtime, 0.5, &pressedTime[ 1 ], &pressedMemory[ 1 ] ) ) {
+                yoffset += 1;
+            }
+            if ( keyRepeat( XK_Left, curtime, 0.5, &pressedTime[ 2 ], &pressedMemory[ 2 ] ) ) {
+                xoffset -= 1;
+            }
+            if ( keyRepeat( XK_Right, curtime, 0.5, &pressedTime[ 3 ], &pressedMemory[ 3 ] ) ) {
+                xoffset += 1;
+            }
+            // If we pressed enter we move the state onward.
+            if ( xengine->keyPressed( XK_Return ) ) {
+                // If we're highlight windows, just select the active window.
+                if ( state == 0 ) {
+                    state = 1;
+                // If we're making a custom selection, select the custom selection.
+                } else if ( state == 2 ) {
+                    state = 3;
+                }
+            }
+            // If we press any key other than the arrow keys or enter key, we shut down!
+            if ( !( xengine->keyPressed( XK_Up ) || xengine->keyPressed( XK_Down ) || xengine->keyPressed( XK_Left ) || xengine->keyPressed( XK_Right ) ) &&
+                !( xengine->keyPressed( XK_Return ) ) &&
+                ( ( xengine->anyKeyPressed() && keyboard ) || xengine->mouseDown( 3 ) ) ) {
                 printSelection( format, true, 0, 0, 0, 0, None );
                 fprintf( stderr, "User pressed key. Canceled selection.\n" );
                 state = -1;
@@ -278,6 +329,9 @@ int app( int argc, char** argv ) {
                 // Set the mouse position of where we clicked, used so that click tolerance doesn't affect the rectangle's position.
                 cx = xengine->m_mousex;
                 cy = xengine->m_mousey;
+                // Make sure we don't have un-seen applied offsets.
+                xoffset = 0;
+                yoffset = 0;
                 // Also remember where the original selection was
                 if ( selection ) {
                     xmem = selection->m_x;
@@ -343,7 +397,7 @@ int app( int argc, char** argv ) {
                 int sx, sy, ex, ey;
                 constrain( cx, cy, xengine->m_mousex, xengine->m_mousey, padding, minimumsize, maximumsize, &sx, &sy, &ex, &ey );
                 // Set the selection rectangle's dimensions to mouse movement.
-                selection->setGeo( sx, sy, ex, ey );
+                selection->setGeo( sx + xoffset, sy + yoffset, ex, ey );
                 break;
             }
             case 3: {

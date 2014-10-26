@@ -73,6 +73,7 @@ public:
     int                 grabCursor( slop::CursorType type );
     int                 grabKeyboard();
     bool                anyKeyPressed();
+    bool                keyPressed( KeySym key );
     int                 releaseCursor();
     int                 releaseKeyboard();
     void                setCursor( slop::CursorType type );

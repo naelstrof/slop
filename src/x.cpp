@@ -102,6 +102,19 @@ int slop::XEngine::init( std::string display ) {
     return EXIT_SUCCESS;
 }
 
+bool slop::XEngine::keyPressed( KeySym key ) {
+    KeyCode keycode = XKeysymToKeycode( m_display, key );
+    if ( keycode != 0 ) {
+        // Get the whole keyboard state
+        char keys[32];
+        XQueryKeymap( m_display, keys );
+        // Check our keycode
+        return ( keys[ keycode / 8 ] & ( 1 << ( keycode % 8 ) ) ) != 0;
+    } else {
+        return false;
+    }
+}
+
 bool slop::XEngine::anyKeyPressed() {
     if ( !m_good ) {
         return false;
