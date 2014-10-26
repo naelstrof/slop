@@ -18,6 +18,7 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
+#include <time.h>
 #include <cstdio>
 #include <sstream>
 

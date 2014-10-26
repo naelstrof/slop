@@ -91,13 +91,15 @@ set( source
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmakemodules" )
 find_package( X11       REQUIRED )
 find_package( XExt      REQUIRED )
+find_package( RT        REQUIRED )
 
 set( CMAKE_CXX_FLAGS
      "${CMAKE_CXX_FLAGS} ${CMAKE_IMLIB2_CXX_FLAGS}" )
 
 # Includes
 include_directories( ${X11_INCLUDE_DIR}
-                     ${XEXT_INCLUDE_DIR} )
+                     ${XEXT_INCLUDE_DIR}
+                     ${RT_INCLUDE_DIR} )
 
 # Executable
 add_executable( "${BIN_TARGET}" ${source} )
@@ -105,7 +107,8 @@ add_executable( "${BIN_TARGET}" ${source} )
 # Libraries
 target_link_libraries( "${BIN_TARGET}"
                        ${X11_LIBRARIES}
-                       "${XEXT_LIBRARY}" )
+                       "${XEXT_LIBRARY}"
+                       "${RT_LIBRARY}" )
 
 install( TARGETS ${BIN_TARGET}
          DESTINATION  ${CMAKE_INSTALL_PREFIX} )
