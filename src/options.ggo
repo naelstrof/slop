@@ -9,7 +9,6 @@ text "Options"
 option "xdisplay" - "Sets the x display."
     string
     typestr="hostname:number.screen_number"
-    default=":0"
     optional
 
 option "nokeyboard" - "Disables the ability to cancel selections with the keyboard."

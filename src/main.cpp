@@ -191,7 +191,20 @@ int app( int argc, char** argv ) {
     slop::Rectangle* selection = NULL;
     Window window = None;
     Window windowmemory = None;
-    std::string xdisplay = options.xdisplay_arg;
+    std::string xdisplay;
+    if ( options.xdisplay_given ) {
+        xdisplay = options.xdisplay_arg;
+    } else {
+        // If we weren't specifically given a xdisplay, we try
+        // to parse it from environment variables
+        char* display = getenv( "DISPLAY" );
+        if ( display ) {
+            xdisplay = display;
+        } else {
+            fprintf( stderr, "Warning: Failed to parse environment variable: DISPLAY. Using \":0\" instead.\n" );
+            xdisplay = ":0";
+        }
+    }
     int padding = options.padding_arg;
     int borderSize = options.bordersize_arg;
     int tolerance = options.tolerance_arg;

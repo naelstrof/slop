@@ -82,7 +82,7 @@ Make sure to check out and install [maim](https://github.com/naelstrof/maim) too
 help
 ----
 ```text
-slop v3.1.10
+slop v3.1.11
 
 Copyright (C) 2014 Dalton Nell, Slop Contributors
 (https://github.com/naelstrof/slop/graphs/contributors)
@@ -96,7 +96,7 @@ user and prints the region to stdout.
   -V, --version                 Print version and exit
 Options
       --xdisplay=hostname:number.screen_number
-                                Sets the x display.  (default=`:0')
+                                Sets the x display.
       --nokeyboard              Disables the ability to cancel selections with
                                   the keyboard.  (default=off)
   -b, --bordersize=INT          Set the selection rectangle's thickness. Does

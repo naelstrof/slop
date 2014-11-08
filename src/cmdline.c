@@ -37,7 +37,7 @@ const char *gengetopt_args_info_help[] = {
   "  -h, --help                    Print help and exit",
   "  -V, --version                 Print version and exit",
   "Options",
-  "      --xdisplay=hostname:number.screen_number\n                                Sets the x display.  (default=`:0')",
+  "      --xdisplay=hostname:number.screen_number\n                                Sets the x display.",
   "      --nokeyboard              Disables the ability to cancel selections with\n                                  the keyboard.  (default=off)",
   "  -b, --bordersize=INT          Set the selection rectangle's thickness. Does\n                                  nothing when --highlight is enabled.\n                                  (default=`5')",
   "  -p, --padding=INT             Set the padding size of the selection. Can be\n                                  negative.  (default=`0')",
@@ -95,7 +95,7 @@ static
 void clear_args (struct gengetopt_args_info *args_info)
 {
   FIX_UNUSED (args_info);
-  args_info->xdisplay_arg = gengetopt_strdup (":0");
+  args_info->xdisplay_arg = NULL;
   args_info->xdisplay_orig = NULL;
   args_info->nokeyboard_flag = 0;
   args_info->bordersize_arg = 5;
@@ -680,7 +680,7 @@ cmdline_parser_internal (
           
             if (update_arg( (void *)&(args_info->xdisplay_arg), 
                  &(args_info->xdisplay_orig), &(args_info->xdisplay_given),
-                &(local_args_info.xdisplay_given), optarg, 0, ":0", ARG_STRING,
+                &(local_args_info.xdisplay_given), optarg, 0, 0, ARG_STRING,
                 check_ambiguity, override, 0, 0,
                 "xdisplay", '-',
                 additional_error))
