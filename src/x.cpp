@@ -28,6 +28,12 @@ int slop::XEngineErrorHandler( Display* dpy, XErrorEvent* event ) {
         fprintf( stderr, "_X Error \"BadAccess\" for XGrabKeyboard ignored...\n" );
         return EXIT_SUCCESS;
     }
+    // Ignore XQueryKeymap BadValue errors, we can work without it.
+    // 128 = XShape request code, not sure why XQueryKeymap generates this?
+    if ( event->request_code == 128 && event->error_code == BadValue ) {
+        fprintf( stderr, "_X Error \"BadValue\" for XQueryKeymap ignored...\n" );
+        return EXIT_SUCCESS;
+    }
     // Everything else should be fatal as I don't like undefined behavior.
     char buffer[1024];
     XGetErrorText( dpy, event->error_code, buffer, 1024 );
