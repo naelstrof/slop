@@ -186,6 +186,11 @@ int app( int argc, char** argv ) {
     if ( err != EXIT_SUCCESS ) {
         return EXIT_FAILURE;
     }
+    if ( !slop::isRectangleSupported() ) {
+        fprintf( stderr, "Error: Your X server doesn't support the XShape extension. There's nothing slop can do about this!\n" );
+        fprintf( stderr, "  Try updating X and making sure you have XExtensions installed. (/usr/lib/libXext.so, /usr/include/X11/extensions/shape.h)\n" );
+        return EXIT_FAILURE;
+    }
     int state = 0;
     bool running = true;
     slop::Rectangle* selection = NULL;

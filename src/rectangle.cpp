@@ -187,3 +187,9 @@ XColor slop::Rectangle::convertColor( float r, float g, float b ) {
     }
     return color;
 }
+
+bool slop::isRectangleSupported() {
+    int event_base;
+    int error_base;
+    return XShapeQueryExtension( xengine->m_display, &event_base, &error_base );
+}

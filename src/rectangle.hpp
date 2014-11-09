@@ -57,6 +57,8 @@ private:
     void    constrain( int w, int h );
 };
 
+bool isRectangleSupported();
+
 }
 
 #endif // IS_RECTANGLE_H_
