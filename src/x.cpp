@@ -32,9 +32,11 @@ int slop::XEngineErrorHandler( Display* dpy, XErrorEvent* event ) {
     char buffer[1024];
     XGetErrorText( dpy, event->error_code, buffer, 1024 );
     fprintf( stderr,
-             "_X Error of failed request:  %s\n_  Major opcode of failed request: % 3d\n_  Serial number of failed request:% 5li\n_  Current serial number in output stream:?????\n",
+             "_X Error of failed request: %s\n_  Error code of failed request: %3d\n_  Major opcode of failed request: %3d\n_  Minor opcode of failed request: %3d\n_  Serial number of failed request: %5li\n_  Current serial number in output stream:?????\n",
              buffer,
+             event->error_code,
              event->request_code,
+             event->minor_code,
              event->serial );
     exit(1);
 }
