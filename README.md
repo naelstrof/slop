@@ -83,7 +83,7 @@ Make sure to check out and install [maim](https://github.com/naelstrof/maim) too
 help
 ----
 ```text
-slop v3.1.11
+slop v3.1.12
 
 Copyright (C) 2014 Dalton Nell, Slop Contributors
 (https://github.com/naelstrof/slop/graphs/contributors)
