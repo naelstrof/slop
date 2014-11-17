@@ -3,20 +3,27 @@ cmake_minimum_required( VERSION 2.8 )
 project( "slop" )
 set( slop_VERSION_MAJOR 3 )
 set( slop_VERSION_MINOR 1 )
-set( slop_VERSION_PATCH 13 )
+set( slop_VERSION_PATCH 14 )
 
 set( BIN_TARGET     "${PROJECT_NAME}" )
 set( CMAKE_INSTALL_PREFIX "/usr/bin" )
+
+if( NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE )
+   set( CMAKE_BUILD_TYPE RelWithDebInfo )
+endif()
 
 # Linux compiler initialization.
 if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
      "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
      "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" )
-    set( CMAKE_CXX_FLAGS
-         "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic-errors -Wno-unused-parameter" )
+     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-parameter" )
+     set( CMAKE_CXX_FLAGS_DEBUG "-Wextra -pedantic-errors -O0 -g" )
+     set( CMAKE_CXX_FLAGS_RELEASE "-O2" )
+     set( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" )
          # -Wall:   Enable all warnings.
          # -Wextra: Enable some more warnings.
          # -Werror: Have errors on warnings.
+         # -pedantic-errors: Even more errors.
          # -Wno-unused-parameter: Prevent unused variable warning. (Several functions are required to have unecessary variables because X11.)
 else()
     message( FATAL_ERROR "Your operating system isn't supported yet! CMake will now exit." )
@@ -56,8 +63,8 @@ endif()
 
 # By default our src/options.ggo has our cmake versions variables for
 # the 'version ""' line. We replace them here.
-configure_file( "src/cmdline.in"
-                "src/cmdline.h" )
+# The ${CMAKE_SOURCE_DIR} is there to fix problems with OpenBSD's out-of-source build black magic.
+configure_file( "src/cmdline.in" "${CMAKE_SOURCE_DIR}/src/cmdline.h" )
 
 # This allows for "make README.md" to be ran to update the README's help
 # section automatically. We don't add it to ALL because running arbitrary
@@ -85,18 +92,29 @@ set( CMAKE_CXX_FLAGS
      "${CMAKE_CXX_FLAGS} ${CMAKE_IMLIB2_CXX_FLAGS}" )
 
 # Includes
-include_directories( ${X11_INCLUDE_DIR}
-                     ${XEXT_INCLUDE_DIR}
-                     ${RT_INCLUDE_DIR} )
+if ( RT_INCLUDE_DIR )
+    include_directories( ${X11_INCLUDE_DIR}
+                         ${XEXT_INCLUDE_DIR}
+                         ${RT_INCLUDE_DIR} )
+else()
+    include_directories( ${X11_INCLUDE_DIR}
+                         ${XEXT_INCLUDE_DIR} )
+endif()
 
 # Executable
 add_executable( "${BIN_TARGET}" ${source} )
 
 # Libraries
-target_link_libraries( "${BIN_TARGET}"
-                       ${X11_LIBRARIES}
-                       "${XEXT_LIBRARY}"
-                       "${RT_LIBRARY}" )
+if ( RT_LIBRARY )
+    target_link_libraries( "${BIN_TARGET}"
+                           ${X11_LIBRARIES}
+                           "${XEXT_LIBRARY}"
+                           "${RT_LIBRARY}" )
+else()
+    target_link_libraries( "${BIN_TARGET}"
+                           ${X11_LIBRARIES}
+                           "${XEXT_LIBRARY}" )
+endif()
 
 install( TARGETS ${BIN_TARGET}
          DESTINATION  ${CMAKE_INSTALL_PREFIX} )
