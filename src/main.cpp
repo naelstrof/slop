@@ -432,8 +432,13 @@ int app( int argc, char** argv ) {
                 h = selection->m_height;
                 // Delete the rectangle, which will remove it from the screen.
                 delete selection;
+                // Make sure if no window was specifically specified, that we output the root window.
+                Window temp = window;
+                if ( temp == None ) {
+                    temp = xengine->m_root;
+                }
                 // Print the selection :)
-                printSelection( format, false, x, y, w, h, window );
+                printSelection( format, false, x, y, w, h, temp );
                 break;
             }
         }
