@@ -1,12 +1,14 @@
 cmake_minimum_required( VERSION 2.8 )
 
 project( "slop" )
-set( slop_VERSION_MAJOR 3 )
+set( slop_VERSION_MAJOR 4 )
 set( slop_VERSION_MINOR 1 )
 set( slop_VERSION_PATCH 15 )
 
 set( BIN_TARGET     "${PROJECT_NAME}" )
-set( CMAKE_INSTALL_PREFIX "/usr/bin" )
+if( NOT CMAKE_INSTALL_PREFIX )
+   set( CMAKE_INSTALL_PREFIX "/usr" )
+endif()
 
 if( NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE )
    set( CMAKE_BUILD_TYPE RelWithDebInfo )
@@ -117,4 +119,4 @@ else()
 endif()
 
 install( TARGETS ${BIN_TARGET}
-         DESTINATION  ${CMAKE_INSTALL_PREFIX} )
+         DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )

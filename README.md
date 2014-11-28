@@ -84,7 +84,7 @@ Make sure to check out and install [maim](https://github.com/naelstrof/maim) too
 help
 ----
 ```text
-slop v3.1.15
+slop v4.1.15
 
 Copyright (C) 2014 Dalton Nell, Slop Contributors
 (https://github.com/naelstrof/slop/graphs/contributors)
@@ -133,7 +133,14 @@ Options
                                   (default=off)
   -f, --format=STRING           Set the output format string. Format specifiers
                                   are %x, %y, %w, %h, %i, %g, and %c.
-                                  (default=`X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n')
+                                  (default=`X=%x
+Y=%y
+W=%w
+H=%h
+G=%g
+ID=%i
+Cancel=%c
+')
 
 Examples
     $ # Gray, thick, transparent border for maximum visiblity.
