@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 2.8 )
 
 project( "slop" )
-set( slop_VERSION_MAJOR 3 )
+set( slop_VERSION_MAJOR 4 )
 set( slop_VERSION_MINOR 1 )
 set( slop_VERSION_PATCH 15 )
 
