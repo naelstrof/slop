@@ -19,7 +19,7 @@ slop (Select Operation) is an application that querys for a selection from the u
 slop can be used to create a video recording script in only two lines of code.
 ```bash
 #!/bin/bash
-eval `slop`
+eval $(slop)
 ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
 ```
 slop lets you select a region or window and ffmpeg will record it in the format of your choice!
@@ -28,7 +28,7 @@ Combined with keybinds and a server on your filesystem you can make a really nea
 You can also take images using imagemagick like so:
 ```bash
 #!/bin/bash
-eval `slop`
+eval $(slop)
 import -window root -crop $G ~/myimage.png
 ```
 If you don't like ImageMagick's import: Check out [maim](https://github.com/naelstrof/maim) for a better screenshot utility.
@@ -64,6 +64,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 
 * [Arch Linux: community/slop](https://www.archlinux.org/packages/community/x86_64/slop/)
 * [Void Linux: slop](https://github.com/voidlinux/void-packages/blob/24ac22af44018e2598047e5ef7fd3522efa79db5/srcpkgs/slop/template)
+* [FreeBSD: x11/slop](http://www.freshports.org/x11/slop/)
 * [OpenBSD: graphics/slop](http://openports.se/graphics/slop)
 * [CRUX: 6c37/slop](https://github.com/6c37/crux-ports/tree/master/slop)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
