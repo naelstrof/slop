@@ -22,9 +22,31 @@
 #include <cstdio>
 #include <sstream>
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 #include "x.hpp"
 #include "rectangle.hpp"
 #include "cmdline.h"
+
+// Work around lack of clock_gettime in OSX
+// https://gist.github.com/jbenet/1087739
+void current_utc_time(struct timespec *ts) {
+    #ifdef __MACH__
+        // OS X does not have clock_gettime, use clock_get_time
+        clock_serv_t cclock;
+        mach_timespec_t mts;
+        host_get_clock_service( mach_host_self(), CALENDAR_CLOCK, &cclock );
+        clock_get_time( cclock, &mts );
+        mach_port_deallocate( mach_task_self(), cclock );
+        ts->tv_sec = mts.tv_sec;
+        ts->tv_nsec = mts.tv_nsec;
+    #else
+        clock_gettime( CLOCK_REALTIME, ts );
+    #endif
+}
 
 int printSelection( std::string format, bool cancelled, int x, int y, int w, int h, int window ) {
     size_t pos = 0;
@@ -223,7 +245,7 @@ int app( int argc, char** argv ) {
     bool highlight = options.highlight_flag;
     bool keyboard = !options.nokeyboard_flag;
     bool decorations = !options.nodecorations_flag;
-    timespec start, time;
+    struct timespec start, time;
     int xoffset = 0;
     int yoffset = 0;
     int cx = 0;
@@ -266,9 +288,9 @@ int app( int argc, char** argv ) {
             fprintf( stderr, "Warning: Failed to grab the keyboard. This is non-fatal, keyboard presses might fall through to other applications.\n" );
         }
     }
-    clock_gettime( CLOCK_REALTIME, &start );
+    current_utc_time( &start );
     while ( running ) {
-        clock_gettime( CLOCK_REALTIME, &time );
+        current_utc_time( &time );
         // "ticking" the xengine makes it process all queued events.
         xengine->tick();
         // If the user presses any key on the keyboard, exit the application.
