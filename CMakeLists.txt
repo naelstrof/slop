@@ -3,7 +3,7 @@ cmake_minimum_required( VERSION 2.8 )
 project( "slop" )
 set( slop_VERSION_MAJOR 4 )
 set( slop_VERSION_MINOR 1 )
-set( slop_VERSION_PATCH 15 )
+set( slop_VERSION_PATCH 16 )
 
 set( BIN_TARGET     "${PROJECT_NAME}" )
 if( NOT CMAKE_INSTALL_PREFIX )

@@ -176,7 +176,10 @@ void slop::XEngine::selectAllInputs( Window win, long event_mask) {
 }
 
 // Grabs the cursor, be wary that setCursor changes the mouse masks.
-int slop::XEngine::grabCursor( slop::CursorType type ) {
+// waittime is how long grabCursor can repeatedly try to grab the cursor, if it fails to grab.
+// This is because tiling window managers like i3 grab the mouse while holding down certain keys,
+// while these certain keys also launch slop.
+int slop::XEngine::grabCursor( slop::CursorType type, double waittime ) {
     if ( !m_good ) {
         return EXIT_FAILURE;
     }
@@ -184,8 +187,33 @@ int slop::XEngine::grabCursor( slop::CursorType type ) {
     int err = XGrabPointer( m_display, m_root, True,
                             PointerMotionMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask,
                             GrabModeAsync, GrabModeAsync, None, xfontcursor, CurrentTime );
+    double accumulationtime = 0;
+    int timestep = 10000; // in microseconds
+    while ( err != GrabSuccess && accumulationtime < waittime ) {
+        err = XGrabPointer( m_display, m_root, True,
+                            PointerMotionMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask,
+                            GrabModeAsync, GrabModeAsync, None, xfontcursor, CurrentTime );
+        usleep( timestep );
+        accumulationtime += double( timestep/1000000.f );
+    }
     if ( err != GrabSuccess ) {
         fprintf( stderr, "Error: Failed to grab X cursor.\n" );
+        switch( err ) {
+            case 1:
+                fprintf( stderr, "       The cursor is already grabbed by another application.\n" );
+                break;
+            case 2:
+                fprintf( stderr, "       The cursor grab was initiated at an invalid time (in the past?) .\n" );
+                break;
+            case 3:
+                fprintf( stderr, "       The cursor is not viewable or outside of the bounds of the root window.\n" );
+                break;
+            case 4:
+                fprintf( stderr, "       The grab is frozen already by an active grab by another application.\n" );
+                break;
+            default:
+                break;
+        }
         fprintf( stderr, "       This can be caused by launching slop weirdly.\n" );
         return EXIT_FAILURE;
     }

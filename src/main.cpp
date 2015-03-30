@@ -277,7 +277,7 @@ int app( int argc, char** argv ) {
         fprintf( stderr, "  Try updating X and making sure you have XExtensions installed. (/usr/lib/libXext.so, /usr/include/X11/extensions/shape.h)\n" );
         return EXIT_FAILURE;
     }
-    err = xengine->grabCursor( slop::Cross );
+    err = xengine->grabCursor( slop::Cross, gracetime );
     if ( err != EXIT_SUCCESS ) {
         printSelection( format, true, 0, 0, 0, 0, None );
         return EXIT_FAILURE;

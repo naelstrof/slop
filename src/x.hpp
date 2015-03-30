@@ -70,7 +70,7 @@ public:
                         ~XEngine();
     int                 init( std::string display );
     void                tick();
-    int                 grabCursor( slop::CursorType type );
+    int                 grabCursor( slop::CursorType type, double waittime );
     int                 grabKeyboard();
     bool                anyKeyPressed();
     bool                keyPressed( KeySym key );
