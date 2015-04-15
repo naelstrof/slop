@@ -39,15 +39,9 @@ https://gist.github.com/naelstrof/6530959
 For those of you who don't want eval to be an integral part of slop (Could be dangerous if I were evil!): You can change the output format and parse it manually like so:
 ```bash
 #!/bin/bash
-slopoutput=$(slop -f "%x %y %w %h %g $i")
-X=$(echo $slopoutput | awk '{print $1}')
-Y=$(echo $slopoutput | awk '{print $2}')
-W=$(echo $slopoutput | awk '{print $3}')
-H=$(echo $slopoutput | awk '{print $4}')
-G=$(echo $slopoutput | awk '{print $5}')
-ID=$(echo $slopoutput | awk '{print $6}')
-maim -g $G -i $ID
-ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
+read -r X Y W H G ID < <(slop -f "%x %y %w %h %g %i")
+maim -g "$G" -i "$ID"
+ffmpeg -f x11grab -s "$W"x"$H" -i ":0.0+$X,$Y" -f alsa -i pulse ~/myfile.webm
 ```
 
 ## Lets see some action
