@@ -90,6 +90,7 @@ find_package( XExt      REQUIRED )
 find_package( OpenGL    REQUIRED )
 find_package( GLX       REQUIRED )
 find_package( XRender   REQUIRED )
+find_package( XRandr    REQUIRED )
 # This library is needed only for Ubuntu it seems, some platforms don't even
 # ship with it. I couldn't find a way to do a test compile to check if librt
 # was needed, so instead I just didn't mark it as REQUIRED.
@@ -102,6 +103,7 @@ set( CMAKE_CXX_FLAGS
 if ( RT_INCLUDE_DIR )
     include_directories( ${X11_INCLUDE_DIR}
                          ${XEXT_INCLUDE_DIR}
+                         ${XRANDR_INCLUDE_DIR}
                          ${OPENGL_INCLUDE_DIR}
                          ${GLX_INCLUDE_DIR}
                          ${XRENDER_INCLUDE_DIRS}
@@ -124,6 +126,7 @@ if ( RT_LIBRARY )
                            ${GLX_LIBRARIES}
                            ${XRENDER_LIBRARIES}
                            "${XEXT_LIBRARY}"
+                           "${XRANDR_LIBRARY}"
                            "${RT_LIBRARY}" )
 else()
     target_link_libraries( "${BIN_TARGET}"

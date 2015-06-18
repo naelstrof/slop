@@ -47,6 +47,13 @@ public:
                         GLSelectRectangle( int sx, int sy, int ex, int ey, int border, bool highlight, float r, float g, float b, float a );
                         ~GLSelectRectangle();
     void                setGeo( int x, int y, int w, int h );
+    void                update( double dt );
+    void                generateMagnifyingGlass();
+    void                setMagnifySettings( bool on, float magstrength, unsigned int pixels );
+    void                pushIn( int* x, int* y, int w, int h, int rx, int ry, int rw, int rh );
+    void                pushOut( int* x, int* y, int w, int h, int rx, int ry, int rw, int rh );
+    void                findOptimalGlassPosition();
+    void                constrainWithinMonitor( int* x, int* y, int* w, int* h );
     float               m_r;
     float               m_g;
     float               m_b;
@@ -57,6 +64,20 @@ public:
     GLXContext          m_renderContext;
     GLXWindow           m_glxWindow;
     Colormap            m_cmap;
+    unsigned int        m_texid;
+    int                 m_offsetx;
+    int                 m_offsety;
+    int                 m_offsetw;
+    int                 m_offseth;
+    unsigned int        m_glassPixels;
+    float               m_glassSize;
+    int                 m_glassBorder;
+    float               m_realglassx;
+    float               m_realglassy;
+    int                 m_glassx;
+    int                 m_glassy;
+    bool                m_glassEnabled;
+    std::vector<XRRCrtcInfo*> m_monitors;
 };
 
 }

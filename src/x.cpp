@@ -104,10 +104,23 @@ int slop::XEngine::init( std::string display ) {
     //m_root      = RootWindow     ( m_display, XScreenNumberOfScreen( m_screen ) );
     m_root      = DefaultRootWindow( m_display );
 
+    m_res = XRRGetScreenResourcesCurrent( m_display, m_root);
+
     m_good = true;
     XSetErrorHandler( slop::XEngineErrorHandler );
     selectAllInputs( m_root, EnterWindowMask );
     return EXIT_SUCCESS;
+}
+
+std::vector<XRRCrtcInfo*> slop::XEngine::getCRTCS() {
+    std::vector<XRRCrtcInfo*> monitors;
+    if ( !m_res ) {
+        return monitors;
+    }
+    for ( int i=0;i<m_res->ncrtc;i++ ) {
+        monitors.push_back( XRRGetCrtcInfo( m_display, m_res, m_res->crtcs[ i ] ) );
+    }
+    return monitors;
 }
 
 bool slop::XEngine::keyPressed( KeySym key ) {
@@ -183,7 +196,7 @@ int slop::XEngine::grabCursor( slop::CursorType type, double waittime ) {
     if ( !m_good ) {
         return EXIT_FAILURE;
     }
-    int xfontcursor = getCursor( type );
+    int xfontcursor = makeCursor( type );
     int err = XGrabPointer( m_display, m_root, True,
                             PointerMotionMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask,
                             GrabModeAsync, GrabModeAsync, None, xfontcursor, CurrentTime );
@@ -290,7 +303,7 @@ void slop::XEngine::tick() {
 }
 
 // This converts an enum into a preallocated cursor, the cursor will automatically deallocate itself on ~XEngine
-Cursor slop::XEngine::getCursor( slop::CursorType type ) {
+Cursor slop::XEngine::makeCursor( slop::CursorType type ) {
     int xfontcursor;
     switch ( type ) {
         default:
@@ -316,12 +329,21 @@ Cursor slop::XEngine::getCursor( slop::CursorType type ) {
     return newcursor;
 }
 
+slop::CursorType slop::XEngine::getCursor() {
+    if ( m_currentCursor ) {
+        return m_currentCursor;
+    } else {
+        return slop::Left;
+    }
+}
+
 // Swaps out the current cursor, bewary that XChangeActivePointerGrab also resets masks, so if you change the mouse masks on grab you need to change them here too.
 void slop::XEngine::setCursor( slop::CursorType type ) {
     if ( !m_good ) {
         return;
     }
-    Cursor xfontcursor = getCursor( type );
+    m_currentCursor = type;
+    Cursor xfontcursor = makeCursor( type );
     XChangeActivePointerGrab( m_display,
                               PointerMotionMask | ButtonPressMask | ButtonReleaseMask,
                               xfontcursor, CurrentTime );

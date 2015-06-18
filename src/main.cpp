@@ -266,6 +266,13 @@ int app( int argc, char** argv ) {
         pressedTime[ i ] = 0;
     }
     std::string format = options.format_arg;
+    bool magenabled = options.magnify_flag;
+    float magstrength = options.magstrength_arg;
+    if ( options.magpixels_arg < 0 ) {
+        fprintf( stderr, "Error: --magpixels < 0, it's an unsigned integer you twat. Stop trying to underflow me!\n" );
+        return EXIT_FAILURE;
+    }
+    unsigned int magpixels = (unsigned int)options.magpixels_arg;
     cmdline_parser_free( &options );
 
     // First we set up the x interface and grab the mouse,
@@ -292,13 +299,17 @@ int app( int argc, char** argv ) {
         }
     }
     current_utc_time( &start );
+    double deltatime = 0;
+    double curtime = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
     while ( running ) {
         current_utc_time( &time );
         // "ticking" the xengine makes it process all queued events.
         xengine->tick();
         // If the user presses any key on the keyboard, exit the application.
         // Make sure at least gracetime has passed before allowing canceling
-        double curtime = double( time.tv_sec*1000000000L + time.tv_nsec )/1000000000.f;
+        double newtime = double( time.tv_sec*1000000000L + time.tv_nsec )/1000000000.f;
+        deltatime = newtime-curtime;
+        curtime = newtime;
         double starttime = double( start.tv_sec*1000000000L + start.tv_nsec )/1000000000.f;
         if ( curtime - starttime > gracetime ) {
             if ( keyRepeat( XK_Up, curtime, 0.5, &pressedTime[ 0 ], &pressedMemory[ 0 ] ) ) {
@@ -356,6 +367,8 @@ int app( int argc, char** argv ) {
                                                                      borderSize,
                                                                      highlight,
                                                                      r, g, b, a );
+                            // Haha why is this so hard to cast?
+                            ((slop::GLSelectRectangle*)(selection))->setMagnifySettings( magenabled, magstrength, magpixels );
                         } else {
                             selection = new slop::XSelectRectangle( t.m_x, t.m_y,
                                                                     t.m_x + t.m_width,
@@ -370,6 +383,9 @@ int app( int argc, char** argv ) {
                     //window = xengine->m_hoverWindow;
                     // Since WindowRectangle can select different windows depending on click location...
                     window = t.getWindow();
+                }
+                if ( selection ) {
+                    selection->update( deltatime );
                 }
                 // If the user clicked we move on to the next state.
                 if ( xengine->mouseDown( 1 ) ) {
@@ -408,6 +424,8 @@ int app( int argc, char** argv ) {
                                                                  borderSize,
                                                                  highlight,
                                                                  r, g, b, a );
+                        // Haha why is this so hard to cast?
+                        ((slop::GLSelectRectangle*)(selection))->setMagnifySettings( magenabled, magstrength, magpixels );
                     } else {
                         selection = new slop::XSelectRectangle( sx, sy,
                                                                 ex, ey,
@@ -429,6 +447,7 @@ int app( int argc, char** argv ) {
                 if ( ( std::abs( w ) < tolerance && std::abs( h ) < tolerance ) ) {
                     // We make sure the selection rectangle stays on the window we had selected
                     selection->setGeo( xmem, ymem, xmem + wmem, ymem + hmem );
+                    selection->update( deltatime );
                     xengine->setCursor( slop::Left );
                     // Make sure
                     window = windowmemory;
@@ -455,7 +474,8 @@ int app( int argc, char** argv ) {
                 int sx, sy, ex, ey;
                 constrain( cx, cy, xengine->m_mousex, xengine->m_mousey, padding, minimumsize, maximumsize, &sx, &sy, &ex, &ey );
                 // Set the selection rectangle's dimensions to mouse movement.
-                selection->setGeo( sx + xoffset, sy + yoffset, ex, ey );
+                selection->setGeo( sx + xoffset, sy + yoffset, ex-1, ey-1 );
+                selection->update( deltatime );
                 break;
             }
             case 3: {

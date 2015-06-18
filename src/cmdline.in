@@ -71,6 +71,14 @@ struct gengetopt_args_info
   const char *highlight_help; /**< @brief Instead of outlining selections, slop highlights it. This is only useful when --color is set to a transparent color. help description.  */
   int opengl_flag;	/**< @brief Enable hardware acceleration. Only works with modern systems that are also running a compositor. (default=off).  */
   const char *opengl_help; /**< @brief Enable hardware acceleration. Only works with modern systems that are also running a compositor. help description.  */
+  int magnify_flag;	/**< @brief Display a magnifying glass when --opengl is also enabled. (default=off).  */
+  const char *magnify_help; /**< @brief Display a magnifying glass when --opengl is also enabled. help description.  */
+  float magstrength_arg;	/**< @brief Sets how many times the magnification window size is multiplied. (default='4').  */
+  char * magstrength_orig;	/**< @brief Sets how many times the magnification window size is multiplied. original value given at command line.  */
+  const char *magstrength_help; /**< @brief Sets how many times the magnification window size is multiplied. help description.  */
+  int magpixels_arg;	/**< @brief Sets how many pixels are displayed in the magnification. The less pixels the bigger the magnification. (default='64').  */
+  char * magpixels_orig;	/**< @brief Sets how many pixels are displayed in the magnification. The less pixels the bigger the magnification. original value given at command line.  */
+  const char *magpixels_help; /**< @brief Sets how many pixels are displayed in the magnification. The less pixels the bigger the magnification. help description.  */
   char * format_arg;	/**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. (default='REPLACEME').  */
   char * format_orig;	/**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. original value given at command line.  */
   const char *format_help; /**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. help description.  */
@@ -89,6 +97,9 @@ struct gengetopt_args_info
   unsigned int max_given ;	/**< @brief Whether max was given.  */
   unsigned int highlight_given ;	/**< @brief Whether highlight was given.  */
   unsigned int opengl_given ;	/**< @brief Whether opengl was given.  */
+  unsigned int magnify_given ;	/**< @brief Whether magnify was given.  */
+  unsigned int magstrength_given ;	/**< @brief Whether magstrength was given.  */
+  unsigned int magpixels_given ;	/**< @brief Whether magpixels was given.  */
   unsigned int format_given ;	/**< @brief Whether format was given.  */
 
 } ;

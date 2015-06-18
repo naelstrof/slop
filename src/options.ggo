@@ -64,6 +64,20 @@ option "opengl" - "Enable hardware acceleration. Only works with modern systems 
     flag
     off
 
+option "magnify" - "Display a magnifying glass when --opengl is also enabled."
+    flag
+    off
+
+option "magstrength" - "Sets how many times the magnification window size is multiplied."
+    float
+    default="4"
+    optional
+
+option "magpixels" - "Sets how many pixels are displayed in the magnification. The less pixels the bigger the magnification."
+    int
+    default="64"
+    optional
+
 option "format" f "Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c."
     string
     default="REPLACEME"

@@ -49,6 +49,9 @@ const char *gengetopt_args_info_help[] = {
   "      --max=INT                 Set the maximum output of width or height\n                                  values. Setting min and max to the same value\n                                  disables drag selections.  (default=`0')",
   "  -l, --highlight               Instead of outlining selections, slop\n                                  highlights it. This is only useful when\n                                  --color is set to a transparent color.\n                                  (default=off)",
   "      --opengl                  Enable hardware acceleration. Only works with\n                                  modern systems that are also running a\n                                  compositor.  (default=off)",
+  "      --magnify                 Display a magnifying glass when --opengl is\n                                  also enabled.  (default=off)",
+  "      --magstrength=FLOAT       Sets how many times the magnification window\n                                  size is multiplied.  (default=`4')",
+  "      --magpixels=INT           Sets how many pixels are displayed in the\n                                  magnification. The less pixels the bigger the\n                                  magnification.  (default=`64')",
   "  -f, --format=STRING           Set the output format string. Format specifiers\n                                  are %x, %y, %w, %h, %i, %g, and %c.\n                                  (default=`X=%x\\nY=%y\\nW=%w\\nH=%h\\nG=%g\\nID=%i\\nCancel=%c\\n')",
   "\nExamples\n    $ # Gray, thick, transparent border for maximum visiblity.\n    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n\n    $ # Remove window decorations.\n    $ slop --nodecorations\n\n    $ # Disable window selections. Useful for selecting individual pixels.\n    $ slop -t 0\n\n    $ # Classic Windows XP selection.\n    $ slop -l -c 0.3,0.4,0.6,0.4\n\n    $ # Change output format to use safer parsing\n    $ slopoutput=$(slop -f \"%x %y %w %h\")\n    $ X=$(echo $slopoutput | awk '{print $1}')\n    $ Y=$(echo $slopoutput | awk '{print $2}')\n    $ W=$(echo $slopoutput | awk '{print $3}')\n    $ H=$(echo $slopoutput | awk '{print $4}')\n\nTips\n    * You can use the arrow keys to move the starting point of a\ndrag-selection, just in case you missed it by a few pixels.\n    * If you don't like a selection: you can cancel it by right-clicking\nregardless of which options are enabled or disabled for slop.\n    * If slop doesn't seem to select a window accurately, the problem could be\nbecause of decorations getting in the way. Try enabling the --nodecorations\nflag.\n",
     0
@@ -58,6 +61,7 @@ typedef enum {ARG_NO
   , ARG_FLAG
   , ARG_STRING
   , ARG_INT
+  , ARG_FLOAT
 } cmdline_parser_arg_type;
 
 static
@@ -90,6 +94,9 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->max_given = 0 ;
   args_info->highlight_given = 0 ;
   args_info->opengl_given = 0 ;
+  args_info->magnify_given = 0 ;
+  args_info->magstrength_given = 0 ;
+  args_info->magpixels_given = 0 ;
   args_info->format_given = 0 ;
 }
 
@@ -117,6 +124,11 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->max_orig = NULL;
   args_info->highlight_flag = 0;
   args_info->opengl_flag = 0;
+  args_info->magnify_flag = 0;
+  args_info->magstrength_arg = 4;
+  args_info->magstrength_orig = NULL;
+  args_info->magpixels_arg = 64;
+  args_info->magpixels_orig = NULL;
   args_info->format_arg = gengetopt_strdup ("X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n");
   args_info->format_orig = NULL;
   
@@ -141,7 +153,10 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->max_help = gengetopt_args_info_help[12] ;
   args_info->highlight_help = gengetopt_args_info_help[13] ;
   args_info->opengl_help = gengetopt_args_info_help[14] ;
-  args_info->format_help = gengetopt_args_info_help[15] ;
+  args_info->magnify_help = gengetopt_args_info_help[15] ;
+  args_info->magstrength_help = gengetopt_args_info_help[16] ;
+  args_info->magpixels_help = gengetopt_args_info_help[17] ;
+  args_info->format_help = gengetopt_args_info_help[18] ;
   
 }
 
@@ -236,6 +251,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->color_orig));
   free_string_field (&(args_info->min_orig));
   free_string_field (&(args_info->max_orig));
+  free_string_field (&(args_info->magstrength_orig));
+  free_string_field (&(args_info->magpixels_orig));
   free_string_field (&(args_info->format_arg));
   free_string_field (&(args_info->format_orig));
   
@@ -296,6 +313,12 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "highlight", 0, 0 );
   if (args_info->opengl_given)
     write_into_file(outfile, "opengl", 0, 0 );
+  if (args_info->magnify_given)
+    write_into_file(outfile, "magnify", 0, 0 );
+  if (args_info->magstrength_given)
+    write_into_file(outfile, "magstrength", args_info->magstrength_orig, 0);
+  if (args_info->magpixels_given)
+    write_into_file(outfile, "magpixels", args_info->magpixels_orig, 0);
   if (args_info->format_given)
     write_into_file(outfile, "format", args_info->format_orig, 0);
   
@@ -470,6 +493,9 @@ int update_arg(void *field, char **orig_field,
   case ARG_INT:
     if (val) *((int *)field) = strtol (val, &stop_char, 0);
     break;
+  case ARG_FLOAT:
+    if (val) *((float *)field) = (float)strtod (val, &stop_char);
+    break;
   case ARG_STRING:
     if (val) {
       string_field = (char **)field;
@@ -485,6 +511,7 @@ int update_arg(void *field, char **orig_field,
   /* check numeric conversion */
   switch(arg_type) {
   case ARG_INT:
+  case ARG_FLOAT:
     if (val && !(stop_char && *stop_char == '\0')) {
       fprintf(stderr, "%s: invalid numeric value: %s\n", package_name, val);
       return 1; /* failure */
@@ -566,6 +593,9 @@ cmdline_parser_internal (
         { "max",	1, NULL, 0 },
         { "highlight",	0, NULL, 'l' },
         { "opengl",	0, NULL, 0 },
+        { "magnify",	0, NULL, 0 },
+        { "magstrength",	1, NULL, 0 },
+        { "magpixels",	1, NULL, 0 },
         { "format",	1, NULL, 'f' },
         { 0,  0, 0, 0 }
       };
@@ -742,6 +772,46 @@ cmdline_parser_internal (
             if (update_arg((void *)&(args_info->opengl_flag), 0, &(args_info->opengl_given),
                 &(local_args_info.opengl_given), optarg, 0, 0, ARG_FLAG,
                 check_ambiguity, override, 1, 0, "opengl", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Display a magnifying glass when --opengl is also enabled..  */
+          else if (strcmp (long_options[option_index].name, "magnify") == 0)
+          {
+          
+          
+            if (update_arg((void *)&(args_info->magnify_flag), 0, &(args_info->magnify_given),
+                &(local_args_info.magnify_given), optarg, 0, 0, ARG_FLAG,
+                check_ambiguity, override, 1, 0, "magnify", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Sets how many times the magnification window size is multiplied..  */
+          else if (strcmp (long_options[option_index].name, "magstrength") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->magstrength_arg), 
+                 &(args_info->magstrength_orig), &(args_info->magstrength_given),
+                &(local_args_info.magstrength_given), optarg, 0, "4", ARG_FLOAT,
+                check_ambiguity, override, 0, 0,
+                "magstrength", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Sets how many pixels are displayed in the magnification. The less pixels the bigger the magnification..  */
+          else if (strcmp (long_options[option_index].name, "magpixels") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->magpixels_arg), 
+                 &(args_info->magpixels_orig), &(args_info->magpixels_given),
+                &(local_args_info.magpixels_given), optarg, 0, "64", ARG_INT,
+                check_ambiguity, override, 0, 0,
+                "magpixels", '-',
                 additional_error))
               goto failure;
           

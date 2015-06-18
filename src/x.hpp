@@ -26,6 +26,7 @@
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
 #include <X11/extensions/shape.h>
+#include <X11/extensions/Xrandr.h>
 
 #include <stdlib.h>
 #include <cstring>
@@ -77,9 +78,12 @@ public:
     int                 releaseCursor();
     int                 releaseKeyboard();
     void                setCursor( slop::CursorType type );
+    slop::CursorType    getCursor();
     void                drawRect( int x, int y, unsigned int w, unsigned int h );
     unsigned int        getWidth();
     unsigned int        getHeight();
+    std::vector<XRRCrtcInfo*>        getCRTCS();
+    void                freeCRTCS( std::vector<XRRCrtcInfo*> monitors );
     int                 m_mousex;
     int                 m_mousey;
     Display*            m_display;
@@ -91,10 +95,12 @@ public:
     std::vector<bool>   m_mouse;
     bool                mouseDown( unsigned int button );
     bool                m_keypressed;
+    XRRScreenResources* m_res;
 private:
+    slop::CursorType    m_currentCursor;
     bool                m_good;
     std::vector<Cursor> m_cursors;
-    Cursor              getCursor( slop::CursorType type );
+    Cursor              makeCursor( slop::CursorType type );
     void                selectAllInputs( Window win, long event_mask);
 };
 

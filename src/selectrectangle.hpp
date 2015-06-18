@@ -42,6 +42,7 @@ class SelectRectangle {
 public:
     virtual ~SelectRectangle();
     virtual void    setGeo( int x, int y, int w, int h );
+    virtual void    update( double dt );
     Window          m_window;
     int             m_x;
     int             m_y;

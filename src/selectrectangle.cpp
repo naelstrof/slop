@@ -28,6 +28,9 @@ bool slop::isSelectRectangleSupported() {
 slop::SelectRectangle::~SelectRectangle() {
 }
 
+void slop::SelectRectangle::update( double dt ) {
+}
+
 void slop::SelectRectangle::setGeo( int sx, int sy, int ex, int ey ) {
     fprintf( stderr, "Tried to use a class function that's meant to be overridden!\n");
 }
