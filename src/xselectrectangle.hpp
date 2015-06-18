@@ -1,4 +1,4 @@
-/* rectangle.hpp: Handles creating rectangles on the screen.
+/* xselectrectangle.hpp: Handles creating rectangles on the screen in pure X11.
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -18,10 +18,11 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IS_RECTANGLE_H_
-#define IS_RECTANGLE_H_
+#ifndef IS_X_SELECT_RECTANGLE_H_
+#define IS_X_SELECT_RECTANGLE_H_
 
 #include "x.hpp"
+#include "selectrectangle.hpp"
 
 #include <unistd.h>
 
@@ -37,10 +38,10 @@
 
 namespace slop {
 
-class Rectangle {
+class XSelectRectangle: public SelectRectangle {
 public:
-            Rectangle( int sx, int sy, int ex, int ey, int border, bool highlight, float r, float g, float b, float a );
-            ~Rectangle();
+            XSelectRectangle( int sx, int sy, int ex, int ey, int border, bool highlight, float r, float g, float b, float a );
+            ~XSelectRectangle();
     void    setPos( int x, int y );
     void    setDim( int w, int h );
     void    setGeo( int x, int y, int w, int h );
@@ -57,8 +58,6 @@ private:
     void    constrain( int w, int h );
 };
 
-bool isRectangleSupported();
-
 }
 
-#endif // IS_RECTANGLE_H_
+#endif // IS_X_SELECT_RECTANGLE_H_

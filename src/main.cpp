@@ -28,7 +28,9 @@
 #endif
 
 #include "x.hpp"
-#include "rectangle.hpp"
+#include "selectrectangle.hpp"
+#include "glselectrectangle.hpp"
+#include "xselectrectangle.hpp"
 #include "cmdline.h"
 
 // Work around lack of clock_gettime in OSX
@@ -210,7 +212,8 @@ int app( int argc, char** argv ) {
     }
     int state = 0;
     bool running = true;
-    slop::Rectangle* selection = NULL;
+    bool opengl = options.opengl_flag;
+    slop::SelectRectangle* selection = NULL;
     Window window = None;
     Window windowmemory = None;
     std::string xdisplay;
@@ -272,7 +275,7 @@ int app( int argc, char** argv ) {
         printSelection( format, true, 0, 0, 0, 0, None );
         return EXIT_FAILURE;
     }
-    if ( !slop::isRectangleSupported() ) {
+    if ( !slop::isSelectRectangleSupported() ) {
         fprintf( stderr, "Error: Your X server doesn't support the XShape extension. There's nothing slop can do about this!\n" );
         fprintf( stderr, "  Try updating X and making sure you have XExtensions installed. (/usr/lib/libXext.so, /usr/include/X11/extensions/shape.h)\n" );
         return EXIT_FAILURE;
@@ -346,13 +349,21 @@ int app( int argc, char** argv ) {
                     t.applyMinMaxSize( minimumsize, maximumsize );
                     // Make sure we only apply offsets to windows that we've forcibly removed decorations on.
                     if ( !selection ) {
-                        selection = new slop::Rectangle( t.m_x,
-                                                         t.m_y,
-                                                         t.m_x + t.m_width,
-                                                         t.m_y + t.m_height,
-                                                         borderSize,
-                                                         highlight,
-                                                         r, g, b, a );
+                        if ( opengl ) {
+                            selection = new slop::GLSelectRectangle( t.m_x, t.m_y,
+                                                                     t.m_x + t.m_width,
+                                                                     t.m_y + t.m_height,
+                                                                     borderSize,
+                                                                     highlight,
+                                                                     r, g, b, a );
+                        } else {
+                            selection = new slop::XSelectRectangle( t.m_x, t.m_y,
+                                                                    t.m_x + t.m_width,
+                                                                    t.m_y + t.m_height,
+                                                                    borderSize,
+                                                                    highlight,
+                                                                    r, g, b, a );
+                        }
                     } else {
                         selection->setGeo( t.m_x, t.m_y, t.m_x + t.m_width, t.m_y + t.m_height );
                     }
@@ -391,13 +402,19 @@ int app( int argc, char** argv ) {
                 if ( !selection ) {
                     int sx, sy, ex, ey;
                     constrain( cx, cy, xengine->m_mousex, xengine->m_mousey, padding, minimumsize, maximumsize, &sx, &sy, &ex, &ey );
-                    selection = new slop::Rectangle( sx,
-                                                     sy,
-                                                     ex,
-                                                     ey,
-                                                     borderSize,
-                                                     highlight,
-                                                     r, g, b, a );
+                    if ( opengl ) {
+                        selection = new slop::GLSelectRectangle( sx, sy,
+                                                                 ex, ey,
+                                                                 borderSize,
+                                                                 highlight,
+                                                                 r, g, b, a );
+                    } else {
+                        selection = new slop::XSelectRectangle( sx, sy,
+                                                                ex, ey,
+                                                                borderSize,
+                                                                highlight,
+                                                                r, g, b, a );
+                    }
                 }
                 windowmemory = window;
                 // If the user has let go of the mouse button, we'll just

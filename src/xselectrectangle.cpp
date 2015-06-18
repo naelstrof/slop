@@ -1,4 +1,4 @@
-/* rectangle.cpp: Handles creating rectangles on the screen.
+/* xselectrectangle.cpp: Handles creating rectangles on the screen in pure X11.
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "rectangle.hpp"
+#include "xselectrectangle.hpp"
 
 static Bool isDestroyNotify( Display* dpy, XEvent* ev, XPointer win ) {
     return ev->type == DestroyNotify && ev->xdestroywindow.window == *((Window*)win);
 }
 
-slop::Rectangle::~Rectangle() {
+slop::XSelectRectangle::~XSelectRectangle() {
     if ( m_window == None ) {
         return;
     }
@@ -42,7 +42,7 @@ slop::Rectangle::~Rectangle() {
     usleep( 10000 );
 }
 
-slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, bool highlight, float r, float g, float b, float a ) {
+slop::XSelectRectangle::XSelectRectangle( int sx, int sy, int ex, int ey, int border, bool highlight, float r, float g, float b, float a ) {
     m_x = std::min( sx, ex );
     m_y = std::min( sy, ey );
     m_width = std::max( sx, ex ) - m_x;
@@ -128,7 +128,7 @@ slop::Rectangle::Rectangle( int sx, int sy, int ex, int ey, int border, bool hig
     XMapWindow( xengine->m_display, m_window );
 }
 
-void slop::Rectangle::setGeo( int sx, int sy, int ex, int ey ) {
+void slop::XSelectRectangle::setGeo( int sx, int sy, int ex, int ey ) {
     int x = std::min( sx, ex );
     int y = std::min( sy, ey );
     int w = std::max( sx, ex ) - x;
@@ -172,7 +172,7 @@ void slop::Rectangle::setGeo( int sx, int sy, int ex, int ey ) {
     }
 }
 
-XColor slop::Rectangle::convertColor( float r, float g, float b ) {
+XColor slop::XSelectRectangle::convertColor( float r, float g, float b ) {
     // Convert float colors to shorts.
     short red   = short( floor( r * 65535.f ) );
     short green = short( floor( g * 65535.f ) );
@@ -186,10 +186,4 @@ XColor slop::Rectangle::convertColor( float r, float g, float b ) {
         fprintf( stderr, "Couldn't allocate color of value %f,%f,%f!\n", r, g, b );
     }
     return color;
-}
-
-bool slop::isRectangleSupported() {
-    int event_base;
-    int error_base;
-    return XShapeQueryExtension( xengine->m_display, &event_base, &error_base );
 }

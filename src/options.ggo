@@ -60,6 +60,10 @@ option "highlight" l "Instead of outlining selections, slop highlights it. This 
     flag
     off
 
+option "opengl" - "Enable hardware acceleration. Only works with modern systems that are also running a compositor."
+    flag
+    off
+
 option "format" f "Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c."
     string
     default="REPLACEME"

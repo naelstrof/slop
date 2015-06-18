@@ -87,7 +87,7 @@ Make sure to check out and install [maim](https://github.com/naelstrof/maim) too
 help
 ----
 ```text
-slop v4.1.16
+slop v4.2.16
 
 Copyright (C) 2014 Dalton Nell, Slop Contributors
 (https://github.com/naelstrof/slop/graphs/contributors)
@@ -134,6 +134,9 @@ Options
                                   highlights it. This is only useful when
                                   --color is set to a transparent color.
                                   (default=off)
+      --opengl                  Enable hardware acceleration. Only works with
+                                  modern systems that are also running a
+                                  compositor.  (default=off)
   -f, --format=STRING           Set the output format string. Format specifiers
                                   are %x, %y, %w, %h, %i, %g, and %c.
                                   (default=`X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n')

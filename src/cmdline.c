@@ -48,6 +48,7 @@ const char *gengetopt_args_info_help[] = {
   "      --min=INT                 Set the minimum output of width or height\n                                  values. This is useful to avoid outputting 0.\n                                  Setting min and max to the same value\n                                  disables drag selections.  (default=`0')",
   "      --max=INT                 Set the maximum output of width or height\n                                  values. Setting min and max to the same value\n                                  disables drag selections.  (default=`0')",
   "  -l, --highlight               Instead of outlining selections, slop\n                                  highlights it. This is only useful when\n                                  --color is set to a transparent color.\n                                  (default=off)",
+  "      --opengl                  Enable hardware acceleration. Only works with\n                                  modern systems that are also running a\n                                  compositor.  (default=off)",
   "  -f, --format=STRING           Set the output format string. Format specifiers\n                                  are %x, %y, %w, %h, %i, %g, and %c.\n                                  (default=`X=%x\\nY=%y\\nW=%w\\nH=%h\\nG=%g\\nID=%i\\nCancel=%c\\n')",
   "\nExamples\n    $ # Gray, thick, transparent border for maximum visiblity.\n    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n\n    $ # Remove window decorations.\n    $ slop --nodecorations\n\n    $ # Disable window selections. Useful for selecting individual pixels.\n    $ slop -t 0\n\n    $ # Classic Windows XP selection.\n    $ slop -l -c 0.3,0.4,0.6,0.4\n\n    $ # Change output format to use safer parsing\n    $ slopoutput=$(slop -f \"%x %y %w %h\")\n    $ X=$(echo $slopoutput | awk '{print $1}')\n    $ Y=$(echo $slopoutput | awk '{print $2}')\n    $ W=$(echo $slopoutput | awk '{print $3}')\n    $ H=$(echo $slopoutput | awk '{print $4}')\n\nTips\n    * You can use the arrow keys to move the starting point of a\ndrag-selection, just in case you missed it by a few pixels.\n    * If you don't like a selection: you can cancel it by right-clicking\nregardless of which options are enabled or disabled for slop.\n    * If slop doesn't seem to select a window accurately, the problem could be\nbecause of decorations getting in the way. Try enabling the --nodecorations\nflag.\n",
     0
@@ -88,6 +89,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->min_given = 0 ;
   args_info->max_given = 0 ;
   args_info->highlight_given = 0 ;
+  args_info->opengl_given = 0 ;
   args_info->format_given = 0 ;
 }
 
@@ -114,6 +116,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->max_arg = 0;
   args_info->max_orig = NULL;
   args_info->highlight_flag = 0;
+  args_info->opengl_flag = 0;
   args_info->format_arg = gengetopt_strdup ("X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n");
   args_info->format_orig = NULL;
   
@@ -137,7 +140,8 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->min_help = gengetopt_args_info_help[11] ;
   args_info->max_help = gengetopt_args_info_help[12] ;
   args_info->highlight_help = gengetopt_args_info_help[13] ;
-  args_info->format_help = gengetopt_args_info_help[14] ;
+  args_info->opengl_help = gengetopt_args_info_help[14] ;
+  args_info->format_help = gengetopt_args_info_help[15] ;
   
 }
 
@@ -290,6 +294,8 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "max", args_info->max_orig, 0);
   if (args_info->highlight_given)
     write_into_file(outfile, "highlight", 0, 0 );
+  if (args_info->opengl_given)
+    write_into_file(outfile, "opengl", 0, 0 );
   if (args_info->format_given)
     write_into_file(outfile, "format", args_info->format_orig, 0);
   
@@ -559,6 +565,7 @@ cmdline_parser_internal (
         { "min",	1, NULL, 0 },
         { "max",	1, NULL, 0 },
         { "highlight",	0, NULL, 'l' },
+        { "opengl",	0, NULL, 0 },
         { "format",	1, NULL, 'f' },
         { 0,  0, 0, 0 }
       };
@@ -723,6 +730,18 @@ cmdline_parser_internal (
                 &(local_args_info.max_given), optarg, 0, "0", ARG_INT,
                 check_ambiguity, override, 0, 0,
                 "max", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Enable hardware acceleration. Only works with modern systems that are also running a compositor..  */
+          else if (strcmp (long_options[option_index].name, "opengl") == 0)
+          {
+          
+          
+            if (update_arg((void *)&(args_info->opengl_flag), 0, &(args_info->opengl_given),
+                &(local_args_info.opengl_given), optarg, 0, 0, ARG_FLAG,
+                check_ambiguity, override, 1, 0, "opengl", '-',
                 additional_error))
               goto failure;
           

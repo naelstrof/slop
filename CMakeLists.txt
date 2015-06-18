@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 2.8 )
 
 project( "slop" )
 set( slop_VERSION_MAJOR 4 )
-set( slop_VERSION_MINOR 1 )
+set( slop_VERSION_MINOR 2 )
 set( slop_VERSION_PATCH 16 )
 
 set( BIN_TARGET     "${PROJECT_NAME}" )
@@ -77,7 +77,9 @@ add_custom_target( README.md "./generateReadme.sh" DEPENDS "slop" )
 # Sources
 set( source
      src/cmdline.c
-     src/rectangle.cpp
+     src/selectrectangle.cpp
+     src/glselectrectangle.cpp
+     src/xselectrectangle.cpp
      src/x.cpp
      src/main.cpp )
 
@@ -85,6 +87,9 @@ set( source
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmakemodules" )
 find_package( X11       REQUIRED )
 find_package( XExt      REQUIRED )
+find_package( OpenGL    REQUIRED )
+find_package( GLX       REQUIRED )
+find_package( XRender   REQUIRED )
 # This library is needed only for Ubuntu it seems, some platforms don't even
 # ship with it. I couldn't find a way to do a test compile to check if librt
 # was needed, so instead I just didn't mark it as REQUIRED.
@@ -97,9 +102,14 @@ set( CMAKE_CXX_FLAGS
 if ( RT_INCLUDE_DIR )
     include_directories( ${X11_INCLUDE_DIR}
                          ${XEXT_INCLUDE_DIR}
+                         ${OPENGL_INCLUDE_DIR}
+                         ${GLX_INCLUDE_DIR}
+                         ${XRENDER_INCLUDE_DIRS}
                          ${RT_INCLUDE_DIR} )
 else()
     include_directories( ${X11_INCLUDE_DIR}
+                         ${OPENGL_INCLUDE_DIR}
+                         ${GLX_INCLUDE_DIR}
                          ${XEXT_INCLUDE_DIR} )
 endif()
 
@@ -110,10 +120,15 @@ add_executable( "${BIN_TARGET}" ${source} )
 if ( RT_LIBRARY )
     target_link_libraries( "${BIN_TARGET}"
                            ${X11_LIBRARIES}
+                           ${OPENGL_LIBRARIES}
+                           ${GLX_LIBRARIES}
+                           ${XRENDER_LIBRARIES}
                            "${XEXT_LIBRARY}"
                            "${RT_LIBRARY}" )
 else()
     target_link_libraries( "${BIN_TARGET}"
+                           ${OPENGL_LIBRARIES}
+                           ${GLX_LIBRARIES}
                            ${X11_LIBRARIES}
                            "${XEXT_LIBRARY}" )
 endif()
