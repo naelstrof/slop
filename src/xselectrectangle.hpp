@@ -45,14 +45,7 @@ public:
     void    setPos( int x, int y );
     void    setDim( int w, int h );
     void    setGeo( int x, int y, int w, int h );
-    Window  m_window;
     XColor  m_color;
-    int     m_x;
-    int     m_y;
-    int     m_width;
-    int     m_height;
-    int     m_border;
-    bool    m_highlight;
 private:
     XColor  convertColor( float r, float g, float b );
     void    constrain( int w, int h );
