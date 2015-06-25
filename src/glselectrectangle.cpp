@@ -222,6 +222,49 @@ void slop::GLSelectRectangle::generateMagnifyingGlass() {
     glDisable(GL_TEXTURE_2D);
 }
 
+void slop::GLSelectRectangle::setTheme( bool on, std::string name ) {
+    if ( !on ) {
+        return;
+    }
+    std::string root = resource->getRealPath( name );
+    std::string tl = root + "/corner_tl.png";
+    std::string bl = root + "/corner_bl.png";
+    std::string tr = root + "/corner_tr.png";
+    std::string br = root + "/corner_br.png";
+    std::string straight = root + "/straight.png";
+    // One of the textures didn't exist, so we cancel the theme.
+    if (!resource->validatePath( tl ) ||
+        !resource->validatePath( bl ) ||
+        !resource->validatePath( tr ) ||
+        !resource->validatePath( br ) ||
+        !resource->validatePath( straight ) ) {
+        fprintf( stderr, "One of the textures was missing in the theme... disabling.\n" );
+        return;
+    }
+    // Otherwise we load each one :)
+    ilInit();
+    ilutInit();
+    ilutRenderer(ILUT_OPENGL);
+    ILuint corner;
+    ilGenImages( 1, &corner );
+    ilBindImage( corner );
+    ilLoadImage( tl.c_str() );
+    m_cornerids[0] = ilutGLBindMipmaps();
+    ilLoadImage( tr.c_str() );
+    m_cornerids[1] = ilutGLBindMipmaps();
+    ilLoadImage( bl.c_str() );
+    m_cornerids[2] = ilutGLBindMipmaps();
+    ilLoadImage( br.c_str() );
+    m_cornerids[3] = ilutGLBindMipmaps();
+    ilLoadImage( straight.c_str() );
+    m_straightwidth = ilGetInteger( IL_IMAGE_WIDTH );
+    m_straightheight = ilGetInteger( IL_IMAGE_HEIGHT );
+    m_straightid = ilutGLBindMipmaps();
+    // And clean up after.
+    ilDeleteImages( 1, &corner );
+    m_themed = on;
+}
+
 slop::GLSelectRectangle::GLSelectRectangle( int sx, int sy, int ex, int ey, int border, bool highlight, float r, float g, float b, float a ) {
     m_x = std::min( sx, ex );
     m_y = std::min( sy, ey );
@@ -242,6 +285,7 @@ slop::GLSelectRectangle::GLSelectRectangle( int sx, int sy, int ex, int ey, int 
     m_glassSize = 4;
     m_glassBorder = 1;
     m_monitors = xengine->getCRTCS();
+    m_themed = false;
 
     // If we don't have a border, we don't exist, so just die.
     if ( m_border == 0 ) {
@@ -352,6 +396,8 @@ slop::GLSelectRectangle::GLSelectRectangle( int sx, int sy, int ex, int ey, int 
     if ( !glXMakeContextCurrent( xengine->m_display, m_glxWindow, m_glxWindow, m_renderContext ) ) {
         fprintf( stderr, "Failed to attach GL context to window!\n" );
     }
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glClearColor( 0, 0, 0, 0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glXSwapBuffers( xengine->m_display, m_glxWindow );
@@ -382,11 +428,75 @@ void slop::GLSelectRectangle::update( double dt ) {
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
 
-    glColor4f( m_r, m_g, m_b, m_a );
-    glRecti( m_x-m_border, m_y, m_x+m_width+m_border, m_y-m_border );
-    glRecti( m_x-m_border, m_y+m_height, m_x+m_width+m_border, m_y+m_height+m_border );
-    glRecti( m_x-m_border, m_y, m_x, m_y+m_height );
-    glRecti( m_x+m_width, m_y, m_x+m_width+m_border, m_y+m_height );
+    if ( !m_themed ) {
+        glColor4f( m_r, m_g, m_b, m_a );
+        glRecti( m_x-m_border, m_y, m_x+m_width+m_border, m_y-m_border );
+        glRecti( m_x-m_border, m_y+m_height, m_x+m_width+m_border, m_y+m_height+m_border );
+        glRecti( m_x-m_border, m_y, m_x, m_y+m_height );
+        glRecti( m_x+m_width, m_y, m_x+m_width+m_border, m_y+m_height );
+    } else {
+        glColor4f( m_r, m_g, m_b, m_a );
+        glEnable( GL_TEXTURE_2D );
+        glBindTexture( GL_TEXTURE_2D, m_straightid );
+        float something = (float)(m_border)/(float)m_straightheight;
+        float txoffset = (((float)m_width+m_border)/(float)m_straightwidth)/something;
+        float tyoffset = (((float)m_height+m_border)/(float)m_straightwidth)/something;
+        //float ratio = ((float)m_straightwidth/(float)m_straightheight);
+        glBegin( GL_QUADS );
+        // straight top
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y-m_border );
+        glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y-m_border );
+        glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y );
+        // straight bot
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y+m_height );
+        glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height );
+        glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y+m_height+m_border );
+        // straight left
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y-m_border/2 );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x, m_y-m_border/2 );
+        glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x, m_y+m_height+m_border/2 );
+        glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x-m_border, m_y+m_height+m_border/2 );
+        // straight right
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y-m_border/2 );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y-m_border/2 );
+        glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border/2 );
+        glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x+m_width, m_y+m_height+m_border/2 );
+        glEnd();
+        // top left corner
+        glBindTexture( GL_TEXTURE_2D, m_cornerids[0] );
+        glBegin( GL_QUADS );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y-m_border );
+        glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y-m_border );
+        glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y );
+        glEnd();
+        // top right
+        glBindTexture( GL_TEXTURE_2D, m_cornerids[1] );
+        glBegin( GL_QUADS );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y-m_border );
+        glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y-m_border );
+        glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y );
+        glEnd();
+        // bottom left
+        glBindTexture( GL_TEXTURE_2D, m_cornerids[2] );
+        glBegin( GL_QUADS );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y+m_height );
+        glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y+m_height );
+        glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y+m_height+m_border );
+        glEnd();
+        // bottom right
+        glBindTexture( GL_TEXTURE_2D, m_cornerids[2] );
+        glBegin( GL_QUADS );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y+m_height );
+        glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y+m_height );
+        glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y+m_height+m_border );
+        glEnd();
+    }
 
     if ( m_glassEnabled ) {
         generateMagnifyingGlass();

@@ -23,12 +23,16 @@
 
 #include "x.hpp"
 #include "selectrectangle.hpp"
+#include "resource.hpp"
 
 #include <unistd.h>
 
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glxext.h>
+#define ILUT_USE_OPENGL
+#include <IL/il.h>
+#include <IL/ilut.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/Xrender.h>
@@ -54,6 +58,7 @@ public:
     void                pushOut( int* x, int* y, int w, int h, int rx, int ry, int rw, int rh );
     void                findOptimalGlassPosition();
     void                constrainWithinMonitor( int* x, int* y, int* w, int* h );
+    void                setTheme( bool on, std::string name );
     float               m_r;
     float               m_g;
     float               m_b;
@@ -64,7 +69,12 @@ public:
     GLXContext          m_renderContext;
     GLXWindow           m_glxWindow;
     Colormap            m_cmap;
+    bool                m_themed;
     unsigned int        m_texid;
+    unsigned int        m_cornerids[4];
+    unsigned int        m_straightid;
+    unsigned int        m_straightwidth;
+    unsigned int        m_straightheight;
     int                 m_offsetx;
     int                 m_offsety;
     int                 m_offsetw;

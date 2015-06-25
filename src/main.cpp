@@ -369,6 +369,7 @@ int app( int argc, char** argv ) {
                                                                      r, g, b, a );
                             // Haha why is this so hard to cast?
                             ((slop::GLSelectRectangle*)(selection))->setMagnifySettings( magenabled, magstrength, magpixels );
+                            ((slop::GLSelectRectangle*)(selection))->setTheme( true, "gothic" );
                         } else {
                             selection = new slop::XSelectRectangle( t.m_x, t.m_y,
                                                                     t.m_x + t.m_width,
@@ -426,6 +427,7 @@ int app( int argc, char** argv ) {
                                                                  r, g, b, a );
                         // Haha why is this so hard to cast?
                         ((slop::GLSelectRectangle*)(selection))->setMagnifySettings( magenabled, magstrength, magpixels );
+                        ((slop::GLSelectRectangle*)(selection))->setTheme( true, "gothic" );
                     } else {
                         selection = new slop::XSelectRectangle( sx, sy,
                                                                 ex, ey,

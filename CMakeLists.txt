@@ -79,6 +79,7 @@ set( source
      src/cmdline.c
      src/selectrectangle.cpp
      src/glselectrectangle.cpp
+     src/resource.cpp
      src/xselectrectangle.cpp
      src/x.cpp
      src/main.cpp )
@@ -91,6 +92,7 @@ find_package( OpenGL    REQUIRED )
 find_package( GLX       REQUIRED )
 find_package( XRender   REQUIRED )
 find_package( XRandr    REQUIRED )
+find_package( DevIL     REQUIRED )
 # This library is needed only for Ubuntu it seems, some platforms don't even
 # ship with it. I couldn't find a way to do a test compile to check if librt
 # was needed, so instead I just didn't mark it as REQUIRED.
@@ -105,12 +107,14 @@ if ( RT_INCLUDE_DIR )
                          ${XEXT_INCLUDE_DIR}
                          ${XRANDR_INCLUDE_DIR}
                          ${OPENGL_INCLUDE_DIR}
+                         ${IL_INCLUDE_DIR}
                          ${GLX_INCLUDE_DIR}
                          ${XRENDER_INCLUDE_DIRS}
                          ${RT_INCLUDE_DIR} )
 else()
     include_directories( ${X11_INCLUDE_DIR}
                          ${OPENGL_INCLUDE_DIR}
+                         ${IL_INCLUDE_DIR}
                          ${GLX_INCLUDE_DIR}
                          ${XEXT_INCLUDE_DIR} )
 endif()
@@ -123,6 +127,8 @@ if ( RT_LIBRARY )
     target_link_libraries( "${BIN_TARGET}"
                            ${X11_LIBRARIES}
                            ${OPENGL_LIBRARIES}
+                           ${IL_LIBRARIES}
+                           ${ILUT_LIBRARIES}
                            ${GLX_LIBRARIES}
                            ${XRENDER_LIBRARIES}
                            "${XEXT_LIBRARY}"
@@ -131,6 +137,8 @@ if ( RT_LIBRARY )
 else()
     target_link_libraries( "${BIN_TARGET}"
                            ${OPENGL_LIBRARIES}
+                           ${IL_LIBRARIES}
+                           ${ILUT_LIBRARIES}
                            ${GLX_LIBRARIES}
                            ${X11_LIBRARIES}
                            "${XEXT_LIBRARY}" )
@@ -138,3 +146,5 @@ endif()
 
 install( TARGETS ${BIN_TARGET}
          DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
+
+add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
