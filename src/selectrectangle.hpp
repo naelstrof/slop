@@ -23,6 +23,7 @@
 
 #include "x.hpp"
 #include "selectrectangle.hpp"
+#include "shader.hpp"
 
 #include <unistd.h>
 

@@ -24,11 +24,13 @@
 #include "x.hpp"
 #include "selectrectangle.hpp"
 #include "resource.hpp"
+#include "framebuffer.hpp"
 
 #include <unistd.h>
 
 #include <GL/gl.h>
 #include <GL/glx.h>
+#include <GL/glew.h>
 #include <GL/glxext.h>
 #define ILUT_USE_OPENGL
 #include <IL/il.h>
@@ -59,6 +61,7 @@ public:
     void                findOptimalGlassPosition();
     void                constrainWithinMonitor( int* x, int* y, int* w, int* h );
     void                setTheme( bool on, std::string name );
+    void                setShader( std::string name );
     float               m_r;
     float               m_g;
     float               m_b;
@@ -79,6 +82,7 @@ public:
     int                 m_offsety;
     int                 m_offsetw;
     int                 m_offseth;
+    unsigned int        m_desktop;
     unsigned int        m_glassPixels;
     float               m_glassSize;
     int                 m_glassBorder;
@@ -87,7 +91,10 @@ public:
     int                 m_glassx;
     int                 m_glassy;
     bool                m_glassEnabled;
+    double              m_time;
+    std::string         m_shader;
     std::vector<XRRCrtcInfo*> m_monitors;
+    slop::Framebuffer*  m_framebuffer;
 };
 
 }

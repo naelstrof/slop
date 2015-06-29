@@ -27,6 +27,7 @@ slop::GLSelectRectangle::~GLSelectRectangle() {
     if ( m_window == None ) {
         return;
     }
+    delete m_framebuffer;
     // Try to erase the window before destroying it.
     glClearColor( 0, 0, 0, 0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -76,6 +77,11 @@ void slop::GLSelectRectangle::constrainWithinMonitor( int* x, int* y, int* w, in
     m_offsety *= m_glassSize;
     m_offsetw *= m_glassSize;
     m_offseth *= m_glassSize;
+}
+
+void slop::GLSelectRectangle::setShader( std::string shader ) {
+    m_shader = shader;
+    m_framebuffer->setShader( shader );
 }
 
 void slop::GLSelectRectangle::setMagnifySettings( bool on, float magstrength, unsigned int pixels ) {
@@ -286,6 +292,8 @@ slop::GLSelectRectangle::GLSelectRectangle( int sx, int sy, int ex, int ey, int 
     m_glassBorder = 1;
     m_monitors = xengine->getCRTCS();
     m_themed = false;
+    m_shader = "simple";
+    m_time = 0;
 
     // If we don't have a border, we don't exist, so just die.
     if ( m_border == 0 ) {
@@ -396,11 +404,32 @@ slop::GLSelectRectangle::GLSelectRectangle( int sx, int sy, int ex, int ey, int 
     if ( !glXMakeContextCurrent( xengine->m_display, m_glxWindow, m_glxWindow, m_renderContext ) ) {
         fprintf( stderr, "Failed to attach GL context to window!\n" );
     }
+    GLenum err = glewInit();
+    if ( GLEW_OK != err ) {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    }
+
+    // Get an image of the entire desktop for use in shaders.
+    XImage* image = XGetImage( xengine->m_display, xengine->m_root, 0, 0, xengine->getWidth(), xengine->getHeight(), 0xffffffff, ZPixmap );
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &m_desktop);
+    glBindTexture(GL_TEXTURE_2D, m_desktop);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, xengine->getWidth(), xengine->getHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+    XDestroyImage( image );
+
+    glDisable(GL_TEXTURE_2D);
+    m_framebuffer = new slop::Framebuffer( xengine->getWidth(), xengine->getHeight(), slop::Framebuffer::color, m_shader );
+    m_framebuffer->bind();
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glClearColor( 0, 0, 0, 0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glXSwapBuffers( xengine->m_display, m_glxWindow );
+    m_framebuffer->unbind();
 }
 
 void slop::GLSelectRectangle::setGeo( int sx, int sy, int ex, int ey ) {
@@ -416,6 +445,8 @@ void slop::GLSelectRectangle::setGeo( int sx, int sy, int ex, int ey ) {
 }
 
 void slop::GLSelectRectangle::update( double dt ) {
+    m_time += dt;
+    m_framebuffer->bind();
     glViewport( 0, 0, xengine->getWidth(), xengine->getHeight() );
 
     glClearColor( 0, 0, 0, 0 );
@@ -497,6 +528,13 @@ void slop::GLSelectRectangle::update( double dt ) {
         glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y+m_height+m_border );
         glEnd();
     }
+
+    m_framebuffer->unbind();
+
+    glClearColor( 0, 0, 0, 0 );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    m_framebuffer->draw( (float) m_time, m_desktop );
 
     if ( m_glassEnabled ) {
         generateMagnifyingGlass();

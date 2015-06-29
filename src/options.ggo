@@ -78,6 +78,16 @@ option "magpixels" - "Sets how many pixels are displayed in the magnification. T
     default="64"
     optional
 
+option "theme" - "Sets the theme of the selection, using textures from ~/.config/slop/ or /usr/share/."
+    string
+    default="none"
+    optional
+
+option "shader" - "Sets the shader to load and use from ~/.config/slop/ or /usr/share/."
+    string
+    default="simple"
+    optional
+
 option "format" f "Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c."
     string
     default="REPLACEME"
@@ -95,6 +105,12 @@ text "    $ slop -t 0\n"
 text "\n"
 text "    $ # Classic Windows XP selection.\n"
 text "    $ slop -l -c 0.3,0.4,0.6,0.4\n"
+text "\n"
+text "    $ # Wiggle wiggle!\n"
+text "    $ slop --opengl --shader wiggle\n"
+text "\n"
+text "    $ # Edgy textures or something.\n"
+text "    $ slop --opengl --theme gothic\n"
 text "\n"
 text "    $ # Change output format to use safer parsing\n"
 text "    $ slopoutput=$(slop -f \"%x %y %w %h\")\n"

@@ -79,6 +79,12 @@ struct gengetopt_args_info
   int magpixels_arg;	/**< @brief Sets how many pixels are displayed in the magnification. The less pixels the bigger the magnification. (default='64').  */
   char * magpixels_orig;	/**< @brief Sets how many pixels are displayed in the magnification. The less pixels the bigger the magnification. original value given at command line.  */
   const char *magpixels_help; /**< @brief Sets how many pixels are displayed in the magnification. The less pixels the bigger the magnification. help description.  */
+  char * theme_arg;	/**< @brief Sets the theme of the selection, using textures from ~/.config/slop/ or /usr/share/. (default='none').  */
+  char * theme_orig;	/**< @brief Sets the theme of the selection, using textures from ~/.config/slop/ or /usr/share/. original value given at command line.  */
+  const char *theme_help; /**< @brief Sets the theme of the selection, using textures from ~/.config/slop/ or /usr/share/. help description.  */
+  char * shader_arg;	/**< @brief Sets the shader to load and use from ~/.config/slop/ or /usr/share/. (default='simple').  */
+  char * shader_orig;	/**< @brief Sets the shader to load and use from ~/.config/slop/ or /usr/share/. original value given at command line.  */
+  const char *shader_help; /**< @brief Sets the shader to load and use from ~/.config/slop/ or /usr/share/. help description.  */
   char * format_arg;	/**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. (default='REPLACEME').  */
   char * format_orig;	/**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. original value given at command line.  */
   const char *format_help; /**< @brief Set the output format string. Format specifiers are %x, %y, %w, %h, %i, %g, and %c. help description.  */
@@ -100,6 +106,8 @@ struct gengetopt_args_info
   unsigned int magnify_given ;	/**< @brief Whether magnify was given.  */
   unsigned int magstrength_given ;	/**< @brief Whether magstrength was given.  */
   unsigned int magpixels_given ;	/**< @brief Whether magpixels was given.  */
+  unsigned int theme_given ;	/**< @brief Whether theme was given.  */
+  unsigned int shader_given ;	/**< @brief Whether shader was given.  */
   unsigned int format_given ;	/**< @brief Whether format was given.  */
 
 } ;

@@ -30,22 +30,26 @@ slop::Resource::Resource() {
         char* home = getpwuid(getuid())->pw_dir;
         m_usrconfig += home;
         m_usrconfig += "/.config/slop/";
+        m_sysconfig = INSTALL_PREFIX;
+        m_sysconfig += "/share/slop/";
         return;
     }
     m_usrconfig += config;
     m_usrconfig += "/slop/";
     m_sysconfig = INSTALL_PREFIX;
-    m_sysconfig += "/share/slop";
+    m_sysconfig += "/share/slop/";
 }
 
 std::string slop::Resource::getRealPath( std::string localpath ) {
-    if ( !validatePath( m_usrconfig + localpath ) ) {
-        if ( !validatePath( m_sysconfig + localpath ) ) {
-            fprintf( stderr, "Failed to find directory %s in %s or %s...\n", localpath.c_str(), m_usrconfig.c_str(), m_sysconfig.c_str() );
-        }
+    if ( validatePath( m_usrconfig + localpath ) ) {
+        return m_usrconfig + localpath;
+    }
+    if ( validatePath( m_sysconfig + localpath ) ) {
         return m_sysconfig + localpath;
     }
-    return m_usrconfig + localpath;
+    std::string err = "The file or folder " + localpath + " was not found in either " + m_sysconfig + " or " + m_usrconfig + "\n";
+    throw err;
+    return localpath;
 }
 
 bool slop::Resource::validatePath( std::string path ) {

@@ -52,8 +52,10 @@ const char *gengetopt_args_info_help[] = {
   "      --magnify                 Display a magnifying glass when --opengl is\n                                  also enabled.  (default=off)",
   "      --magstrength=FLOAT       Sets how many times the magnification window\n                                  size is multiplied.  (default=`4')",
   "      --magpixels=INT           Sets how many pixels are displayed in the\n                                  magnification. The less pixels the bigger the\n                                  magnification.  (default=`64')",
+  "      --theme=STRING            Sets the theme of the selection, using textures\n                                  from ~/.config/slop/ or /usr/share/.\n                                  (default=`none')",
+  "      --shader=STRING           Sets the shader to load and use from\n                                  ~/.config/slop/ or /usr/share/.\n                                  (default=`simple')",
   "  -f, --format=STRING           Set the output format string. Format specifiers\n                                  are %x, %y, %w, %h, %i, %g, and %c.\n                                  (default=`X=%x\\nY=%y\\nW=%w\\nH=%h\\nG=%g\\nID=%i\\nCancel=%c\\n')",
-  "\nExamples\n    $ # Gray, thick, transparent border for maximum visiblity.\n    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n\n    $ # Remove window decorations.\n    $ slop --nodecorations\n\n    $ # Disable window selections. Useful for selecting individual pixels.\n    $ slop -t 0\n\n    $ # Classic Windows XP selection.\n    $ slop -l -c 0.3,0.4,0.6,0.4\n\n    $ # Change output format to use safer parsing\n    $ slopoutput=$(slop -f \"%x %y %w %h\")\n    $ X=$(echo $slopoutput | awk '{print $1}')\n    $ Y=$(echo $slopoutput | awk '{print $2}')\n    $ W=$(echo $slopoutput | awk '{print $3}')\n    $ H=$(echo $slopoutput | awk '{print $4}')\n\nTips\n    * You can use the arrow keys to move the starting point of a\ndrag-selection, just in case you missed it by a few pixels.\n    * If you don't like a selection: you can cancel it by right-clicking\nregardless of which options are enabled or disabled for slop.\n    * If slop doesn't seem to select a window accurately, the problem could be\nbecause of decorations getting in the way. Try enabling the --nodecorations\nflag.\n",
+  "\nExamples\n    $ # Gray, thick, transparent border for maximum visiblity.\n    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n\n    $ # Remove window decorations.\n    $ slop --nodecorations\n\n    $ # Disable window selections. Useful for selecting individual pixels.\n    $ slop -t 0\n\n    $ # Classic Windows XP selection.\n    $ slop -l -c 0.3,0.4,0.6,0.4\n\n    $ # Wiggle wiggle!\n    $ slop --opengl --shader wiggle\n\n    $ # Edgy textures or something.\n    $ slop --opengl --theme gothic\n\n    $ # Change output format to use safer parsing\n    $ slopoutput=$(slop -f \"%x %y %w %h\")\n    $ X=$(echo $slopoutput | awk '{print $1}')\n    $ Y=$(echo $slopoutput | awk '{print $2}')\n    $ W=$(echo $slopoutput | awk '{print $3}')\n    $ H=$(echo $slopoutput | awk '{print $4}')\n\nTips\n    * You can use the arrow keys to move the starting point of a\ndrag-selection, just in case you missed it by a few pixels.\n    * If you don't like a selection: you can cancel it by right-clicking\nregardless of which options are enabled or disabled for slop.\n    * If slop doesn't seem to select a window accurately, the problem could be\nbecause of decorations getting in the way. Try enabling the --nodecorations\nflag.\n",
     0
 };
 
@@ -97,6 +99,8 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->magnify_given = 0 ;
   args_info->magstrength_given = 0 ;
   args_info->magpixels_given = 0 ;
+  args_info->theme_given = 0 ;
+  args_info->shader_given = 0 ;
   args_info->format_given = 0 ;
 }
 
@@ -129,6 +133,10 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->magstrength_orig = NULL;
   args_info->magpixels_arg = 64;
   args_info->magpixels_orig = NULL;
+  args_info->theme_arg = gengetopt_strdup ("none");
+  args_info->theme_orig = NULL;
+  args_info->shader_arg = gengetopt_strdup ("simple");
+  args_info->shader_orig = NULL;
   args_info->format_arg = gengetopt_strdup ("X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n");
   args_info->format_orig = NULL;
   
@@ -156,7 +164,9 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->magnify_help = gengetopt_args_info_help[15] ;
   args_info->magstrength_help = gengetopt_args_info_help[16] ;
   args_info->magpixels_help = gengetopt_args_info_help[17] ;
-  args_info->format_help = gengetopt_args_info_help[18] ;
+  args_info->theme_help = gengetopt_args_info_help[18] ;
+  args_info->shader_help = gengetopt_args_info_help[19] ;
+  args_info->format_help = gengetopt_args_info_help[20] ;
   
 }
 
@@ -253,6 +263,10 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   free_string_field (&(args_info->max_orig));
   free_string_field (&(args_info->magstrength_orig));
   free_string_field (&(args_info->magpixels_orig));
+  free_string_field (&(args_info->theme_arg));
+  free_string_field (&(args_info->theme_orig));
+  free_string_field (&(args_info->shader_arg));
+  free_string_field (&(args_info->shader_orig));
   free_string_field (&(args_info->format_arg));
   free_string_field (&(args_info->format_orig));
   
@@ -319,6 +333,10 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "magstrength", args_info->magstrength_orig, 0);
   if (args_info->magpixels_given)
     write_into_file(outfile, "magpixels", args_info->magpixels_orig, 0);
+  if (args_info->theme_given)
+    write_into_file(outfile, "theme", args_info->theme_orig, 0);
+  if (args_info->shader_given)
+    write_into_file(outfile, "shader", args_info->shader_orig, 0);
   if (args_info->format_given)
     write_into_file(outfile, "format", args_info->format_orig, 0);
   
@@ -596,6 +614,8 @@ cmdline_parser_internal (
         { "magnify",	0, NULL, 0 },
         { "magstrength",	1, NULL, 0 },
         { "magpixels",	1, NULL, 0 },
+        { "theme",	1, NULL, 0 },
+        { "shader",	1, NULL, 0 },
         { "format",	1, NULL, 'f' },
         { 0,  0, 0, 0 }
       };
@@ -812,6 +832,34 @@ cmdline_parser_internal (
                 &(local_args_info.magpixels_given), optarg, 0, "64", ARG_INT,
                 check_ambiguity, override, 0, 0,
                 "magpixels", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Sets the theme of the selection, using textures from ~/.config/slop/ or /usr/share/..  */
+          else if (strcmp (long_options[option_index].name, "theme") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->theme_arg), 
+                 &(args_info->theme_orig), &(args_info->theme_given),
+                &(local_args_info.theme_given), optarg, 0, "none", ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "theme", '-',
+                additional_error))
+              goto failure;
+          
+          }
+          /* Sets the shader to load and use from ~/.config/slop/ or /usr/share/..  */
+          else if (strcmp (long_options[option_index].name, "shader") == 0)
+          {
+          
+          
+            if (update_arg( (void *)&(args_info->shader_arg), 
+                 &(args_info->shader_orig), &(args_info->shader_given),
+                &(local_args_info.shader_given), optarg, 0, "simple", ARG_STRING,
+                check_ambiguity, override, 0, 0,
+                "shader", '-',
                 additional_error))
               goto failure;
           

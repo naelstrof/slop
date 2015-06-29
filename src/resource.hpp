@@ -22,6 +22,7 @@
 #define IS_RESOURCE_H_
 
 #include <stdlib.h>
+#include <cassert>
 #include <cstdio>
 #include <string>
 #include <unistd.h>

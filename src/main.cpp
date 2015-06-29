@@ -21,6 +21,7 @@
 #include <time.h>
 #include <cstdio>
 #include <sstream>
+#include <execinfo.h>
 
 #ifdef __MACH__
 #include <mach/clock.h>
@@ -248,6 +249,9 @@ int app( int argc, char** argv ) {
     bool highlight = options.highlight_flag;
     bool keyboard = !options.nokeyboard_flag;
     bool decorations = !options.nodecorations_flag;
+    bool themeon = (bool)options.theme_given;
+    std::string theme = options.theme_arg;
+    std::string shader = options.shader_arg;
     struct timespec start, time;
     int xoffset = 0;
     int yoffset = 0;
@@ -369,7 +373,8 @@ int app( int argc, char** argv ) {
                                                                      r, g, b, a );
                             // Haha why is this so hard to cast?
                             ((slop::GLSelectRectangle*)(selection))->setMagnifySettings( magenabled, magstrength, magpixels );
-                            ((slop::GLSelectRectangle*)(selection))->setTheme( true, "gothic" );
+                            ((slop::GLSelectRectangle*)(selection))->setTheme( themeon, theme );
+                            ((slop::GLSelectRectangle*)(selection))->setShader( shader );
                         } else {
                             selection = new slop::XSelectRectangle( t.m_x, t.m_y,
                                                                     t.m_x + t.m_width,
@@ -427,7 +432,8 @@ int app( int argc, char** argv ) {
                                                                  r, g, b, a );
                         // Haha why is this so hard to cast?
                         ((slop::GLSelectRectangle*)(selection))->setMagnifySettings( magenabled, magstrength, magpixels );
-                        ((slop::GLSelectRectangle*)(selection))->setTheme( true, "gothic" );
+                        ((slop::GLSelectRectangle*)(selection))->setTheme( themeon, theme );
+                        ((slop::GLSelectRectangle*)(selection))->setShader( shader );
                     } else {
                         selection = new slop::XSelectRectangle( sx, sy,
                                                                 ex, ey,
@@ -527,12 +533,12 @@ int main( int argc, char** argv ) {
         return app( argc, argv );
     } catch( std::bad_alloc const& exception ) {
         fprintf( stderr, "Couldn't allocate enough memory! No space left in RAM." );
-        return EXIT_FAILURE;
     } catch( std::exception const& exception ) {
         fprintf( stderr, "Unhandled Exception Thrown: %s\n", exception.what() );
-        return EXIT_FAILURE;
+    } catch( std::string err ) {
+        fprintf( stderr, "Unhandled Exception Thrown: %s\n", err.c_str() );
     } catch( ... ) {
         fprintf( stderr, "Unknown Exception Thrown!\n" );
-        return EXIT_FAILURE;
     }
+    return EXIT_FAILURE;
 }
