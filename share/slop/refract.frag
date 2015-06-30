@@ -21,18 +21,10 @@ void main() {
     float numBlurPixelsPerSide = 2.0f;
     float blurMultiplier = 2.0f;
 
-    // Don't change anything below.
-    float blurSize = 1.f/desktopHeight*blurMultiplier;
-    vec2  blurMultiplyVec      = vec2(0.0f, 1.0f);
-    // Higher strength means bigger wobble
-    float strength = 8;
-    // Higher speed means faster wobble
-    float speed = 1;
-    float x = (sin( time*speed + uvCoord.y * desktopHeight/strength ) + 0.5)/desktopWidth*strength;
-    float y = (cos( time*speed + uvCoord.x * desktopWidth/strength ) + 0.5)/desktopHeight*strength;
-    x = x - (sin( time*speed*0.5 + uvCoord.y * desktopHeight/strength ) + 0.5)/desktopWidth*strength/2;
-    y = y - (cos( time*speed*0.5 + uvCoord.x * desktopWidth/strength ) + 0.5)/desktopHeight*strength/2;
-    vec2 offset = vec2(x,y);
+    vec2 tc = uvCoord.xy;
+    vec2 p = -1.0 + 2.0 * tc;
+    float len = length(p);
+    vec2 offset = (p/len)*cos(len*12.0-time*4.0)*0.005;
 
     // Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)
     vec3 incrementalGaussian;
