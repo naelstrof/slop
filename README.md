@@ -14,6 +14,10 @@ slop (Select Operation) is an application that querys for a selection from the u
     * Set click tolerance for if you have a shaky mouse.
     * Set the color of the selection rectangles to match your theme! (Even supports transparency!)
     * Remove window decorations from selections.
+* Supports OpenGL hardware acceleration.
+* Supports textured themes.
+* Supports programmable shaders.
+* Supports a magnifying glass.
 
 ## Practical applications
 slop can be used to create a video recording script in only two lines of code.
@@ -73,16 +77,46 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 
 ### Install using CMake (Requires CMake)
 
-Note: Dependencies should be installed first: libXext.
+*Note: Dependencies should be installed first: libxext, imlib2, mesa, libxrender, libxrandr, and glew.*
 
 ```bash
 git clone https://github.com/naelstrof/slop.git
 cd slop
-cmake ./
+cmake -DCMAKE_OPENGL_SUPPORT=true ./
 make && sudo make install
 ```
 
 Make sure to check out and install [maim](https://github.com/naelstrof/maim) too if you want a proper screenshot utility.
+
+## Configuration
+Ever since slop had OpenGL support, it now has quite a few customizations that can be done.
+
+*Note: Configuration directories are located at __${XDG\_CONFIG\_HOME}/slop__ or __${CMAKE\_INSTALL\_PREFIX}/share/slop__, whichever comes first. These will be refferred to as __~/.config/slop__ and __/usr/share/slop__ respectively from here on.*
+
+### Shaders
+[![Demo Shaders](http://farmpolice.com/content/images/slop_demo.gif)](http://farmpolice.com/content/videos/8a5c37c4.webm)
+
+*Click for video*
+
+Slop supports shaders that are loaded from the configuration directories.
+They're all completely programmable, but they do lack some features like chaining right now.
+To configure the shaders or create your own, first copy the global configuration folder to your ~/.config folder like so:
+```bash
+cp -r /usr/share/slop ~/.config
+```
+Then edit or add new shaders at ~/.config/slop as if you were editing the originals, slop will reflect the changes on restart.
+If there's any missing features in the shaders: don't hesitate to make an issue to request them, and feel free to make your own shaders and submit a pull request to see if it can be officially included!
+
+### Themes
+![Demo Themes](http://farmpolice.com/content/images/1436653680.png)
+Slop has primitive support for texture themes, I've included a poorly made *gothic* theme that you can test with `slop --opengl --theme gothic`.
+To create your own you'll have to copy the configuration directory, just like with the shaders above, like so:
+```bash
+cp -r /usr/share/slop ~/.config
+```
+The theme names are taken from the folder names, the files inside represent the corresponding textures. For example *~/config/gothic/corner\_tr.png* would correspond to the top right square texture in a gothic themed selection.
+The theming is still missing offset configuration, and is quite limiting in design. Themes probably won't be flushed out further unless someone makes an issue to request more features.
+Feel free to make your own themes and submit a pull request to see if it can be officially included!
 
 help
 ----
@@ -137,6 +171,19 @@ Options
       --opengl                  Enable hardware acceleration. Only works with
                                   modern systems that are also running a
                                   compositor.  (default=off)
+      --magnify                 Display a magnifying glass when --opengl is
+                                  also enabled.  (default=off)
+      --magstrength=FLOAT       Sets how many times the magnification window
+                                  size is multiplied.  (default=`4')
+      --magpixels=INT           Sets how many pixels are displayed in the
+                                  magnification. The less pixels the bigger the
+                                  magnification.  (default=`64')
+      --theme=STRING            Sets the theme of the selection, using textures
+                                  from ~/.config/slop/ or /usr/share/.
+                                  (default=`none')
+      --shader=STRING           Sets the shader to load and use from
+                                  ~/.config/slop/ or /usr/share/.
+                                  (default=`simple')
   -f, --format=STRING           Set the output format string. Format specifiers
                                   are %x, %y, %w, %h, %i, %g, and %c.
                                   (default=`X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n')
