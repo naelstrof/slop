@@ -27,6 +27,7 @@ slop::GLSelectRectangle::~GLSelectRectangle() {
     if ( m_window == None ) {
         return;
     }
+    xengine->freeCRTCS( m_monitors );
     delete m_framebuffer;
     // Try to erase the window before destroying it.
     glClearColor( 0, 0, 0, 0 );
@@ -229,7 +230,7 @@ void slop::GLSelectRectangle::generateMagnifyingGlass() {
 }
 
 void slop::GLSelectRectangle::setTheme( bool on, std::string name ) {
-    if ( !on ) {
+    if ( !on || name == "none" ) {
         return;
     }
     std::string root = resource->getRealPath( name );
@@ -248,28 +249,98 @@ void slop::GLSelectRectangle::setTheme( bool on, std::string name ) {
         return;
     }
     // Otherwise we load each one :)
-    ilInit();
-    ilutInit();
-    ilutRenderer(ILUT_OPENGL);
-    ILuint corner;
-    ilGenImages( 1, &corner );
-    ilBindImage( corner );
-    ilLoadImage( tl.c_str() );
-    m_cornerids[0] = ilutGLBindMipmaps();
-    ilLoadImage( tr.c_str() );
-    m_cornerids[1] = ilutGLBindMipmaps();
-    ilLoadImage( bl.c_str() );
-    m_cornerids[2] = ilutGLBindMipmaps();
-    ilLoadImage( br.c_str() );
-    m_cornerids[3] = ilutGLBindMipmaps();
-    ilLoadImage( straight.c_str() );
-    m_straightwidth = ilGetInteger( IL_IMAGE_WIDTH );
-    m_straightheight = ilGetInteger( IL_IMAGE_HEIGHT );
-    m_straightid = ilutGLBindMipmaps();
-    // And clean up after.
-    ilDeleteImages( 1, &corner );
+    loadImage( &(m_cornerids[0]), tl );
+    loadImage( &(m_cornerids[1]), tr );
+    loadImage( &(m_cornerids[2]), bl );
+    loadImage( &(m_cornerids[3]), br );
+    loadImage( &(m_straightid), straight );
+    glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &m_straightwidth );
+    glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &m_straightheight );
     m_themed = on;
 }
+
+unsigned int slop::GLSelectRectangle::loadImage( unsigned int* texture, std::string path ) {
+    glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures( 1, texture );
+    glBindTexture( GL_TEXTURE_2D, *texture );
+    Imlib_Load_Error err;
+    Imlib_Image image = imlib_load_image_with_error_return( path.c_str(), &err );
+    if ( err != IMLIB_LOAD_ERROR_NONE ) {
+        std::string message = "Failed to load image: ";
+        message += path;
+        message += "\n\t";
+        switch( err ) {
+            default: {
+                message += "unknown error ";
+                message += (int)err;
+                message += "\n";
+                break;
+            }
+            case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:
+                message += "out of file descriptors\n";
+                break;
+            case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:
+                message += "out of memory\n";
+                break;
+            case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
+                message += "path contains too many symbolic links\n";
+                break;
+            case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
+                message += "path points outside address space\n";
+                break;
+            case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
+                message += "path component is not a directory\n";
+                break;
+            case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
+                message += "path component is non-existant (~ isn't expanded inside quotes!)\n";
+                break;
+            case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
+                message += "path is too long\n";
+                break;
+            case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:
+                message += "no loader for file format (unsupported format)\n";
+                break;
+            case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE: {
+                message += "not enough disk space\n";
+                break;
+            }
+            case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST: {
+                message += "file does not exist\n";
+                break;
+            }
+            case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY: {
+                message += "file is a directory\n";
+                break;
+            }
+            case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:
+            case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ: {
+                message += "permission denied\n";
+                break;
+            }
+        }
+        throw std::runtime_error( message.c_str() );
+        return *texture;
+    }
+    imlib_context_set_image( image );
+    DATA32* data = imlib_image_get_data_for_reading_only();
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, imlib_image_get_width(), imlib_image_get_height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)data );
+    if ( GLEW_VERSION_3_0 ) {
+        glHint( GL_GENERATE_MIPMAP_HINT, GL_NICEST );
+        glGenerateMipmap( GL_TEXTURE_2D );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    } else {
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    }
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    imlib_free_image();
+    glDisable(GL_TEXTURE_2D);
+    return *texture;
+}
+
+
 
 slop::GLSelectRectangle::GLSelectRectangle( int sx, int sy, int ex, int ey, int border, bool highlight, float r, float g, float b, float a ) {
     m_x = std::min( sx, ex );
@@ -475,57 +546,57 @@ void slop::GLSelectRectangle::update( double dt ) {
         //float ratio = ((float)m_straightwidth/(float)m_straightheight);
         glBegin( GL_QUADS );
         // straight top
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y-m_border );
-        glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y-m_border );
-        glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y-m_border );
+        glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y-m_border );
+        glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y );
         // straight bot
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y+m_height );
-        glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height );
-        glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height+m_border );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y+m_height );
+        glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height );
+        glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y+m_height+m_border );
         // straight left
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y-m_border/2 );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x, m_y-m_border/2 );
-        glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x, m_y+m_height+m_border/2 );
-        glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x-m_border, m_y+m_height+m_border/2 );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y-m_border/2 );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x, m_y-m_border/2 );
+        glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x, m_y+m_height+m_border/2 );
+        glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x-m_border, m_y+m_height+m_border/2 );
         // straight right
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y-m_border/2 );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y-m_border/2 );
-        glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border/2 );
-        glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x+m_width, m_y+m_height+m_border/2 );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y-m_border/2 );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y-m_border/2 );
+        glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border/2 );
+        glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x+m_width, m_y+m_height+m_border/2 );
         glEnd();
         // top left corner
         glBindTexture( GL_TEXTURE_2D, m_cornerids[0] );
         glBegin( GL_QUADS );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y-m_border );
-        glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y-m_border );
-        glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y-m_border );
+        glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y-m_border );
+        glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y );
         glEnd();
         // top right
         glBindTexture( GL_TEXTURE_2D, m_cornerids[1] );
         glBegin( GL_QUADS );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y-m_border );
-        glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y-m_border );
-        glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y-m_border );
+        glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y-m_border );
+        glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y );
         glEnd();
         // bottom left
         glBindTexture( GL_TEXTURE_2D, m_cornerids[2] );
         glBegin( GL_QUADS );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y+m_height );
-        glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y+m_height );
-        glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y+m_height+m_border );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y+m_height );
+        glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y+m_height );
+        glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y+m_height+m_border );
         glEnd();
         // bottom right
         glBindTexture( GL_TEXTURE_2D, m_cornerids[2] );
         glBegin( GL_QUADS );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y+m_height );
-        glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y+m_height );
-        glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y+m_height );
+        glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y+m_height );
+        glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border );
+        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y+m_height+m_border );
         glEnd();
     }
 

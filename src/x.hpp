@@ -82,8 +82,10 @@ public:
     void                drawRect( int x, int y, unsigned int w, unsigned int h );
     unsigned int        getWidth();
     unsigned int        getHeight();
+#ifdef OPENGL_ENABLED
     std::vector<XRRCrtcInfo*>        getCRTCS();
     void                freeCRTCS( std::vector<XRRCrtcInfo*> monitors );
+#endif // OPENGL_ENABLED
     int                 m_mousex;
     int                 m_mousey;
     Display*            m_display;

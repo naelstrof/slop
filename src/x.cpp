@@ -104,7 +104,9 @@ int slop::XEngine::init( std::string display ) {
     //m_root      = RootWindow     ( m_display, XScreenNumberOfScreen( m_screen ) );
     m_root      = DefaultRootWindow( m_display );
 
+#ifdef OPENGL_ENABLED
     m_res = XRRGetScreenResourcesCurrent( m_display, m_root);
+#endif // OPENGL_ENABLED
 
     m_good = true;
     XSetErrorHandler( slop::XEngineErrorHandler );
@@ -112,6 +114,7 @@ int slop::XEngine::init( std::string display ) {
     return EXIT_SUCCESS;
 }
 
+#ifdef OPENGL_ENABLED
 std::vector<XRRCrtcInfo*> slop::XEngine::getCRTCS() {
     std::vector<XRRCrtcInfo*> monitors;
     if ( !m_res ) {
@@ -122,6 +125,13 @@ std::vector<XRRCrtcInfo*> slop::XEngine::getCRTCS() {
     }
     return monitors;
 }
+
+void slop::XEngine::freeCRTCS( std::vector<XRRCrtcInfo*> monitors ) {
+    for ( unsigned int i=0;i<monitors.size();i++ ) {
+        XRRFreeCrtcInfo( monitors[ i ] );
+    }
+}
+#endif // OPENGL_ENABLED
 
 bool slop::XEngine::keyPressed( KeySym key ) {
     KeyCode keycode = XKeysymToKeycode( m_display, key );

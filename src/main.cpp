@@ -22,6 +22,7 @@
 #include <cstdio>
 #include <sstream>
 #include <execinfo.h>
+#include <stdexcept>
 
 #ifdef __MACH__
 #include <mach/clock.h>
@@ -30,7 +31,9 @@
 
 #include "x.hpp"
 #include "selectrectangle.hpp"
+#ifdef OPENGL_ENABLED
 #include "glselectrectangle.hpp"
+#endif //OPENGL_ENABLED
 #include "xselectrectangle.hpp"
 #include "cmdline.h"
 
@@ -251,6 +254,7 @@ int app( int argc, char** argv ) {
     bool decorations = !options.nodecorations_flag;
     bool themeon = (bool)options.theme_given;
     std::string theme = options.theme_arg;
+    bool shadergiven = (bool)options.shader_given;
     std::string shader = options.shader_arg;
     struct timespec start, time;
     int xoffset = 0;
@@ -278,6 +282,15 @@ int app( int argc, char** argv ) {
     }
     unsigned int magpixels = (unsigned int)options.magpixels_arg;
     cmdline_parser_free( &options );
+#ifndef OPENGL_ENABLED
+    if ( opengl || themeon || magenabled ) {
+        throw std::runtime_error( "Slop wasn't compiled with OpenGL support, so themes, magnifications, and shaders are disabled! Try compiling it with the CMAKE_OPENGL_ENABLED set to true." );
+    }
+#else // OPENGL_ENABLED
+    if ( ( themeon || magenabled || shadergiven ) && !opengl ) {
+        throw std::runtime_error( "Slop needs --opengl enabled to use themes, shaders, or magnifications." );
+    }
+#endif
 
     // First we set up the x interface and grab the mouse,
     // if we fail for either we exit immediately.
@@ -364,6 +377,7 @@ int app( int argc, char** argv ) {
                     t.applyMinMaxSize( minimumsize, maximumsize );
                     // Make sure we only apply offsets to windows that we've forcibly removed decorations on.
                     if ( !selection ) {
+#ifdef OPENGL_ENABLED
                         if ( opengl ) {
                             selection = new slop::GLSelectRectangle( t.m_x, t.m_y,
                                                                      t.m_x + t.m_width,
@@ -376,13 +390,16 @@ int app( int argc, char** argv ) {
                             ((slop::GLSelectRectangle*)(selection))->setTheme( themeon, theme );
                             ((slop::GLSelectRectangle*)(selection))->setShader( shader );
                         } else {
+#endif // OPENGL_ENABLED
                             selection = new slop::XSelectRectangle( t.m_x, t.m_y,
                                                                     t.m_x + t.m_width,
                                                                     t.m_y + t.m_height,
                                                                     borderSize,
                                                                     highlight,
                                                                     r, g, b, a );
+#ifdef OPENGL_ENABLED
                         }
+#endif // OPENGL_ENABLED
                     } else {
                         selection->setGeo( t.m_x, t.m_y, t.m_x + t.m_width, t.m_y + t.m_height );
                     }
@@ -424,6 +441,7 @@ int app( int argc, char** argv ) {
                 if ( !selection ) {
                     int sx, sy, ex, ey;
                     constrain( cx, cy, xengine->m_mousex, xengine->m_mousey, padding, minimumsize, maximumsize, &sx, &sy, &ex, &ey );
+#ifdef OPENGL_ENABLED
                     if ( opengl ) {
                         selection = new slop::GLSelectRectangle( sx, sy,
                                                                  ex, ey,
@@ -435,12 +453,15 @@ int app( int argc, char** argv ) {
                         ((slop::GLSelectRectangle*)(selection))->setTheme( themeon, theme );
                         ((slop::GLSelectRectangle*)(selection))->setShader( shader );
                     } else {
+#endif // OPENGL_ENABLED
                         selection = new slop::XSelectRectangle( sx, sy,
                                                                 ex, ey,
                                                                 borderSize,
                                                                 highlight,
                                                                 r, g, b, a );
+#ifdef OPENGL_ENABLED
                     }
+#endif // OPENGL_ENABLED
                 }
                 windowmemory = window;
                 // If the user has let go of the mouse button, we'll just
@@ -537,6 +558,8 @@ int main( int argc, char** argv ) {
         fprintf( stderr, "Unhandled Exception Thrown: %s\n", exception.what() );
     } catch( std::string err ) {
         fprintf( stderr, "Unhandled Exception Thrown: %s\n", err.c_str() );
+    } catch( char* err ) {
+        fprintf( stderr, "Unhandled Exception Thrown: %s\n", err );
     } catch( ... ) {
         fprintf( stderr, "Unknown Exception Thrown!\n" );
     }

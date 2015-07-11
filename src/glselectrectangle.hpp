@@ -28,13 +28,11 @@
 
 #include <unistd.h>
 
+#include <Imlib2.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glew.h>
 #include <GL/glxext.h>
-#define ILUT_USE_OPENGL
-#include <IL/il.h>
-#include <IL/ilut.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/Xrender.h>
@@ -76,8 +74,8 @@ public:
     unsigned int        m_texid;
     unsigned int        m_cornerids[4];
     unsigned int        m_straightid;
-    unsigned int        m_straightwidth;
-    unsigned int        m_straightheight;
+    int                 m_straightwidth;
+    int                 m_straightheight;
     int                 m_offsetx;
     int                 m_offsety;
     int                 m_offsetw;
@@ -95,6 +93,8 @@ public:
     std::string         m_shader;
     std::vector<XRRCrtcInfo*> m_monitors;
     slop::Framebuffer*  m_framebuffer;
+private:
+    unsigned int loadImage( unsigned int* texture, std::string path );
 };
 
 }

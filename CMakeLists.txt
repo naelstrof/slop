@@ -5,6 +5,8 @@ set( slop_VERSION_MAJOR 4 )
 set( slop_VERSION_MINOR 2 )
 set( slop_VERSION_PATCH 16 )
 
+set( CMAKE_OPENGL_SUPPORT FALSE CACHE BOOL "Whether or not to compile with OpenGL, shaders, magnification, and theming support." )
+
 set( BIN_TARGET     "${PROJECT_NAME}" )
 if( NOT CMAKE_INSTALL_PREFIX )
    set( CMAKE_INSTALL_PREFIX "/usr" )
@@ -75,26 +77,35 @@ configure_file( "src/cmdline.in" "${CMAKE_SOURCE_DIR}/src/cmdline.h" )
 add_custom_target( README.md "./generateReadme.sh" DEPENDS "slop" )
 
 # Sources
-set( source
-     src/cmdline.c
-     src/selectrectangle.cpp
-     src/glselectrectangle.cpp
-     src/shader.cpp
-     src/framebuffer.cpp
-     src/resource.cpp
-     src/xselectrectangle.cpp
-     src/x.cpp
-     src/main.cpp )
+if( CMAKE_OPENGL_SUPPORT )
+    set( source
+         src/cmdline.c
+         src/selectrectangle.cpp
+         src/glselectrectangle.cpp
+         src/shader.cpp
+         src/framebuffer.cpp
+         src/resource.cpp
+         src/xselectrectangle.cpp
+         src/x.cpp
+         src/main.cpp )
+else()
+    set( source
+         src/cmdline.c
+         src/selectrectangle.cpp
+         src/xselectrectangle.cpp
+         src/x.cpp
+         src/main.cpp )
+endif()
 
 # Obtain library paths and make sure they exist.
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmakemodules" )
+find_package( Imlib2    REQUIRED )
 find_package( X11       REQUIRED )
 find_package( XExt      REQUIRED )
 find_package( OpenGL    REQUIRED )
 find_package( GLX       REQUIRED )
 find_package( XRender   REQUIRED )
 find_package( XRandr    REQUIRED )
-find_package( DevIL     REQUIRED )
 find_package( GLEW      REQUIRED )
 # This library is needed only for Ubuntu it seems, some platforms don't even
 # ship with it. I couldn't find a way to do a test compile to check if librt
@@ -105,56 +116,53 @@ set( CMAKE_CXX_FLAGS
      "${CMAKE_CXX_FLAGS} ${CMAKE_IMLIB2_CXX_FLAGS}" )
 
 # Includes
+include_directories( "${X11_INCLUDE_DIR}"
+                     "${XEXT_INCLUDE_DIR}" )
+
+if ( CMAKE_OPENGL_SUPPORT )
+include_directories( "${IMLIB2_INCLUDE_DIR}"
+                     "${XRANDR_INCLUDE_DIR}"
+                     "${OPENGL_INCLUDE_DIR}"
+                     "${GLX_INCLUDE_DIR}"
+                     ${GLEW_INCLUDE_DIRS}
+                     ${XRENDER_INCLUDE_DIRS} )
+endif()
+
 if ( RT_INCLUDE_DIR )
-    include_directories( ${X11_INCLUDE_DIR}
-                         ${XEXT_INCLUDE_DIR}
-                         ${XRANDR_INCLUDE_DIR}
-                         ${OPENGL_INCLUDE_DIR}
-                         ${IL_INCLUDE_DIR}
-                         ${GLX_INCLUDE_DIR}
-                         ${GLEW_INCLUDE_DIRS}
-                         ${XRENDER_INCLUDE_DIRS}
-                         ${RT_INCLUDE_DIR} )
-else()
-    include_directories( ${X11_INCLUDE_DIR}
-                         ${OPENGL_INCLUDE_DIR}
-                         ${IL_INCLUDE_DIR}
-                         ${GLEW_INCLUDE_DIRS}
-                         ${GLX_INCLUDE_DIR}
-                         ${XEXT_INCLUDE_DIR} )
+    include_directories( ${RT_INCLUDE_DIR} )
 endif()
 
 # Executable
 add_executable( "${BIN_TARGET}" ${source} )
 
 # Libraries
-if ( RT_LIBRARY )
+target_link_libraries( "${BIN_TARGET}"
+                       ${X11_LIBRARIES}
+                       "${XEXT_LIBRARY}" )
+
+if ( CMAKE_OPENGL_SUPPORT )
     target_link_libraries( "${BIN_TARGET}"
-                           ${X11_LIBRARIES}
+                           ${IMLIB2_LIBRARIES}
                            ${OPENGL_LIBRARIES}
-                           ${IL_LIBRARIES}
-                           ${ILUT_LIBRARIES}
                            ${GLX_LIBRARIES}
                            ${GLEW_LIBRARIES}
                            ${XRENDER_LIBRARIES}
-                           "${XEXT_LIBRARY}"
-                           "${XRANDR_LIBRARY}"
-                           "${RT_LIBRARY}" )
-else()
+                           "${XRANDR_LIBRARY}" )
+endif()
+
+
+if ( RT_LIBRARY )
     target_link_libraries( "${BIN_TARGET}"
-                           ${OPENGL_LIBRARIES}
-                           ${IL_LIBRARIES}
-                           ${ILUT_LIBRARIES}
-                           ${GLEW_LIBRARIES}
-                           ${GLX_LIBRARIES}
-                           ${X11_LIBRARIES}
-                           "${XEXT_LIBRARY}" )
+                           "${RT_LIBRARY}" )
 endif()
 
 install( TARGETS ${BIN_TARGET}
          DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
 
-install( DIRECTORY "${CMAKE_SOURCE_DIR}/share"
-         DESTINATION "${CMAKE_INSTALL_PREFIX}" )
-
 add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+
+if( CMAKE_OPENGL_SUPPORT )
+    install( DIRECTORY "${CMAKE_SOURCE_DIR}/share"
+             DESTINATION "${CMAKE_INSTALL_PREFIX}" )
+    add_definitions(-DOPENGL_ENABLED=1)
+endif()

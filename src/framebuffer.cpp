@@ -90,7 +90,7 @@ slop::Framebuffer::Framebuffer( unsigned int width, unsigned int height, unsigne
         //Make sure we unbind when we're done.
         glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
     } else {
-        fprintf( stderr, "Error: Failed to create framebuffer! You need OpenGL 3.0 or the GL_EXT_framebuffer_object extension!\n" );
+        throw std::runtime_error( "Error: Failed to create framebuffer! You need OpenGL 3.0 or the GL_EXT_framebuffer_object extension!" );
     }
 }
 
