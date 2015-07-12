@@ -3,7 +3,7 @@ cmake_minimum_required( VERSION 2.8 )
 project( "slop" )
 set( slop_VERSION_MAJOR 4 )
 set( slop_VERSION_MINOR 2 )
-set( slop_VERSION_PATCH 16 )
+set( slop_VERSION_PATCH 17 )
 
 set( CMAKE_OPENGL_SUPPORT FALSE CACHE BOOL "Whether or not to compile with OpenGL, shaders, magnification, and theming support." )
 

@@ -121,7 +121,7 @@ Feel free to make your own themes and submit a pull request to see if it can be 
 help
 ----
 ```text
-slop v4.2.16
+slop v4.2.17
 
 Copyright (C) 2014 Dalton Nell, Slop Contributors
 (https://github.com/naelstrof/slop/graphs/contributors)
@@ -200,6 +200,12 @@ Examples
 
     $ # Classic Windows XP selection.
     $ slop -l -c 0.3,0.4,0.6,0.4
+
+    $ # Wiggle wiggle!
+    $ slop --opengl --shader wiggle
+
+    $ # Edgy textures or something.
+    $ slop --opengl --theme gothic
 
     $ # Change output format to use safer parsing
     $ slopoutput=$(slop -f "%x %y %w %h")

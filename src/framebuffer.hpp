@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <glm/glm.hpp>
+#include <stdexcept>
 
 #include "x.hpp"
 #include "shader.hpp"
