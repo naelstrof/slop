@@ -21,7 +21,6 @@
 #include <time.h>
 #include <cstdio>
 #include <sstream>
-#include <execinfo.h>
 #include <stdexcept>
 
 #ifdef __MACH__
