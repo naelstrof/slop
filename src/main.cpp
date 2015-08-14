@@ -253,7 +253,9 @@ int app( int argc, char** argv ) {
     bool decorations = !options.nodecorations_flag;
     bool themeon = (bool)options.theme_given;
     std::string theme = options.theme_arg;
+#ifdef OPENGL_ENABLED
     bool shadergiven = (bool)options.shader_given;
+#endif
     std::string shader = options.shader_arg;
     struct timespec start, time;
     int xoffset = 0;
@@ -274,12 +276,14 @@ int app( int argc, char** argv ) {
     }
     std::string format = options.format_arg;
     bool magenabled = options.magnify_flag;
+#ifdef OPENGL_ENABLED
     float magstrength = options.magstrength_arg;
     if ( options.magpixels_arg < 0 ) {
         fprintf( stderr, "Error: --magpixels < 0, it's an unsigned integer you twat. Stop trying to underflow me!\n" );
         return EXIT_FAILURE;
     }
     unsigned int magpixels = (unsigned int)options.magpixels_arg;
+#endif
     cmdline_parser_free( &options );
 #ifndef OPENGL_ENABLED
     if ( opengl || themeon || magenabled ) {

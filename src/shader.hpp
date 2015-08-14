@@ -6,9 +6,11 @@
 #include <string>
 #include <cstdio>
 #include <vector>
+#ifdef OPENGL_ENABLED
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
+#endif
 #include <string>
 #include <fstream>
 #include <streambuf>
@@ -25,9 +27,11 @@ public:
     void            unbind();
     void            setParameter( std::string name, int foo );
     void            setParameter( std::string name, float foo );
+#ifdef OPENGL_ENABLED
     void            setParameter( std::string name, glm::mat4 foo );
     void            setParameter( std::string name, glm::vec4 foo );
     void            setParameter( std::string name, glm::vec2 foo );
+#endif
     void            setAttribute( std::string name, unsigned int buffer, unsigned int stepsize );
     int             m_type;
 private:
