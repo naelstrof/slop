@@ -115,7 +115,7 @@ Feel free to make your own themes and submit a pull request to see if it can be 
 help
 ----
 ```text
-slop v4.2.18
+slop v4.2.19
 
 Copyright (C) 2014 Dalton Nell, Slop Contributors
 (https://github.com/naelstrof/slop/graphs/contributors)

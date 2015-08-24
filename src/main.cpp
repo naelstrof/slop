@@ -54,6 +54,11 @@ void current_utc_time(struct timespec *ts) {
 }
 
 int printSelection( std::string format, bool cancelled, int x, int y, int w, int h, int window ) {
+    //Impossible to select nothing
+    if (!cancelled) {
+        w += 1;
+        h += 1;
+    }
     size_t pos = 0;
     while ( ( pos = format.find( "%", pos ) ) != std::string::npos ) {
         if ( pos + 1 > format.size() ) {
