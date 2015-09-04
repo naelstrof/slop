@@ -214,6 +214,17 @@ void slop::GLSelectRectangle::findOptimalGlassPosition() {
 void slop::GLSelectRectangle::generateMagnifyingGlass() {
     int x = xengine->m_mousex-m_glassPixels/2;
     int y = xengine->m_mousey-m_glassPixels/2;
+    bool fx = xengine->m_mousex < m_x+m_width/2;
+    bool fy = xengine->m_mousey < m_y+m_height/2;
+    // Mouse behavior SUCKS
+    if ( !fx && !fy ) {
+        x += 1;
+        y += 1;
+    } else if ( fx && !fy ) {
+        y += 1;
+    } else if ( !fx && fy ) {
+        x += 1;
+    }
     int w = m_glassPixels;
     int h = m_glassPixels;
     constrainWithinMonitor( &x, &y, &w, &h );

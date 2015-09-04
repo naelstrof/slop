@@ -54,11 +54,6 @@ void current_utc_time(struct timespec *ts) {
 }
 
 int printSelection( std::string format, bool cancelled, int x, int y, int w, int h, int window ) {
-    //Impossible to select nothing
-    if (!cancelled) {
-        w += 1;
-        h += 1;
-    }
     size_t pos = 0;
     while ( ( pos = format.find( "%", pos ) ) != std::string::npos ) {
         if ( pos + 1 > format.size() ) {
@@ -292,7 +287,7 @@ int app( int argc, char** argv ) {
     cmdline_parser_free( &options );
 #ifndef OPENGL_ENABLED
     if ( opengl || themeon || magenabled ) {
-        throw std::runtime_error( "Slop wasn't compiled with OpenGL support, so themes, magnifications, and shaders are disabled! Try compiling it with the CMAKE_OPENGL_ENABLED set to true." );
+        throw std::runtime_error( "Slop wasn't compiled with OpenGL support, so themes, magnifications, and shaders are disabled! Try compiling it with the CMAKE_OPENGL_SUPPORT set to true." );
     }
 #else // OPENGL_ENABLED
     if ( ( themeon || magenabled || shadergiven ) && !opengl ) {
@@ -511,7 +506,7 @@ int app( int argc, char** argv ) {
                 int sx, sy, ex, ey;
                 constrain( cx, cy, xengine->m_mousex, xengine->m_mousey, padding, minimumsize, maximumsize, &sx, &sy, &ex, &ey );
                 // Set the selection rectangle's dimensions to mouse movement.
-                selection->setGeo( sx + xoffset, sy + yoffset, ex-1, ey-1 );
+                selection->setGeo( sx + xoffset, sy + yoffset, ex, ey );
                 selection->update( deltatime );
                 break;
             }
