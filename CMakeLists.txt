@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 2.8 )
 
 project( "slop" )
 set( slop_VERSION_MAJOR 4 )
-set( slop_VERSION_MINOR 2 )
+set( slop_VERSION_MINOR 3 )
 set( slop_VERSION_PATCH 20 )
 
 set( CMAKE_OPENGL_SUPPORT FALSE CACHE BOOL "Whether or not to compile with OpenGL, shaders, magnification, and theming support." )
@@ -10,6 +10,10 @@ set( CMAKE_OPENGL_SUPPORT FALSE CACHE BOOL "Whether or not to compile with OpenG
 set( BIN_TARGET     "${PROJECT_NAME}" )
 if( NOT CMAKE_INSTALL_PREFIX )
    set( CMAKE_INSTALL_PREFIX "/usr" )
+endif()
+
+if( NOT INSTALL_PREFIX )
+   set( INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "The path where slop thinks it resides in, so that it can find the shaders. This is not necessarily the CMAKE_INSTALL_PREFIX. For example if the shaders will exist in /usr/share/slop, INSTALL_PREFIX should be \"/usr\"." )
 endif()
 
 if( NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE )
@@ -159,7 +163,7 @@ endif()
 install( TARGETS ${BIN_TARGET}
          DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
 
-add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+add_definitions(-DINSTALL_PREFIX="${INSTALL_PREFIX}")
 
 if( CMAKE_OPENGL_SUPPORT )
     install( DIRECTORY "${CMAKE_SOURCE_DIR}/share"

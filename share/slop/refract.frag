@@ -27,6 +27,8 @@ void main() {
     vec2 offset = (p/len)*cos(len*12.0-time*4.0)*0.005;
 
     // Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)
+    float blurSize = 1.f/desktopWidth*blurMultiplier;
+    vec2 blurMultiplyVec      = vec2(0.0f, 1.0f);
     vec3 incrementalGaussian;
     incrementalGaussian.x = 1.0f / (sqrt(2.0f * pi) * sigma);
     incrementalGaussian.y = exp(-0.5f / (sigma * sigma));
