@@ -543,72 +543,88 @@ void slop::GLSelectRectangle::update( double dt ) {
 
     if ( !m_themed ) {
         glColor4f( m_r, m_g, m_b, m_a );
-        glRecti( m_x-m_border, m_y, m_x+m_width+m_border, m_y-m_border );
-        glRecti( m_x-m_border, m_y+m_height, m_x+m_width+m_border, m_y+m_height+m_border );
-        glRecti( m_x-m_border, m_y, m_x, m_y+m_height );
-        glRecti( m_x+m_width, m_y, m_x+m_width+m_border, m_y+m_height );
+        if ( m_highlight ) {
+            glRecti( m_x-m_border, m_y+m_height+m_border, m_x+m_width+m_border, m_y-m_border );
+        } else {
+            glRecti( m_x-m_border, m_y, m_x+m_width+m_border, m_y-m_border );
+            glRecti( m_x-m_border, m_y+m_height, m_x+m_width+m_border, m_y+m_height+m_border );
+            glRecti( m_x-m_border, m_y, m_x, m_y+m_height );
+            glRecti( m_x+m_width, m_y, m_x+m_width+m_border, m_y+m_height );
+        }
     } else {
         glColor4f( m_r, m_g, m_b, m_a );
         glEnable( GL_TEXTURE_2D );
-        glBindTexture( GL_TEXTURE_2D, m_straightid );
-        float something = (float)(m_border)/(float)m_straightheight;
-        float txoffset = (((float)m_width+m_border)/(float)m_straightwidth)/something;
-        float tyoffset = (((float)m_height+m_border)/(float)m_straightwidth)/something;
-        //float ratio = ((float)m_straightwidth/(float)m_straightheight);
-        glBegin( GL_QUADS );
-        // straight top
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y-m_border );
-        glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y-m_border );
-        glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y );
-        // straight bot
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y+m_height );
-        glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height );
-        glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height+m_border );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y+m_height+m_border );
-        // straight left
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y-m_border/2 );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x, m_y-m_border/2 );
-        glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x, m_y+m_height+m_border/2 );
-        glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x-m_border, m_y+m_height+m_border/2 );
-        // straight right
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y-m_border/2 );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y-m_border/2 );
-        glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border/2 );
-        glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x+m_width, m_y+m_height+m_border/2 );
-        glEnd();
-        // top left corner
-        glBindTexture( GL_TEXTURE_2D, m_cornerids[0] );
-        glBegin( GL_QUADS );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y-m_border );
-        glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y-m_border );
-        glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y );
-        glEnd();
-        // top right
-        glBindTexture( GL_TEXTURE_2D, m_cornerids[1] );
-        glBegin( GL_QUADS );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y-m_border );
-        glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y-m_border );
-        glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y );
-        glEnd();
-        // bottom left
-        glBindTexture( GL_TEXTURE_2D, m_cornerids[2] );
-        glBegin( GL_QUADS );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y+m_height );
-        glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y+m_height );
-        glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y+m_height+m_border );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y+m_height+m_border );
-        glEnd();
-        // bottom right
-        glBindTexture( GL_TEXTURE_2D, m_cornerids[2] );
-        glBegin( GL_QUADS );
-        glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y+m_height );
-        glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y+m_height );
-        glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border );
-        glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y+m_height+m_border );
-        glEnd();
+        if ( !m_highlight ) {
+            glBindTexture( GL_TEXTURE_2D, m_straightid );
+            float something = (float)(m_border)/(float)m_straightheight;
+            float txoffset = (((float)m_width+m_border)/(float)m_straightwidth)/something;
+            float tyoffset = (((float)m_height+m_border)/(float)m_straightwidth)/something;
+            //float ratio = ((float)m_straightwidth/(float)m_straightheight);
+            glBegin( GL_QUADS );
+            // straight top
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y-m_border );
+            glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y-m_border );
+            glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y );
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y );
+            // straight bot
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border/2, m_y+m_height );
+            glTexCoord2f(txoffset, 0.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height );
+            glTexCoord2f(txoffset, 1.0); glVertex2f( m_x+m_width+m_border/2, m_y+m_height+m_border );
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border/2, m_y+m_height+m_border );
+            // straight left
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y-m_border/2 );
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x, m_y-m_border/2 );
+            glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x, m_y+m_height+m_border/2 );
+            glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x-m_border, m_y+m_height+m_border/2 );
+            // straight right
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y-m_border/2 );
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y-m_border/2 );
+            glTexCoord2f(tyoffset, 0.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border/2 );
+            glTexCoord2f(tyoffset, 1.0); glVertex2f( m_x+m_width, m_y+m_height+m_border/2 );
+            glEnd();
+            // top left corner
+            glBindTexture( GL_TEXTURE_2D, m_cornerids[0] );
+            glBegin( GL_QUADS );
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y-m_border );
+            glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y-m_border );
+            glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y );
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y );
+            glEnd();
+            // top right
+            glBindTexture( GL_TEXTURE_2D, m_cornerids[1] );
+            glBegin( GL_QUADS );
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y-m_border );
+            glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y-m_border );
+            glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y );
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y );
+            glEnd();
+            // bottom left
+            glBindTexture( GL_TEXTURE_2D, m_cornerids[2] );
+            glBegin( GL_QUADS );
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y+m_height );
+            glTexCoord2f(1.0, 0.0); glVertex2f( m_x, m_y+m_height );
+            glTexCoord2f(1.0, 1.0); glVertex2f( m_x, m_y+m_height+m_border );
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y+m_height+m_border );
+            glEnd();
+            // bottom right
+            glBindTexture( GL_TEXTURE_2D, m_cornerids[2] );
+            glBegin( GL_QUADS );
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x+m_width, m_y+m_height );
+            glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y+m_height );
+            glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y+m_height+m_border );
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x+m_width, m_y+m_height+m_border );
+            glEnd();
+        } else {
+            glBindTexture( GL_TEXTURE_2D, m_cornerids[0] );
+            glBegin( GL_QUADS );
+            // straight top
+            glTexCoord2f(0.0, 1.0); glVertex2f( m_x-m_border, m_y+m_border+m_height );
+            glTexCoord2f(1.0, 1.0); glVertex2f( m_x+m_width+m_border, m_y+m_border+m_height );
+            glTexCoord2f(1.0, 0.0); glVertex2f( m_x+m_width+m_border, m_y-m_border );
+            glTexCoord2f(0.0, 0.0); glVertex2f( m_x-m_border, m_y-m_border );
+            glEnd();
+        }
+        glDisable( GL_TEXTURE_2D );
     }
 
     m_framebuffer->unbind();
