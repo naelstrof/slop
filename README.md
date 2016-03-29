@@ -64,7 +64,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 * [Void Linux: slop](https://github.com/voidlinux/void-packages/blob/24ac22af44018e2598047e5ef7fd3522efa79db5/srcpkgs/slop/template)
 * [FreeBSD: x11/slop](http://www.freshports.org/x11/slop/)
 * [OpenBSD: graphics/slop](http://openports.se/graphics/slop)
-* [CRUX: 6c37/slop](https://github.com/6c37/crux-ports/tree/master/slop)
+* [CRUX: 6c37/slop](https://github.com/6c37/crux-ports/tree/3.2/slop)
 * [Gentoo: x11-misc/slop::fkmclane](https://github.com/fkmclane/overlay/tree/master/x11-misc/slop)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
 
