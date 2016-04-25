@@ -1,6 +1,6 @@
 # slop
 
-slop (Select Operation) is an application that querys for a selection from the user and prints the region to stdout. It grabs the mouse and turns it into a crosshair, lets the user click and drag to make a selection (or click on a window) while drawing a pretty box around it, then finally prints the selection's dimensions to stdout.
+slop (Select Operation) is an application that queries for a selection from the user and prints the region to stdout. It grabs the mouse and turns it into a crosshair, lets the user click and drag to make a selection (or click on a window) while drawing a pretty box around it, then finally prints the selection's dimensions to stdout.
 
 ## Features
 * Hovering over a window will cause a selection rectangle to appear over it.
@@ -66,6 +66,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 * [OpenBSD: graphics/slop](http://openports.se/graphics/slop)
 * [CRUX: 6c37/slop](https://github.com/6c37/crux-ports/tree/3.2/slop)
 * [Gentoo: x11-misc/slop::fkmclane](https://github.com/fkmclane/overlay/tree/master/x11-misc/slop)
+* [GNU Guix: slop](https://www.gnu.org/software/guix/packages/#slop)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
 
 
