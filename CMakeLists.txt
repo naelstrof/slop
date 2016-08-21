@@ -106,11 +106,6 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmakemodules" )
 find_package( Imlib2    REQUIRED )
 find_package( X11       REQUIRED )
 find_package( XExt      REQUIRED )
-find_package( OpenGL    REQUIRED )
-find_package( GLX       REQUIRED )
-find_package( XRender   REQUIRED )
-find_package( XRandr    REQUIRED )
-find_package( GLEW      REQUIRED )
 # This library is needed only for Ubuntu it seems, some platforms don't even
 # ship with it. I couldn't find a way to do a test compile to check if librt
 # was needed, so instead I just didn't mark it as REQUIRED.
@@ -124,6 +119,11 @@ include_directories( "${X11_INCLUDE_DIR}"
                      "${XEXT_INCLUDE_DIR}" )
 
 if ( CMAKE_OPENGL_SUPPORT )
+find_package( OpenGL    REQUIRED )
+find_package( GLX       REQUIRED )
+find_package( XRender   REQUIRED )
+find_package( XRandr    REQUIRED )
+find_package( GLEW      REQUIRED )
 include_directories( "${IMLIB2_INCLUDE_DIR}"
                      "${XRANDR_INCLUDE_DIR}"
                      "${OPENGL_INCLUDE_DIR}"
