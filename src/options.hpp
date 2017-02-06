@@ -28,7 +28,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-static std::string validStringArguments[] = { "borderSize", "padding", "color", "shader", "highlight", "format" };
+static std::string validStringArguments[] = { "bordersize", "padding", "color", "shader", "highlight", "format" };
 static char validCharArguments[] = { 'b', 'p', 'c', 's', 'h', 'f' };
 // 0 for flag, 1 for how many arguments to eat up
 static unsigned int isFlagArgument[] = { false, false, false, false, true, false };

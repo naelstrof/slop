@@ -91,6 +91,7 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     while( memory.running ) {
         // This is specifically for wayland updates.
         wl_display_dispatch_pending(wayland->display);
+        // We move our statemachine forward.
         memory.update( 1 );
 
         // Then we draw our junk to a framebuffer.
