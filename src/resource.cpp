@@ -47,7 +47,7 @@ std::string Resource::getRealPath( std::string localpath ) {
         return sysconfig + localpath;
     }
     std::string err = "The file or folder " + localpath + " was not found in either " + sysconfig + " or " + usrconfig + "\n";
-    throw std::runtime_error(err);
+    throw new std::runtime_error(err);
     return localpath;
 }
 
