@@ -1,15 +1,8 @@
 #include "shader.hpp"
 
-slop::Shader::Shader( std::string name, std::string vert, std::string frag, std::string type ) {
-    m_name = name;
-    // Set up the type of the shader, this is read by render to know what kind of matricies it needs.
-    if ( type == "perspective" ) {
-        m_type = 0;
-    } else if ( type == "orthographic" ) {
-        m_type = 1;
-    } else {
-        m_type = -1;
-    }
+Shader::Shader( std::string vert, std::string frag) {
+    vert = resource->getRealPath(vert);
+    frag = resource->getRealPath(frag);
     m_good = false;
     // Create the program to link to.
     m_program = glCreateProgram();
@@ -23,33 +16,46 @@ slop::Shader::Shader( std::string name, std::string vert, std::string frag, std:
 
     const char* vertsrc = vert_contents.c_str();
     const char* fragsrc = frag_contents.c_str();
+    
+    if ( vert_contents.length() <= 0 ) {
+        std::string errstring = "Failed to open file (or is empty) `" + vert + "`.\n";
+        throw new std::runtime_error(errstring);
+    }
+
+    if ( frag_contents.length() <= 0 ) {
+        std::string errstring = "Failed to open file (or is empty) `" + frag + "`.\n";
+        throw new std::runtime_error(errstring);
+    }
 
     // Compile both shaders.
     unsigned int vertShader = glCreateShader( GL_VERTEX_SHADER );
     glShaderSource( vertShader, 1, &vertsrc , NULL );
-    int err = compile( vertShader );
+    std::string errortxt;
+    int err = compile( vertShader, errortxt );
 
     if ( err ) {
-        fprintf( stderr, "Failed to compile shader %s.\n", vert.c_str() );
+        std::string errstring = "Failed to compile shader `" + vert + "`:\n" + errortxt;
+        throw new std::runtime_error(errstring);
         glDeleteShader( vertShader );
         return;
     }
 
     unsigned int fragShader = glCreateShader( GL_FRAGMENT_SHADER );
     glShaderSource( fragShader, 1, &fragsrc, NULL );
-    err = compile( fragShader );
+    err = compile( fragShader, errortxt );
     if ( err ) {
-        fprintf( stderr, "Failed to compile shader %s.\n", frag.c_str() );
+        std::string errstring = "Failed to compile shader `" + frag + "`:\n" + errortxt;
+        throw new std::runtime_error(errstring);
         glDeleteShader( vertShader );
         glDeleteShader( fragShader );
         return;
     }
 
-
     // Then attempt to link them to this shader.
-    err = link( vertShader, fragShader );
+    err = link( vertShader, fragShader, errortxt );
     if ( err ) {
-        fprintf( stderr, "Failed to link shader %s.\n", name.c_str() );
+        std::string errstring = "Failed to link shader `" + vert + "` and  `" + frag + "`:\n" + errortxt;
+        throw new std::runtime_error(errstring);
         glDeleteShader( vertShader );
         glDeleteShader( fragShader );
         return;
@@ -62,57 +68,57 @@ slop::Shader::Shader( std::string name, std::string vert, std::string frag, std:
     glUseProgram( 0 );
 }
 
-slop::Shader::~Shader() {
+Shader::~Shader() {
     glDeleteProgram( m_program );
 }
 
-unsigned int slop::Shader::getProgram() {
+unsigned int Shader::getProgram() {
     return m_program;
 }
 
-void slop::Shader::bind() {
+void Shader::bind() {
     glUseProgram( m_program );
 }
 
-int slop::Shader::compile( unsigned int shader ) {
+int Shader::compile( unsigned int shader, std::string& error ) {
     glCompileShader( shader );
 
     // Compiling the shader is the easy part, all this junk down here is for printing the error it might generate.
-    int result;
+    int result = GL_FALSE;
     int logLength;
     glGetShaderiv( shader, GL_COMPILE_STATUS, &result );
     glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &logLength );
     if ( result == GL_FALSE ) {
         char* errormsg = new char[ logLength ];
         glGetShaderInfoLog( shader, logLength, NULL, errormsg );
-        fprintf( stderr, "%s\n", errormsg );
+        error = errormsg;
         delete[] errormsg;
         return 1;
     }
     return 0;
 }
 
-int slop::Shader::link( unsigned int vertshader, unsigned int fragshader ) {
+int Shader::link( unsigned int vertshader, unsigned int fragshader, std::string& error ) {
     glAttachShader( m_program, vertshader );
     glAttachShader( m_program, fragshader );
     glLinkProgram( m_program );
 
     // Linking the shader is the easy part, all this junk down here is for printing the error it might generate.
-    int result;
+    int result = GL_FALSE;
     int logLength;
     glGetProgramiv( m_program, GL_LINK_STATUS, &result);
     glGetProgramiv( m_program, GL_INFO_LOG_LENGTH, &logLength);
     if ( result == GL_FALSE ) {
         char* errormsg = new char[ logLength ];
         glGetProgramInfoLog( m_program, logLength, NULL, errormsg );
-        fprintf( stderr, "%s\n", errormsg );
+        error = errormsg;
         delete[] errormsg;
         return 1;
     }
     return 0;
 }
 
-unsigned int slop::Shader::getUniformLocation( std::string name ) {
+unsigned int Shader::getUniformLocation( std::string name ) {
     if ( !m_good ) {
         return 0;
     }
@@ -120,42 +126,42 @@ unsigned int slop::Shader::getUniformLocation( std::string name ) {
     return glGetUniformLocation( m_program, name.c_str() );
 }
 
-void slop::Shader::setParameter( std::string name, int foo ) {
+void Shader::setParameter( std::string name, int foo ) {
     if ( !m_good ) {
         return;
     }
     glUniform1i( getUniformLocation( name ), foo );
 }
 
-void slop::Shader::setParameter( std::string name, float foo ) {
+void Shader::setParameter( std::string name, float foo ) {
     if ( !m_good ) {
         return;
     }
     glUniform1f( getUniformLocation( name ), foo );
 }
 
-void slop::Shader::setParameter( std::string name, glm::mat4 foo ) {
+void Shader::setParameter( std::string name, glm::mat4& foo ) {
     if ( !m_good ) {
         return;
     }
     glUniformMatrix4fv( getUniformLocation( name ), 1, GL_FALSE, glm::value_ptr( foo ) );
 }
 
-void slop::Shader::setParameter( std::string name, glm::vec4 foo ) {
+void Shader::setParameter( std::string name, glm::vec4 foo ) {
     if ( !m_good ) {
         return;
     }
     glUniform4f( getUniformLocation( name ), foo.x, foo.y, foo.z, foo.w );
 }
 
-void slop::Shader::setParameter( std::string name, glm::vec2 foo ) {
+void Shader::setParameter( std::string name, glm::vec2 foo ) {
     if ( !m_good ) {
         return;
     }
     glUniform2f( getUniformLocation( name ), foo.x, foo.y );
 }
 
-void slop::Shader::setAttribute( std::string name, unsigned int buffer, unsigned int stepsize ) {
+void Shader::setAttribute( std::string name, unsigned int buffer, unsigned int stepsize ) {
     unsigned int a = glGetAttribLocation( m_program, name.c_str() );
     glEnableVertexAttribArray( a );
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
@@ -163,7 +169,7 @@ void slop::Shader::setAttribute( std::string name, unsigned int buffer, unsigned
     m_activeattribs.push_back( a );
 }
 
-void slop::Shader::unbind() {
+void Shader::unbind() {
     for ( unsigned int i=0; i<m_activeattribs.size(); i++ ) {
         glDisableVertexAttribArray( m_activeattribs[i] );
     }

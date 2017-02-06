@@ -1,48 +1,39 @@
-// shader.hpp: Loads shaders into opengl
+#ifndef N_SHADER_H_
+#define N_SHADER_H_
 
-#ifndef IS_SHADER_H_
-#define IS_SHADER_H_
-
-#include <string>
-#include <cstdio>
+#include <fstream>
 #include <vector>
-#ifdef OPENGL_ENABLED
+#include <string>
+#include <exception>
+
+#include "gl_core_3_3.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <GL/glew.h>
-#endif
-#include <string>
-#include <fstream>
-#include <streambuf>
+#include <EGL/egl.h>
+#include <GL/gl.h>
 
-namespace slop {
+#include "resource.hpp"
 
 class Shader {
 public:
-    Shader( std::string name, std::string vert, std::string frag, std::string shadertype = "other" );
+    Shader( std::string vert, std::string frag );
     ~Shader();
     unsigned int    getProgram();
-    std::string     m_name;
     void            bind();
     void            unbind();
     void            setParameter( std::string name, int foo );
     void            setParameter( std::string name, float foo );
-#ifdef OPENGL_ENABLED
-    void            setParameter( std::string name, glm::mat4 foo );
+    void            setParameter( std::string name, glm::mat4& foo );
     void            setParameter( std::string name, glm::vec4 foo );
     void            setParameter( std::string name, glm::vec2 foo );
-#endif
     void            setAttribute( std::string name, unsigned int buffer, unsigned int stepsize );
-    int             m_type;
 private:
     std::vector<unsigned int>   m_activeattribs;
     bool                        m_good;
     unsigned int                getUniformLocation( std::string );
-    int                         compile( unsigned int shader );
-    int                         link( unsigned int vert, unsigned int frag );
+    int                         compile( unsigned int shader, std::string& error );
+    int                         link( unsigned int vert, unsigned int frag, std::string& error );
     unsigned int                m_program;
 };
 
-};
-
-#endif // IS_SHADER_H_
+#endif // N_SHADER_H_
