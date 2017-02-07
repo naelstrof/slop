@@ -29,6 +29,7 @@ SlopMemory::SlopMemory( SlopOptions* options ) {
     state = (SlopState*)new SlopStart();
     nextState = NULL;
     rectangle = new Rectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight);
+    state->onEnter( *this );
 }
 
 SlopMemory::~SlopMemory() {

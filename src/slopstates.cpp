@@ -11,14 +11,23 @@ void SlopState::update( SlopMemory& memory, double dt ) {
 void SlopState::draw( SlopMemory& memory, glm::mat4 matrix ) {
 }
 
-// Start
+void SlopStart::onEnter( SlopMemory& memory ) {
+    setStartPos = false;
+}
 void SlopStart::update( SlopMemory& memory, double dt ) {
-    if ( mouse->getButton( 1 ) ) {
-        memory.setState( (SlopState*)new SlopStartDrag( mouse->getMousePos() ) );
+    if ( mouse->getButton( 1 ) && !setStartPos ) {
+        startPos = mouse->getMousePos();
+        setStartPos = true;
+    }
+    if ( setStartPos && glm::distance( startPos, mouse->getMousePos() ) > 4 ) {
+        memory.setState( (SlopState*)new SlopStartDrag( startPos ) );
     }
     if ( mouse->hoverWindow != None ) {
         glm::vec4 rect = getWindowGeometry( mouse->hoverWindow, true );
         memory.rectangle->setPoints( glm::vec2( (float)rect.x, (float)rect.y ), glm::vec2( (float)rect.x+rect.z, (float)rect.y+rect.w ) );
+    }
+    if ( setStartPos && !mouse->getButton( 1 ) ) {
+        memory.setState( (SlopState*)new SlopEndDrag() );
     }
 }
 

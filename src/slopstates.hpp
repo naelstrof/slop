@@ -38,7 +38,11 @@ public:
 };
 
 class SlopStart : SlopState {
+private:
+    bool setStartPos;
+    glm::vec2 startPos;
 public:
+    virtual void onEnter( SlopMemory& memory );
     virtual void update( SlopMemory& memory, double dt );
     virtual void draw( SlopMemory& memory, glm::mat4 matrix );
 };
