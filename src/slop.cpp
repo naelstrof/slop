@@ -1,6 +1,6 @@
 #include "slop.hpp"
 
-Wayland* wayland;
+X11* x11;
 Mouse* mouse;
 Keyboard* keyboard;
 Resource* resource;
@@ -69,17 +69,12 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     }
     resource = new Resource();
     // Set up wayland temporarily
-    wayland = new Wayland();
-    wayland->init();
-    mouse = new Mouse( wayland );
-    keyboard = new Keyboard( wayland );
+    x11 = new X11(":0");
+    mouse = new Mouse( x11 );
+    keyboard = new Keyboard( x11 );
 
     // Set up window with GL context
-    Window* window = new Window( 1, 1 );
-    window->setTitle("slop");
-    window->setClass("slop");
-    window->setFullScreen();
-    window->setCurrent();
+    SlopWindow* window = new SlopWindow();
 
     window->framebuffer->setShader( options->shader );
 
@@ -89,8 +84,7 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     // This is where we'll run through all of our stuffs
     //FIXME: We need to sync up with wayland's draw pings so that we don't overdraw ever...
     while( memory.running ) {
-        // This is specifically for wayland updates.
-        wl_display_dispatch_pending(wayland->display);
+        mouse->tick();
         // We move our statemachine forward.
         memory.update( 1 );
 
@@ -108,7 +102,7 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
         if ( err != GL_NO_ERROR ) {
             throw err;
         }
-        if ( keyboard->anyKeyDown() || mouse->getButton( BTN_RIGHT ) ) {
+        if ( keyboard->anyKeyDown() || mouse->getButton( 2 ) ) {
             memory.running = false;
             if ( cancelled ) {
                 *cancelled = true;
@@ -132,7 +126,7 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     // Then we clean up.
     delete window;
     delete mouse;
-    delete wayland;
+    delete x11;
     delete resource;
     if ( deleteOptions ) {
         delete options;

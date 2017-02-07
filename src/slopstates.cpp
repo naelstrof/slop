@@ -13,7 +13,7 @@ void SlopState::draw( SlopMemory& memory, glm::mat4 matrix ) {
 
 // Start
 void SlopStart::update( SlopMemory& memory, double dt ) {
-    if ( mouse->getButton( BTN_LEFT ) ) {
+    if ( mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopStartDrag( mouse->getMousePos() ) );
     }
 }
@@ -32,12 +32,12 @@ void SlopStartDrag::update( SlopMemory& memory, double dt ) {
     char b = startPoint.x > mouse->getMousePos().x;
     char c = (a << 1) | b;
     switch ( c ) {
-        case 0: mouse->setCursor( "lr_angle" ); break;
-        case 1: mouse->setCursor( "ll_angle" ); break;
-        case 2: mouse->setCursor( "ur_angle" ); break;
-        case 3: mouse->setCursor( "ul_angle" ); break;
+        case 0: mouse->setCursor( XC_lr_angle ); break;
+        case 1: mouse->setCursor( XC_ll_angle ); break;
+        case 2: mouse->setCursor( XC_ur_angle ); break;
+        case 3: mouse->setCursor( XC_ul_angle ); break;
     }
-    if ( !mouse->getButton( BTN_LEFT ) ) {
+    if ( !mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
 }

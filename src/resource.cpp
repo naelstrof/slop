@@ -22,21 +22,21 @@
 
 Resource::Resource() {
     // Find the configuration directory.
-    // usually ~/.config/slop-wayland and /usr/share/slop-wayland
+    // usually ~/.config/slop and /usr/share/slop
     char* config = getenv( "XDG_CONFIG_HOME" );
     if ( config == NULL ) {
         char* home = getpwuid(getuid())->pw_dir;
         usrconfig += home;
-        usrconfig += "/.config/slop-wayland/";
-        // SHADER_PREFIX is defined within the CMakeLists.txt
+        usrconfig += "/.config/slop/";
+        // SHADER_PREFIX is defined by the user within CMake, defaults to `/usr`.
         sysconfig = SHADER_PREFIX;
-        sysconfig += "/share/slop-wayland/";
+        sysconfig += "/share/slop/";
         return;
     }
     usrconfig += config;
-    usrconfig += "/slop-wayland/";
+    usrconfig += "/slop/";
     sysconfig = SHADER_PREFIX;
-    sysconfig += "/share/slop-wayland/";
+    sysconfig += "/share/slop/";
 }
 
 std::string Resource::getRealPath( std::string localpath ) {

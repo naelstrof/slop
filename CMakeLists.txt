@@ -10,10 +10,10 @@ if( NOT CMAKE_INSTALL_PREFIX )
 endif()
 
 if( NOT SHADER_PREFIX )
-    set( SHADER_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "The path where slop thinks it resides in, so that it can find the shaders. This is not necessarily the CMAKE_INSTALL_PREFIX. For example if the shaders will exist in /usr/share/slop-wayland, SHADER_PREFIX should be \"/usr\"." )
+    set( SHADER_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "The path where slop thinks it resides in, so that it can find the shaders. This is not necessarily the CMAKE_INSTALL_PREFIX. For example if the shaders will exist in /usr/share/slop, SHADER_PREFIX should be \"/usr\"." )
 endif()
 
-project(slop-wayland)
+project(slop)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
@@ -23,22 +23,21 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/")
 include_directories("${PROJECT_BINARY_DIR}")
 
 # Define sources and executable
-set(EXECUTABLE_NAME "slop-wayland")
+set(EXECUTABLE_NAME "slop")
 
-set( source
-         src/wayland.cpp
-         src/window.cpp
-         src/mouse.cpp
-         src/keyboard.cpp
-         src/framebuffer.cpp
-         src/resource.cpp
-         src/options.cpp
-         src/gl_core_3_3.c
-         src/shader.cpp
-         src/slopstates.cpp
-         src/slop.cpp
-         src/rectangle.cpp
-         src/main.cpp )
+set( source src/x.cpp
+            src/window.cpp
+            src/mouse.cpp
+            src/keyboard.cpp
+            src/framebuffer.cpp
+            src/resource.cpp
+            src/options.cpp
+            src/gl_core_3_3.c
+            src/shader.cpp
+            src/slopstates.cpp
+            src/slop.cpp
+            src/rectangle.cpp
+            src/main.cpp )
 
 add_executable(${EXECUTABLE_NAME} ${source})
 
@@ -47,23 +46,32 @@ add_executable(${EXECUTABLE_NAME} ${source})
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules" )
 #Find any version 2.X of SFML
 #See the FindSFML.cmake file for additional details and instructions
-find_package(Wayland REQUIRED)
-find_package(EGL REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLM REQUIRED)
+find_package(GLX REQUIRED)
+find_package(X11 REQUIRED)
+find_package(XExt REQUIRED) 
+find_package(XRender REQUIRED)
+find_package(RT) 
 
-include_directories(${WAYLAND_CLIENT_INCLUDE_DIR}
-                    ${WAYLAND_CURSOR_INCLUDE_DIR}
-                    ${WAYLAND_EGL_INCLUDE_DIR}
-                    ${EGL_INCLUDE_DIR}
+include_directories(${X11_INCLUDE_DIR}
                     ${GLM_INCLUDE_DIR}
+                    ${GLX_INCLUDE_DIR}
+                    ${XRENDER_INCLUDE_DIRS}
                     ${OPENGL_INCLUDE_DIR})
 
-target_link_libraries(${EXECUTABLE_NAME} ${WAYLAND_CLIENT_LIBRARIES}
-                      ${WAYLAND_CURSOR_LIBRARIES}
-                      ${WAYLAND_EGL_LIBRARIES}
-                      ${EGL_LIBRARIES}
-                      ${OPENGL_LIBRARIES})
+if ( RT_INCLUDE_DIR )
+    include_directories(${RT_INCLUDE_DIR})
+endif()
+
+target_link_libraries(${EXECUTABLE_NAME} ${X11_LIBRARIES}
+                                         ${GLX_LIBRARIES}
+                                         ${XRENDER_LIBRARIES}
+                                         ${OPENGL_LIBRARIES})
+if ( RT_LIBRARY )
+    target_link_libraries(${EXECUTABLE_NAME} ${RT_LIBRARY})
+endif()
+
 
 # Install targets
 install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )

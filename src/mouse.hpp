@@ -1,4 +1,4 @@
-/* mouse.hpp: Interfaces with wayland to grab mouse information.
+/* mouse.hpp: Interfaces with x11 to grab mouse information.
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -21,27 +21,24 @@
 #ifndef N_MOUSE_H_
 #define N_MOUSE_H_
 
-#include <wayland-client.h>
-#include <wayland-cursor.h>
 #include <vector>
 #include <glm/glm.hpp>
-#include "linux/input-event-codes.h"
-#include "wayland.hpp"
+#include <X11/cursorfont.h>
+
+#include "x.hpp"
 
 class Mouse {
 private:
-    wl_cursor_theme* theme;
-    float x,y;
+    X11* x11;
     std::vector<glm::ivec2> buttons;
-    std::string currentMouseCursor;
+    Cursor xcursor;
+    int currentCursor;
 public:
-    wl_surface* surface;
-    wl_cursor* cursor;
-    wl_pointer* pointer;
-    int serial;
-    Mouse( Wayland* wayland );
-    void setMousePos( float x, float y );
-    void setCursor( std::string name );
+	Window hoverWindow;
+	void tick();
+    Mouse( X11* x11 );
+    ~Mouse();
+    void setCursor( int cursor );
     glm::vec2 getMousePos();
     void setButton( int button, int state );
     int getButton( int button );

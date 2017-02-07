@@ -24,33 +24,29 @@
 #include <string>
 #include <exception>
 
+#include <iostream>
 #include "gl_core_3_3.h"
-#include "wayland.hpp"
-//#include <GL/glew.h>
-#include <wayland-egl.h>
-#include <EGL/egl.h>
 #include <GL/gl.h>
+#include <GL/glx.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
 
+#include "x.hpp"
 #include "framebuffer.hpp"
 
-class Window {
+// Gotta name it SlopWindow since Window and GLXWindow are taken... :/
+class SlopWindow {
 public:
     Framebuffer* framebuffer;
     int width, height;
     glm::mat4 camera;
-    Window( unsigned int w, unsigned int h );
-    ~Window();
-    void setFullScreen();
+    GLXWindow window;
+    GLXContext context;
+    SlopWindow();
+    ~SlopWindow();
     void setCurrent();
-    void setTitle( std::string title );
-    void setClass( std::string c );
     void display();
-    EGLContext egl_context;
-    struct wl_surface *surface;
-    struct wl_shell_surface *shell_surface;
-    struct wl_egl_window *egl_window;
-    EGLSurface egl_surface;
 };
 
 #endif // N_WINDOW_H_

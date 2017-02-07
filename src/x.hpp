@@ -1,4 +1,4 @@
-/* wayland.hpp: Interfaces with wayland to get keyboard, mouse, windows...
+/* x.hpp: initializes x11
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -18,39 +18,24 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef N_WAYLAND_H_
-#define N_WAYLAND_H_
+#ifndef N_X_H_
+#define N_X_H_
 
-#include <wayland-client.h>
-#include <wayland-egl.h>
-#include <EGL/egl.h>
+#include <X11/Xlib.h>
 #include <string>
-#include <iostream>
-#include <vector>
-#include <glm/glm.hpp>
+#include <stdexcept>
 
-//#include <mutter/meta/compositor-mutter.h>
-
-#ifndef NULL
-#define NULL 0
-#endif
-
-class Wayland {
+class X11 {
+private:
 public:
-    Wayland();
-    ~Wayland();
-    void init();
-    wl_display* display;
-    wl_compositor* compositor;
-    wl_seat* seat;
-    wl_shell* shell;
-    wl_shm* shm;
-    wl_output* output;
-    EGLDisplay egl_display;
-    glm::vec2 mousepos;
-    std::vector<glm::vec4> getWindows();
+    X11( std::string displayName );
+    ~X11();
+    Display* display;
+    Visual* visual;
+    Screen* screen;
+    Window root;
 };
 
-extern Wayland* wayland;
+extern X11* x11;
 
-#endif // N_WAYLAND_H_
+#endif
