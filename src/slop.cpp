@@ -82,9 +82,9 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     SlopMemory memory( options );
 
     // This is where we'll run through all of our stuffs
-    //FIXME: We need to sync up with wayland's draw pings so that we don't overdraw ever...
     while( memory.running ) {
-        mouse->tick();
+        mouse->update();
+        keyboard->update();
         // We move our statemachine forward.
         memory.update( 1 );
 
@@ -102,7 +102,7 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
         if ( err != GL_NO_ERROR ) {
             throw err;
         }
-        if ( keyboard->anyKeyDown() || mouse->getButton( 2 ) ) {
+        if ( keyboard->anyKeyDown() || mouse->getButton( 3 ) ) {
             memory.running = false;
             if ( cancelled ) {
                 *cancelled = true;

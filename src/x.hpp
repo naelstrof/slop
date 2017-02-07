@@ -21,12 +21,14 @@
 #ifndef N_X_H_
 #define N_X_H_
 
+#include <iostream>
 #include <X11/Xlib.h>
 #include <string>
 #include <stdexcept>
 
 class X11 {
 private:
+    void selectAllInputs( Window win );
 public:
     X11( std::string displayName );
     ~X11();

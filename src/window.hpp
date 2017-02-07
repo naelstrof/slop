@@ -31,6 +31,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/shape.h>
 
 #include "x.hpp"
 #include "framebuffer.hpp"

@@ -52,7 +52,7 @@ Mouse::~Mouse() {
 	XUngrabPointer( x11->display, CurrentTime );
 }
 
-void Mouse::tick() {
+void Mouse::update() {
     XEvent event;
     while ( XCheckTypedEvent( x11->display, ButtonPress, &event ) ) {
 		setButton( event.xbutton.button, 1 );
@@ -61,11 +61,9 @@ void Mouse::tick() {
 		setButton( event.xbutton.button, 0 );
 	}
     while ( XCheckTypedEvent( x11->display, EnterNotify, &event ) ) {
-		if ( event.xcrossing.subwindow != None ) {
-			hoverWindow = event.xcrossing.subwindow;
-		} else {
-			hoverWindow = event.xcrossing.window;
-		}
+        subWindow = event.xcrossing.subwindow;
+        hoverWindow = event.xcrossing.window;
+        std::cout << hoverWindow << "\n";
 	}
 }
 

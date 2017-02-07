@@ -51,27 +51,15 @@ find_package(GLM REQUIRED)
 find_package(GLX REQUIRED)
 find_package(X11 REQUIRED)
 find_package(XExt REQUIRED) 
-find_package(XRender REQUIRED)
-find_package(RT) 
 
 include_directories(${X11_INCLUDE_DIR}
                     ${GLM_INCLUDE_DIR}
                     ${GLX_INCLUDE_DIR}
-                    ${XRENDER_INCLUDE_DIRS}
                     ${OPENGL_INCLUDE_DIR})
-
-if ( RT_INCLUDE_DIR )
-    include_directories(${RT_INCLUDE_DIR})
-endif()
 
 target_link_libraries(${EXECUTABLE_NAME} ${X11_LIBRARIES}
                                          ${GLX_LIBRARIES}
-                                         ${XRENDER_LIBRARIES}
                                          ${OPENGL_LIBRARIES})
-if ( RT_LIBRARY )
-    target_link_libraries(${EXECUTABLE_NAME} ${RT_LIBRARY})
-endif()
-
 
 # Install targets
 install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )

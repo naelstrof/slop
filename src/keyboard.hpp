@@ -25,10 +25,13 @@
 
 class Keyboard {
 private:
+    char deltaState[32];
     X11* x11;
+    bool keyDown;
 public:
     Keyboard( X11* x11 );
     ~Keyboard();
+    void update();
     bool getKey( KeySym key );
     bool anyKeyDown();
 };

@@ -61,9 +61,21 @@ SlopWindow::SlopWindow() {
         throw new std::runtime_error("Failed to load function pointers for OpenGL.");
     }
     framebuffer = new Framebuffer( WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
-	XMapWindow( x11->display, window );
+
+    // Then we do a basic double clear (double buffered).
     glViewport( 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
     camera = glm::ortho( 0.0f, (float)WidthOfScreen( x11->screen ), (float)HeightOfScreen( x11->screen ), 0.0f, -1.0f, 1.0f);
+    glClearColor( 0, 0, 0, 0 );
+    glClear( GL_COLOR_BUFFER_BIT );
+    display();
+
+    // Make it so all input falls through
+    XRectangle rect;
+    rect.x = rect.y = rect.width = rect.height = 0; 
+    XShapeCombineRectangles( x11->display, window, ShapeInput, 0, 0, &rect, 1, ShapeSet, 0);
+
+    // Last, we actually display the window <:o)
+	XMapWindow( x11->display, window );
 }
 
 SlopWindow::~SlopWindow() {

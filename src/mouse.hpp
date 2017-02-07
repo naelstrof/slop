@@ -24,6 +24,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <X11/cursorfont.h>
+#include <iostream>
 
 #include "x.hpp"
 
@@ -35,7 +36,8 @@ private:
     int currentCursor;
 public:
 	Window hoverWindow;
-	void tick();
+	Window subWindow;
+	void update();
     Mouse( X11* x11 );
     ~Mouse();
     void setCursor( int cursor );

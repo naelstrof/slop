@@ -14,18 +14,28 @@ bool Keyboard::getKey( KeySym key ) {
 }
 
 bool Keyboard::anyKeyDown() {
-    // Thanks to SFML for some reliable key state grabbing.
-    // Get the whole keyboard state
-    char keys[ 32 ];
+    return keyDown;
+}
+
+void Keyboard::update() {
+    char keys[32];
     XQueryKeymap( x11->display, keys );
-    // Each bit indicates a different key, 1 for pressed, 0 otherwise.
-    // Every bit should be 0 if nothing is pressed.
-    for ( unsigned int i = 0; i < 32; i++ ) {
-        if ( keys[ i ] != 0 ) {
-            return true;
+    keyDown = false;
+    for ( int i=0;i<32;i++ ) {
+        if ( deltaState[i] == keys[i] ) {
+            continue;
         }
+        // Found a key in a group of 4 that's different
+        char a = deltaState[i];
+        char b = keys[i];
+        // Find the "different" bits
+        char c = a^b;
+        // A new key was pressed since the last update.
+        if ( c && b&c ) {
+            keyDown = true;
+        }
+        deltaState[i] = keys[i];
     }
-    return false;
 }
 
 Keyboard::Keyboard( X11* x11 ) {
@@ -34,6 +44,8 @@ Keyboard::Keyboard( X11* x11 ) {
     if ( err != GrabSuccess ) {
         throw new std::runtime_error( "Failed to grab keyboard.\n" );
     }
+    XQueryKeymap( x11->display, deltaState );
+    keyDown = false;
 }
 
 Keyboard::~Keyboard() {
