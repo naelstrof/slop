@@ -27,6 +27,7 @@ set(EXECUTABLE_NAME "slop")
 
 set( source src/x.cpp
             src/window.cpp
+            src/windowhelper.cpp
             src/mouse.cpp
             src/keyboard.cpp
             src/framebuffer.cpp

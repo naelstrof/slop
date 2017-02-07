@@ -23,6 +23,7 @@
 
 #include "mouse.hpp"
 #include "rectangle.hpp"
+#include "windowhelper.hpp"
 #include "slop.hpp"
 
 class SlopMemory;
@@ -39,6 +40,7 @@ public:
 class SlopStart : SlopState {
 public:
     virtual void update( SlopMemory& memory, double dt );
+    virtual void draw( SlopMemory& memory, glm::mat4 matrix );
 };
 
 class SlopStartDrag : SlopState {

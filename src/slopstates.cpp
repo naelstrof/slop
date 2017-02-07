@@ -16,6 +16,14 @@ void SlopStart::update( SlopMemory& memory, double dt ) {
     if ( mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopStartDrag( mouse->getMousePos() ) );
     }
+    if ( mouse->hoverWindow != None ) {
+        glm::vec4 rect = getWindowGeometry( mouse->hoverWindow, true );
+        memory.rectangle->setPoints( glm::vec2( (float)rect.x, (float)rect.y ), glm::vec2( (float)rect.x+rect.z, (float)rect.y+rect.w ) );
+    }
+}
+
+void SlopStart::draw( SlopMemory& memory, glm::mat4 matrix ) {
+    memory.rectangle->draw( matrix );
 }
 
 SlopStartDrag::SlopStartDrag( glm::vec2 point ) {

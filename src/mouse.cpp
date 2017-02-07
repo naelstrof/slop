@@ -43,9 +43,16 @@ Mouse::Mouse(X11* x11) {
     this->x11 = x11;
     currentCursor = XC_cross;
     xcursor = XCreateFontCursor( x11->display, XC_cross );
+    hoverWindow = None;
     XGrabPointer( x11->display, x11->root, True,
                   PointerMotionMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask,
                   GrabModeAsync, GrabModeAsync, None, xcursor, CurrentTime );
+
+    Window root;
+    int mx, my;
+    int wx, wy;
+    unsigned int mask;
+    XQueryPointer( x11->display, x11->root, &root, &hoverWindow, &mx, &my, &wx, &wy, &mask );
 }
 
 Mouse::~Mouse() {
@@ -61,9 +68,7 @@ void Mouse::update() {
 		setButton( event.xbutton.button, 0 );
 	}
     while ( XCheckTypedEvent( x11->display, EnterNotify, &event ) ) {
-        subWindow = event.xcrossing.subwindow;
         hoverWindow = event.xcrossing.window;
-        std::cout << hoverWindow << "\n";
 	}
 }
 

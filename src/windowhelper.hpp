@@ -1,4 +1,4 @@
-/* mouse.hpp: Interfaces with x11 to grab mouse information.
+/* windowhelper.hpp: Analyzes input windows to determine decorations and such.
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -18,33 +18,14 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef N_MOUSE_H_
-#define N_MOUSE_H_
+#ifndef N_WINDOWHELPER_H_
+#define N_WINDOWHELPER_H_
 
-#include <vector>
 #include <glm/glm.hpp>
-#include <X11/cursorfont.h>
-#include <iostream>
+#include <X11/Xlib.h>
 
 #include "x.hpp"
 
-class Mouse {
-private:
-    X11* x11;
-    std::vector<glm::ivec2> buttons;
-    Cursor xcursor;
-    int currentCursor;
-public:
-	Window hoverWindow;
-	void update();
-    Mouse( X11* x11 );
-    ~Mouse();
-    void setCursor( int cursor );
-    glm::vec2 getMousePos();
-    void setButton( int button, int state );
-    int getButton( int button );
-};
+glm::vec4 getWindowGeometry( Window win, bool removeDecoration );
 
-extern Mouse* mouse;
-
-#endif // N_MOUSE_H_
+#endif
