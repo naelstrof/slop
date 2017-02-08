@@ -1,18 +1,21 @@
-#slop-wayland
+#slop-release-candidate
 
-A wayland port of slop. It's currently a work in progress.
+Since I made slop when I was around 16, it is *really bad*.
+
+This just a re-write with less dependencies, inaccuracies, etc.
 
 TODO:
-- [ ] Window Selection (CURRENTLY IMPOSSIBLE WITHOUT HACKS/EXPLOITS/EXTENSIONS, Wayland is too secure)
-- [ ] Magnification (UNLIKELY, again due to wayland being very secure)
+- [x] Window Selection
 - [x] Keyboard
-- [x] Shaders
+- [ ] Shaders (Partially complete, need more robust features still).
 - [x] Custom output formatting
-- [ ] Themes
-- [ ] Multi-monitor testing (Pretty sure it won't work properly with multiple monitors, still needs to spawn a fullscreen window for each output.)
 - [ ] Manpages
 - [x] Option parsing
 - [x] Highlighting
 - [x] Mouse stuff
 - [x] Drawing stuff
 - [x] Printing stuff
+
+Avoiding:
+- [ ] Themes (Not going to happen. It'd add a texture library dependency.)
+- [ ] Magnification (Very expensive, probably not going to happen.)
