@@ -50,6 +50,7 @@ ffmpeg -f x11grab -s "$W"x"$H" -i ":0.0+$X,$Y" -f alsa -i pulse ~/myfile.webm
 
 ## Lets see some action
 Ok. Here's a comparison between 'scrot -s's selection and slop's:
+
 ![scrotbad](http://farmpolice.com/content/images/2014-10-14-12:08:24.png)
 ![slopgood](http://farmpolice.com/content/images/2014-10-14-12:14:51.png)
 
