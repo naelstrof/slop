@@ -67,6 +67,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 * [CRUX: 6c37/slop](https://github.com/6c37/crux-ports/tree/3.2/slop)
 * [Gentoo: x11-misc/slop](https://packages.gentoo.org/packages/x11-misc/slop)
 * [GNU Guix: slop](https://www.gnu.org/software/guix/packages/#slop)
+* [Debian: slop](https://packages.debian.org/sid/slop)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
 
 
