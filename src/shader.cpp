@@ -3,7 +3,6 @@
 Shader::Shader( std::string vert, std::string frag) {
     vert = resource->getRealPath(vert);
     frag = resource->getRealPath(frag);
-    m_good = false;
     // Create the program to link to.
     m_program = glCreateProgram();
 
@@ -64,7 +63,6 @@ Shader::Shader( std::string vert, std::string frag) {
     // Clean up :)
     glDeleteShader( vertShader );
     glDeleteShader( fragShader );
-    m_good = true;
     glUseProgram( 0 );
 }
 
@@ -119,45 +117,27 @@ int Shader::link( unsigned int vertshader, unsigned int fragshader, std::string&
 }
 
 unsigned int Shader::getUniformLocation( std::string name ) {
-    if ( !m_good ) {
-        return 0;
-    }
     glUseProgram( m_program );
     return glGetUniformLocation( m_program, name.c_str() );
 }
 
 void Shader::setParameter( std::string name, int foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniform1i( getUniformLocation( name ), foo );
 }
 
 void Shader::setParameter( std::string name, float foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniform1f( getUniformLocation( name ), foo );
 }
 
 void Shader::setParameter( std::string name, glm::mat4& foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniformMatrix4fv( getUniformLocation( name ), 1, GL_FALSE, glm::value_ptr( foo ) );
 }
 
 void Shader::setParameter( std::string name, glm::vec4 foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniform4f( getUniformLocation( name ), foo.x, foo.y, foo.z, foo.w );
 }
 
 void Shader::setParameter( std::string name, glm::vec2 foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniform2f( getUniformLocation( name ), foo.x, foo.y );
 }
 

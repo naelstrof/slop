@@ -62,12 +62,8 @@ SlopWindow::SlopWindow() {
     }
     framebuffer = new Framebuffer( WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
 
-    // Then we do a basic double clear (double buffered).
     glViewport( 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
     camera = glm::ortho( 0.0f, (float)WidthOfScreen( x11->screen ), (float)HeightOfScreen( x11->screen ), 0.0f, -1.0f, 1.0f);
-    glClearColor( 0, 0, 0, 0 );
-    glClear( GL_COLOR_BUFFER_BIT );
-    display();
 
     // Make it so all input falls through
     XRectangle rect;
@@ -87,6 +83,7 @@ SlopWindow::~SlopWindow() {
     glClearColor( 0, 0, 0, 0 );
     glClear( GL_COLOR_BUFFER_BIT );
     display();
+    glXDestroyContext( x11->display, context );
     XDestroyWindow( x11->display, window );
 }
 

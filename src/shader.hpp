@@ -49,7 +49,6 @@ public:
     void            setAttribute( std::string name, unsigned int buffer, unsigned int stepsize );
 private:
     std::vector<unsigned int>   m_activeattribs;
-    bool                        m_good;
     unsigned int                getUniformLocation( std::string );
     int                         compile( unsigned int shader, std::string& error );
     int                         link( unsigned int vert, unsigned int frag, std::string& error );
