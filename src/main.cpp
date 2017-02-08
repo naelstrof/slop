@@ -30,6 +30,7 @@ SlopOptions* getOptions( Options& options ) {
     options.getFloat("tolerance", 't', foo->tolerance);
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     options.getColor("color", 'c', color);
+    options.getString( "xdisplay", 'x', foo->xdisplay );
     foo->r = color.r;
     foo->g = color.g;
     foo->b = color.b;
@@ -71,9 +72,89 @@ std::string formatOutput( std::string input, SlopSelection selection ) {
     return output.str();
 }
 
+void printHelp() {
+    std::cout << "slop v5.3.21\n";
+    std::cout << "\n";
+    std::cout << "Copyright (C) 2017 Dalton Nell, Slop Contributors\n";
+    std::cout << "(https://github.com/naelstrof/slop/graphs/contributors)\n";
+    std::cout << "Usage: slop [options]\n";
+    std::cout << "\n";
+    std::cout << "slop (Select Operation) is an application that queries for a selection from the\n";
+    std::cout << "user and prints the region to stdout.\n";
+    std::cout << "\n";
+    std::cout << "-h, --help                    Print help and exit\n";
+    std::cout << "-v, --version                 Print version and exit\n";
+    std::cout << "Options\n";
+    std::cout << "  -x, --xdisplay=hostname:number.screen_number\n";
+    std::cout << "                                Sets the x display.\n";
+	std::cout << "  -k, --nokeyboard              Disables the ability to cancel selections with\n";
+	std::cout << "                                  the keyboard.  (default=off)\n";
+	std::cout << "  -b, --bordersize=FLOAT        Set the selection rectangle's thickness.\n";
+	std::cout << "                                  (default=`1')\n";
+	std::cout << "  -p, --padding=FLOAT           Set the padding size of the selection. Can be\n";
+	std::cout << "                                  negative.  (default=`0')\n";
+	std::cout << "  -t, --tolerance=FLOAT         How far in pixels the mouse can move after\n";
+	std::cout << "                                  clicking and still be detected as a normal\n";
+	std::cout << "                                  click instead of a click and drag. Setting\n";
+	std::cout << "                                  this to 0 will disable window selections.\n";
+	std::cout << "                                  Alternatively setting it to 999999 would.\n";
+	std::cout << "                                  only allow for window selections.\n";
+	std::cout << "                                  (default=`2')\n";
+	std::cout << "  -c, --color=FLOAT,FLOAT,FLOAT,FLOAT\n";
+	std::cout << "                                Set the selection rectangle's color. Supports\n";
+	std::cout << "                                  RGB or RGBA values.\n";
+	std::cout << "                                  (default=`0.5,0.5,0.5,1')\n";
+	std::cout << "  -n, --nodecorations           Attempt to select child windows in order to\n";
+	std::cout << "                                  avoid window decorations.  (default=off)\n";
+	std::cout << "  -l, --highlight               Instead of outlining selections, slop\n";
+	std::cout << "                                  highlights it. This is only useful when\n";
+	std::cout << "                                  --color is set to a transparent color.\n";
+	std::cout << "                                  (default=off)\n";
+	std::cout << "      --shader=STRING           Sets the shader to load and use from\n";
+	std::cout << "                                  ~/.config/slop/ or /usr/share/.\n";
+	std::cout << "                                  (default=`simple')\n";
+	std::cout << "  -f, --format=STRING           Set the output format string. Format specifiers\n";
+	std::cout << "                                  are %x, %y, %w, %h, %i, %g, and %c.\n";
+	std::cout << "                                  (default=`X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n')\n";
+	std::cout << "Examples\n";
+	std::cout << "    $ # Gray, thick, transparent border for maximum visiblity.\n";
+	std::cout << "    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n";
+	std::cout << "\n";
+	std::cout << "    $ # Remove window decorations.\n";
+	std::cout << "    $ slop --nodecorations\n";
+	std::cout << "\n";
+	std::cout << "    $ # Disable window selections. Useful for selecting individual pixels.\n";
+	std::cout << "    $ slop -t 0\n";
+	std::cout << "\n";
+	std::cout << "    $ # Classic Windows XP selection.\n";
+	std::cout << "    $ slop -l -c 0.3,0.4,0.6,0.4\n";
+	std::cout << "\n";
+	std::cout << "    $ # Wiggle wiggle!\n";
+	std::cout << "    $ slop --opengl --shader wiggle\n";
+	std::cout << "\n";
+	std::cout << "    $ # Change output format to use safer parsing\n";
+	std::cout << "    $ slopoutput=$(slop -f \"%x %y %w %h\")\n";
+	std::cout << "    $ X=$(echo $slopoutput | awk '{print $1}')\n";
+	std::cout << "    $ Y=$(echo $slopoutput | awk '{print $2}')\n";
+	std::cout << "    $ W=$(echo $slopoutput | awk '{print $3}')\n";
+	std::cout << "    $ H=$(echo $slopoutput | awk '{print $4}')\n";
+	std::cout << "\n";
+	std::cout << "Tips\n";
+	std::cout << "    * If you don't like a selection: you can cancel it by right-clicking\n";
+	std::cout << "regardless of which options are enabled or disabled for slop.\n";
+	std::cout << "    * If slop doesn't seem to select a window accurately, the problem could be\n";
+	std::cout << "because of decorations getting in the way. Try enabling the --nodecorations\n";
+	std::cout << "flag.\n";
+}
+
 int app( int argc, char** argv ) {
     // Options just validates all of our input from argv
     Options options( argc, argv );
+    bool help;
+    if ( options.getBool( "help", 'h', help ) ) {
+        printHelp();
+        return 0;
+    }
     // We then parse the options into something slop can understand.
     SlopOptions* parsedOptions = getOptions( options );
 

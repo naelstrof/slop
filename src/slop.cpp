@@ -9,10 +9,11 @@ Resource* resource;
 SlopOptions::SlopOptions() {
     borderSize = 1;
     nodecorations = false;
-    tolerance = 4;
+    tolerance = 2;
     padding = 0;
     shader = "textured";
     highlight = false;
+    xdisplay = ":0";
     r = 0.5;
     g = 0.5;
     b = 0.5;
@@ -76,7 +77,7 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     }
     resource = new Resource();
     // Set up x11 temporarily
-    x11 = new X11(":0");
+    x11 = new X11(options->xdisplay);
     mouse = new Mouse( x11, options->nodecorations );
     keyboard = new Keyboard( x11 );
 

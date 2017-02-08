@@ -47,6 +47,7 @@ public:
     float g;
     float b;
     float a;
+    std::string xdisplay;
 };
 
 class SlopSelection {
