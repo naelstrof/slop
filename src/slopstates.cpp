@@ -47,15 +47,22 @@ void SlopStartDrag::onEnter( SlopMemory& memory ) {
 }
 
 void SlopStartDrag::update( SlopMemory& memory, double dt ) {
-    memory.rectangle->setPoints(startPoint, mouse->getMousePos());
     char a = startPoint.y > mouse->getMousePos().y;
     char b = startPoint.x > mouse->getMousePos().x;
     char c = (a << 1) | b;
     switch ( c ) {
-        case 0: mouse->setCursor( XC_lr_angle ); break;
-        case 1: mouse->setCursor( XC_ll_angle ); break;
-        case 2: mouse->setCursor( XC_ur_angle ); break;
-        case 3: mouse->setCursor( XC_ul_angle ); break;
+        case 0: mouse->setCursor( XC_lr_angle );
+                memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1,1));
+                break;
+        case 1: mouse->setCursor( XC_ll_angle );
+                memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1,1));
+                break;
+        case 2: mouse->setCursor( XC_ur_angle );
+                memory.rectangle->setPoints(startPoint+glm::vec2(0,1), mouse->getMousePos()+glm::vec2(1,0));
+                break;
+        case 3: mouse->setCursor( XC_ul_angle );
+                memory.rectangle->setPoints(startPoint+glm::vec2(1,1), mouse->getMousePos()+glm::vec2(0,0));
+                break;
     }
     if ( !mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );

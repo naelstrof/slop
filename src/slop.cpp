@@ -138,5 +138,5 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
         delete options;
     }
     // Finally return the data.
-    return SlopSelection( output.x, output.y, output.z+1, output.w+1, memory.selectedWindow );
+    return SlopSelection( output.x, output.y, output.z, output.w, memory.selectedWindow );
 }
