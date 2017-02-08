@@ -27,8 +27,6 @@
 #include <stdexcept>
 
 class X11 {
-private:
-    void selectAllInputs( Window win );
 public:
     X11( std::string displayName );
     ~X11();

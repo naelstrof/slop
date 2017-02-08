@@ -34,10 +34,11 @@ private:
     std::vector<glm::ivec2> buttons;
     Cursor xcursor;
     int currentCursor;
+    void selectAllInputs( Window win, bool nodecorations = false );
 public:
 	Window hoverWindow;
 	void update();
-    Mouse( X11* x11 );
+    Mouse( X11* x11, bool nodecorations );
     ~Mouse();
     void setCursor( int cursor );
     glm::vec2 getMousePos();

@@ -28,11 +28,11 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-static std::string validStringArguments[] = { "bordersize", "padding", "color", "shader", "highlight", "format" };
-static char validCharArguments[] = { 'b', 'p', 'c', 's', 'h', 'f' };
+static std::string validStringArguments[] = { "bordersize", "padding", "color", "shader", "highlight", "format", "tolerance", "nodecorations", "nokeyboard" };
+static char validCharArguments[] = { 'b', 'p', 'c', 's', 'h', 'f', 't', 'n', 'k' };
 // 0 for flag, 1 for how many arguments to eat up
-static unsigned int isFlagArgument[] = { false, false, false, false, true, false };
-static unsigned int validArgumentCount = 6;
+static unsigned int isFlagArgument[] = { false, false, false, false, true, false, false, true, true };
+static unsigned int validArgumentCount = 9;
 static unsigned int maxFloatingValues = 0;
 
 class Options {

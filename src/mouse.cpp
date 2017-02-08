@@ -39,7 +39,7 @@ void Mouse::setCursor( int cursor ) {
                               xcursor, CurrentTime );
 }
 
-Mouse::Mouse(X11* x11) {
+Mouse::Mouse(X11* x11, bool nodecorations ) {
     this->x11 = x11;
     currentCursor = XC_cross;
     xcursor = XCreateFontCursor( x11->display, XC_cross );
@@ -52,7 +52,17 @@ Mouse::Mouse(X11* x11) {
     int mx, my;
     int wx, wy;
     unsigned int mask;
-    XQueryPointer( x11->display, x11->root, &root, &hoverWindow, &mx, &my, &wx, &wy, &mask );
+    if ( nodecorations ) {
+        // Get the deepest available window if we don't want decorations.
+        Window child = x11->root;
+        while( child ) {
+            hoverWindow = child;
+            XQueryPointer( x11->display, child, &root, &child, &mx, &my, &wx, &wy, &mask );
+        }
+    } else {
+        XQueryPointer( x11->display, x11->root, &root, &hoverWindow, &mx, &my, &wx, &wy, &mask );
+    }
+    selectAllInputs( x11->root, nodecorations );
 }
 
 Mouse::~Mouse() {
@@ -72,3 +82,17 @@ void Mouse::update() {
 	}
 }
 
+// This cheesy function makes sure we get all EnterNotify events on ALL the windows.
+void Mouse::selectAllInputs( Window win, bool nodecorations ) {
+    Window root, parent;
+    Window* children;
+    unsigned int nchildren;
+    XQueryTree( x11->display, win, &root, &parent, &children, &nchildren );
+    for ( unsigned int i=0;i<nchildren;i++ ) {
+            XSelectInput( x11->display, children[ i ], EnterWindowMask );
+        if ( nodecorations ) {
+            selectAllInputs( children[i], nodecorations );
+        }
+    }
+    free( children );
+}

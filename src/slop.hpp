@@ -39,7 +39,9 @@ public:
     SlopOptions();
     float borderSize;
     float padding;
+    float tolerance;
     bool highlight;
+    bool nodecorations;
     std::string shader;
     float r;
     float g;
@@ -49,11 +51,12 @@ public:
 
 class SlopSelection {
 public:
-    SlopSelection( float x, float y, float w, float h );
+    SlopSelection( float x, float y, float w, float h, Window id );
     float x;
     float y;
     float w;
     float h;
+    Window id;
 };
 
 class SlopMemory {
@@ -63,7 +66,10 @@ private:
 public:
     SlopMemory( SlopOptions* options );
     ~SlopMemory();
+    Window selectedWindow;
     bool running;
+    float tolerance;
+    bool nodecorations;
     Rectangle* rectangle;
     void setState( SlopState* state );
     void update( double dt );

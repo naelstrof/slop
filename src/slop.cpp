@@ -8,6 +8,8 @@ Resource* resource;
 // Defaults!
 SlopOptions::SlopOptions() {
     borderSize = 1;
+    nodecorations = false;
+    tolerance = 4;
     padding = 0;
     shader = "textured";
     highlight = false;
@@ -17,18 +19,22 @@ SlopOptions::SlopOptions() {
     a = 1;
 }
 
-SlopSelection::SlopSelection( float x, float y, float w, float h ) {
+SlopSelection::SlopSelection( float x, float y, float w, float h, Window id ) {
     this->x = x;
     this->y = y;
     this->w = w;
     this->h = h;
+    this->id = id;
 }
 
 SlopMemory::SlopMemory( SlopOptions* options ) {
     running = true;
     state = (SlopState*)new SlopStart();
     nextState = NULL;
+    tolerance = options->tolerance;
+    nodecorations = options->nodecorations;
     rectangle = new Rectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight);
+    selectedWindow = x11->root;
     state->onEnter( *this );
 }
 
@@ -69,9 +75,9 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
         options = new SlopOptions();
     }
     resource = new Resource();
-    // Set up wayland temporarily
+    // Set up x11 temporarily
     x11 = new X11(":0");
-    mouse = new Mouse( x11 );
+    mouse = new Mouse( x11, options->nodecorations );
     keyboard = new Keyboard( x11 );
 
     // Set up window with GL context
@@ -121,7 +127,6 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     glClearColor (0.0, 0.0, 0.0, 0.0);
     glClear (GL_COLOR_BUFFER_BIT);
     window->display();
-    glClearColor (0.0, 0.0, 0.0, 0.0);
     glClear (GL_COLOR_BUFFER_BIT);
     window->display();
     // Then we clean up.
@@ -133,5 +138,5 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
         delete options;
     }
     // Finally return the data.
-    return SlopSelection( output.x, output.y, output.z+1, output.w+1 );
+    return SlopSelection( output.x, output.y, output.z+1, output.w+1, memory.selectedWindow );
 }

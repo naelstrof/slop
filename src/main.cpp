@@ -27,6 +27,7 @@ SlopOptions* getOptions( Options& options ) {
     SlopOptions* foo = new SlopOptions();
     options.getFloat("bordersize", 'b', foo->borderSize);
     options.getFloat("padding", 'p', foo->padding);
+    options.getFloat("tolerance", 't', foo->tolerance);
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     options.getColor("color", 'c', color);
     foo->r = color.r;
@@ -34,6 +35,7 @@ SlopOptions* getOptions( Options& options ) {
     foo->b = color.b;
     foo->a = color.a;
     options.getBool("highlight", 'h', foo->highlight);
+    options.getBool("nodecorations", 'n', foo->nodecorations);
     return foo;
 }
 
@@ -56,8 +58,10 @@ std::string formatOutput( std::string input, SlopSelection selection ) {
                 case 'g':
                 case 'G': output << round(selection.w) << "x" << round(selection.h)
                           << "+" << round(selection.x) << "+" << round(selection.y); break;
+                case 'i':
+                case 'I': output << selection.id; break;
                 case '%': output << "%"; break;
-                default: throw new std::invalid_argument( std::string()+"Expected x, y, w, h, g, or % after % in format. Got `" + input[i+1] + "`." );
+                default: throw new std::invalid_argument( std::string()+"Expected x, y, w, h, g, i, or % after % in format. Got `" + input[i+1] + "`." );
              }
             i++;
             continue;
@@ -75,7 +79,7 @@ int app( int argc, char** argv ) {
 
     // We want to validate our format option if we got one, we do that by just doing a dry run
     // on a fake selection.
-    SlopSelection selection(0,0,0,0);
+    SlopSelection selection(0,0,0,0,0);
     std::string format;
     bool gotFormat = options.getString("format", 'f', format);
     if ( gotFormat ) {
@@ -99,7 +103,7 @@ int app( int argc, char** argv ) {
         return 0;
     }
     // Otherwise we default to an `eval` compatible format.
-    std::cout << formatOutput( "X=%x\nY=%y\nW=%w\nH=%h\nG=%g\n", selection );
+    std::cout << formatOutput( "X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\n", selection );
     return 0;
 }
 
