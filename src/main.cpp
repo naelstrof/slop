@@ -155,6 +155,10 @@ int app( int argc, char** argv ) {
         printHelp();
         return 0;
     }
+    if ( options.getBool( "version", 'v', help ) ) {
+        std::cout << SLOP_VERSION << "\n";
+        return 0;
+    }
     // We then parse the options into something slop can understand.
     SlopOptions* parsedOptions = getOptions( options );
 

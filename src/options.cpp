@@ -13,8 +13,8 @@ int Options::validateStringOption( int argc, char** argv, int argumentIndex ) {
                 if ( !isFlagArgument[index] && argument.find("=") == std::string::npos ) {
                     throw new std::invalid_argument("Expected `=` after " + arguments[i]);
                 }
-                if ( argument[i+3] != '=' ) {
-                    break;
+                if ( isFlagArgument[index] && i+3 != argument.length() ) {
+                    throw new std::invalid_argument("Trailing characters on flag " + argument );
                 }
                 return parseStringOption( argc, argv, argumentIndex, index );
             }

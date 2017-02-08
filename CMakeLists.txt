@@ -1,6 +1,8 @@
 #Change this if you need to target a specific CMake version
 cmake_minimum_required(VERSION 3.1)
 
+add_definitions(-DSLOP_VERSION="v5.3.21")
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
 endif()
