@@ -48,8 +48,6 @@ public:
     void            setParameter( std::string name, glm::vec2 foo );
     void            setAttribute( std::string name, unsigned int buffer, unsigned int stepsize );
 private:
-    void loadFromFile( std::string vert, std::string frag );
-    void loadFromMemory( std::string vert, std::string frag );
     std::vector<unsigned int>   activeAttributes;
     unsigned int                getUniformLocation( std::string );
     int                         compile( unsigned int shader, std::string& error );
