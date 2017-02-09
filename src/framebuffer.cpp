@@ -1,7 +1,9 @@
 #include "framebuffer.hpp"
 
 Framebuffer::Framebuffer( int w, int h ) {
-    shader = new Shader( "textured.vert", "textured.frag" );
+    std::string vert = "#version 130\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 uvCoord;\nvoid main()\n{\nuvCoord = uv;\ngl_Position = vec4(position,0,1);\n}\n";
+    std::string frag = "#version 130\nuniform sampler2D texture;\nvarying vec2 uvCoord;\nout vec4 outColor;void main()\n{\noutColor = texture2D( texture, uvCoord );\n}\n";
+    shader = new Shader( vert, frag, false );
     glGenFramebuffers( 1, &fbuffer );
     glBindFramebuffer( GL_FRAMEBUFFER, fbuffer );
     glGenTextures(1, &image);

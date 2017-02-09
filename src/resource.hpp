@@ -40,7 +40,6 @@ public:
 private:
     bool validatePath( std::string path );
     std::string usrconfig;
-    std::string sysconfig;
 };
 
 extern Resource* resource;

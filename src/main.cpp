@@ -29,6 +29,7 @@ SlopOptions* getOptions( Options& options ) {
     options.getFloat("padding", 'p', foo->padding);
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     options.getColor("color", 'c', color);
+    options.getString( "shader", 's', foo->shader );
     foo->r = color.r;
     foo->g = color.g;
     foo->b = color.b;

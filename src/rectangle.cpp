@@ -21,7 +21,10 @@ Rectangle::Rectangle( glm::vec2 p1, glm::vec2 p2, float border, float padding, g
     our = ur + glm::vec2(border,border);
     obr = br + glm::vec2(border,-border);
     generateBuffers();
-    shader = new Shader( "simple.vert", "simple.frag" );
+    std::string vert = "#version 130\nin vec2 position;\nuniform mat4 projection;\nvoid main() {\ngl_Position = projection*vec4(position,0,1);\n }";
+    std::string frag = "#version 130\nuniform vec4 color;\nout vec4 outColor;\nvoid main() {\noutColor = color;\n}";
+
+    shader = new Shader( vert, frag, false );
 }
 
 void Rectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {

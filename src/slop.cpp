@@ -81,7 +81,9 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     window->setFullScreen();
     window->setCurrent();
 
-    window->framebuffer->setShader( options->shader );
+    if ( options->shader != "textured" ) {
+        window->framebuffer->setShader( options->shader );
+    }
 
     // Init our little state machine, memory is a tad of a misnomer
     SlopMemory memory( options );

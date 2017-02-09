@@ -1,21 +1,27 @@
 #include "shader.hpp"
 
-Shader::Shader( std::string vert, std::string frag) {
-    vert = resource->getRealPath(vert);
-    frag = resource->getRealPath(frag);
-    m_good = false;
-    // Create the program to link to.
-    m_program = glCreateProgram();
-
-    std::ifstream v( vert.c_str() );
-    std::string vert_contents((std::istreambuf_iterator<char>(v)),
-                               std::istreambuf_iterator<char>());
-    std::ifstream f( frag.c_str() );
-    std::string frag_contents((std::istreambuf_iterator<char>(f)),
-                              std::istreambuf_iterator<char>());
+Shader::Shader( std::string vert, std::string frag, bool file ) {
+    std::string vert_contents;
+    std::string frag_contents;
+    if ( file ) {
+        vert = resource->getRealPath(vert);
+        frag = resource->getRealPath(frag);
+        std::ifstream v( vert.c_str() );
+        vert_contents = std::string((std::istreambuf_iterator<char>(v)),
+                                   std::istreambuf_iterator<char>());
+        std::ifstream f( frag.c_str() );
+        frag_contents = std::string((std::istreambuf_iterator<char>(f)),
+                                  std::istreambuf_iterator<char>());
+    } else {
+        vert_contents = vert;
+        frag_contents = frag;
+    }
 
     const char* vertsrc = vert_contents.c_str();
     const char* fragsrc = frag_contents.c_str();
+
+    // Create the program to link to.
+    program = glCreateProgram();
     
     if ( vert_contents.length() <= 0 ) {
         std::string errstring = "Failed to open file (or is empty) `" + vert + "`.\n";
@@ -64,20 +70,19 @@ Shader::Shader( std::string vert, std::string frag) {
     // Clean up :)
     glDeleteShader( vertShader );
     glDeleteShader( fragShader );
-    m_good = true;
     glUseProgram( 0 );
 }
 
 Shader::~Shader() {
-    glDeleteProgram( m_program );
+    glDeleteProgram( program );
 }
 
 unsigned int Shader::getProgram() {
-    return m_program;
+    return program;
 }
 
 void Shader::bind() {
-    glUseProgram( m_program );
+    glUseProgram( program );
 }
 
 int Shader::compile( unsigned int shader, std::string& error ) {
@@ -99,18 +104,18 @@ int Shader::compile( unsigned int shader, std::string& error ) {
 }
 
 int Shader::link( unsigned int vertshader, unsigned int fragshader, std::string& error ) {
-    glAttachShader( m_program, vertshader );
-    glAttachShader( m_program, fragshader );
-    glLinkProgram( m_program );
+    glAttachShader( program, vertshader );
+    glAttachShader( program, fragshader );
+    glLinkProgram( program );
 
     // Linking the shader is the easy part, all this junk down here is for printing the error it might generate.
     int result = GL_FALSE;
     int logLength;
-    glGetProgramiv( m_program, GL_LINK_STATUS, &result);
-    glGetProgramiv( m_program, GL_INFO_LOG_LENGTH, &logLength);
+    glGetProgramiv( program, GL_LINK_STATUS, &result);
+    glGetProgramiv( program, GL_INFO_LOG_LENGTH, &logLength);
     if ( result == GL_FALSE ) {
         char* errormsg = new char[ logLength ];
-        glGetProgramInfoLog( m_program, logLength, NULL, errormsg );
+        glGetProgramInfoLog( program, logLength, NULL, errormsg );
         error = errormsg;
         delete[] errormsg;
         return 1;
@@ -119,60 +124,42 @@ int Shader::link( unsigned int vertshader, unsigned int fragshader, std::string&
 }
 
 unsigned int Shader::getUniformLocation( std::string name ) {
-    if ( !m_good ) {
-        return 0;
-    }
-    glUseProgram( m_program );
-    return glGetUniformLocation( m_program, name.c_str() );
+    glUseProgram( program );
+    return glGetUniformLocation( program, name.c_str() );
 }
 
 void Shader::setParameter( std::string name, int foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniform1i( getUniformLocation( name ), foo );
 }
 
 void Shader::setParameter( std::string name, float foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniform1f( getUniformLocation( name ), foo );
 }
 
 void Shader::setParameter( std::string name, glm::mat4& foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniformMatrix4fv( getUniformLocation( name ), 1, GL_FALSE, glm::value_ptr( foo ) );
 }
 
 void Shader::setParameter( std::string name, glm::vec4 foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniform4f( getUniformLocation( name ), foo.x, foo.y, foo.z, foo.w );
 }
 
 void Shader::setParameter( std::string name, glm::vec2 foo ) {
-    if ( !m_good ) {
-        return;
-    }
     glUniform2f( getUniformLocation( name ), foo.x, foo.y );
 }
 
 void Shader::setAttribute( std::string name, unsigned int buffer, unsigned int stepsize ) {
-    unsigned int a = glGetAttribLocation( m_program, name.c_str() );
+    unsigned int a = glGetAttribLocation( program, name.c_str() );
     glEnableVertexAttribArray( a );
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
     glVertexAttribPointer( a, stepsize, GL_FLOAT, GL_FALSE, 0, NULL );
-    m_activeattribs.push_back( a );
+    activeAttributes.push_back( a );
 }
 
 void Shader::unbind() {
-    for ( unsigned int i=0; i<m_activeattribs.size(); i++ ) {
-        glDisableVertexAttribArray( m_activeattribs[i] );
+    for ( unsigned int i=0; i<activeAttributes.size(); i++ ) {
+        glDisableVertexAttribArray( activeAttributes[i] );
     }
-    m_activeattribs.clear();
+    activeAttributes.clear();
     glUseProgram( 0 );
 }
