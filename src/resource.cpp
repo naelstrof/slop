@@ -28,25 +28,17 @@ Resource::Resource() {
         char* home = getpwuid(getuid())->pw_dir;
         usrconfig += home;
         usrconfig += "/.config/slop/";
-        // SHADER_PREFIX is defined by the user within CMake, defaults to `/usr`.
-        sysconfig = SHADER_PREFIX;
-        sysconfig += "/share/slop/";
         return;
     }
     usrconfig += config;
     usrconfig += "/slop/";
-    sysconfig = SHADER_PREFIX;
-    sysconfig += "/share/slop/";
 }
 
 std::string Resource::getRealPath( std::string localpath ) {
     if ( validatePath( usrconfig + localpath ) ) {
         return usrconfig + localpath;
     }
-    if ( validatePath( sysconfig + localpath ) ) {
-        return sysconfig + localpath;
-    }
-    std::string err = "The file or folder " + localpath + " was not found in either " + sysconfig + " or " + usrconfig + "\n";
+    std::string err = "The file or folder " + localpath + " was not found in " + usrconfig + "\n";
     throw new std::runtime_error(err);
     return localpath;
 }

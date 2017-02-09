@@ -36,7 +36,7 @@
 
 class Shader {
 public:
-    Shader( std::string vert, std::string frag );
+    Shader( std::string vert, std::string frag, bool file = true );
     ~Shader();
     unsigned int    getProgram();
     void            bind();
@@ -48,11 +48,13 @@ public:
     void            setParameter( std::string name, glm::vec2 foo );
     void            setAttribute( std::string name, unsigned int buffer, unsigned int stepsize );
 private:
-    std::vector<unsigned int>   m_activeattribs;
+    void loadFromFile( std::string vert, std::string frag );
+    void loadFromMemory( std::string vert, std::string frag );
+    std::vector<unsigned int>   activeAttributes;
     unsigned int                getUniformLocation( std::string );
     int                         compile( unsigned int shader, std::string& error );
     int                         link( unsigned int vert, unsigned int frag, std::string& error );
-    unsigned int                m_program;
+    unsigned int                program;
 };
 
 #endif // N_SHADER_H_

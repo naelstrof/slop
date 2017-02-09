@@ -1,21 +1,13 @@
 #Change this if you need to target a specific CMake version
 cmake_minimum_required(VERSION 3.1)
 
-add_definitions(-DSLOP_VERSION="v5.3.21")
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
-endif()
-
-if( NOT CMAKE_INSTALL_PREFIX )
-    set( CMAKE_INSTALL_PREFIX "/usr" )
-endif()
-
-if( NOT SHADER_PREFIX )
-    set( SHADER_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "The path where slop thinks it resides in, so that it can find the shaders. This is not necessarily the CMAKE_INSTALL_PREFIX. For example if the shaders will exist in /usr/share/slop, SHADER_PREFIX should be \"/usr\"." )
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)")
+if ( NOT CMAKE_INSTALL_PREFIX )
+    set(CMAKE_INSTALL_PREFIX "/usr")
 endif()
 
 project(slop)
+add_definitions(-DSLOP_VERSION="v5.3.21")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
@@ -66,6 +58,3 @@ target_link_libraries(${EXECUTABLE_NAME} ${X11_LIBRARIES}
 
 # Install targets
 install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
-install( DIRECTORY "${CMAKE_SOURCE_DIR}/share" DESTINATION "${CMAKE_INSTALL_PREFIX}" )
-
-add_definitions(-DSHADER_PREFIX="${SHADER_PREFIX}")
