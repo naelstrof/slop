@@ -1,6 +1,6 @@
 #include "windowhelper.hpp"
 
-glm::vec4 getWindowGeometry( Window win, bool removeDecoration ) {
+glm::vec4 getWindowGeometry( Window win, bool removeDecoration) {
     XWindowAttributes attr;         
     XGetWindowAttributes( x11->display, win, &attr );
     unsigned int width = attr.width;           

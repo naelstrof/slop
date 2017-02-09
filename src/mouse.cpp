@@ -39,7 +39,7 @@ void Mouse::setCursor( int cursor ) {
                               xcursor, CurrentTime );
 }
 
-Mouse::Mouse(X11* x11, bool nodecorations ) {
+Mouse::Mouse(X11* x11, bool nodecorations, Window ignoreWindow ) {
     this->x11 = x11;
     currentCursor = XC_cross;
     xcursor = XCreateFontCursor( x11->display, XC_cross );
@@ -47,22 +47,9 @@ Mouse::Mouse(X11* x11, bool nodecorations ) {
     XGrabPointer( x11->display, x11->root, True,
                   PointerMotionMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask,
                   GrabModeAsync, GrabModeAsync, None, xcursor, CurrentTime );
-
-    Window root;
-    int mx, my;
-    int wx, wy;
-    unsigned int mask;
-    if ( nodecorations ) {
-        // Get the deepest available window if we don't want decorations.
-        Window child = x11->root;
-        while( child ) {
-            hoverWindow = child;
-            XQueryPointer( x11->display, child, &root, &child, &mx, &my, &wx, &wy, &mask );
-        }
-    } else {
-        XQueryPointer( x11->display, x11->root, &root, &hoverWindow, &mx, &my, &wx, &wy, &mask );
-    }
-    selectAllInputs( x11->root, nodecorations );
+    this->nodecorations = nodecorations;
+    this->ignoreWindow = ignoreWindow;
+    hoverWindow = findWindow(x11->root);
 }
 
 Mouse::~Mouse() {
@@ -74,6 +61,13 @@ void Mouse::update() {
     while ( XCheckTypedEvent( x11->display, ButtonPress, &event ) ) {
 		setButton( event.xbutton.button, 1 );
 	}
+    bool findNewWindow = false;
+    while ( XCheckTypedEvent( x11->display, MotionNotify, &event ) ) {
+        findNewWindow = true;
+	}
+    if ( findNewWindow ) {
+        hoverWindow = findWindow(x11->root);
+    }
     while ( XCheckTypedEvent( x11->display, ButtonRelease, &event ) ) {
 		setButton( event.xbutton.button, 0 );
 	}
@@ -82,17 +76,36 @@ void Mouse::update() {
 	}
 }
 
-// This cheesy function makes sure we get all EnterNotify events on ALL the windows.
-void Mouse::selectAllInputs( Window win, bool nodecorations ) {
+Window Mouse::findWindow( Window foo ) {
+    glm::vec2 pos = getMousePos();
     Window root, parent;
     Window* children;
     unsigned int nchildren;
-    XQueryTree( x11->display, win, &root, &parent, &children, &nchildren );
-    for ( unsigned int i=0;i<nchildren;i++ ) {
-            XSelectInput( x11->display, children[ i ], EnterWindowMask );
-        if ( nodecorations ) {
-            selectAllInputs( children[i], nodecorations );
+    Window selectedWindow;
+    XQueryTree( x11->display, foo, &root, &parent, &children, &nchildren );
+    // The children are ordered, so we traverse backwards.
+    if ( !children || nchildren <= 0 ) {
+        return foo;
+    }
+    for( int i=nchildren-1;i>=0;i-- ) {
+        if ( children[i] == ignoreWindow ) {
+            continue;
+        }
+        glm::vec4 rect = getWindowGeometry(children[i], false);
+        float a = pos.x - rect.x;
+        float b = pos.y - rect.y;
+        if ( a <= rect.z && a >= 0 ) {
+            if ( b <= rect.w && b >= 0 ) {
+                selectedWindow = children[i];
+                if ( !nodecorations ) {
+                    XFree(children);
+                    return selectedWindow;
+                } else {
+                    XFree(children);
+                    return findWindow( selectedWindow );
+                }
+            }
         }
     }
-    free( children );
+    return foo;
 }

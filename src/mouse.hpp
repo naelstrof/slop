@@ -27,6 +27,7 @@
 #include <iostream>
 
 #include "x.hpp"
+#include "windowhelper.hpp"
 
 class Mouse {
 private:
@@ -34,11 +35,13 @@ private:
     std::vector<glm::ivec2> buttons;
     Cursor xcursor;
     int currentCursor;
-    void selectAllInputs( Window win, bool nodecorations = false );
+    Window findWindow( Window foo );
+    bool nodecorations;
+    Window ignoreWindow;
 public:
 	Window hoverWindow;
 	void update();
-    Mouse( X11* x11, bool nodecorations );
+    Mouse( X11* x11, bool nodecorations, Window ignoreWindow );
     ~Mouse();
     void setCursor( int cursor );
     glm::vec2 getMousePos();

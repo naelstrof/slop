@@ -1,5 +1,5 @@
 #Change this if you need to target a specific CMake version
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)")
 if ( NOT CMAKE_INSTALL_PREFIX )
@@ -9,9 +9,6 @@ endif()
 project(slop)
 add_definitions(-DSLOP_VERSION="v5.3.21")
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wno-missing-braces")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/")
 
 include_directories("${PROJECT_BINARY_DIR}")
@@ -45,7 +42,6 @@ find_package(OpenGL REQUIRED)
 find_package(GLM REQUIRED)
 find_package(GLX REQUIRED)
 find_package(X11 REQUIRED)
-find_package(XExt REQUIRED) 
 
 include_directories(${X11_INCLUDE_DIR}
                     ${GLM_INCLUDE_DIR}

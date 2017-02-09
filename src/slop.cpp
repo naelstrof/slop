@@ -78,11 +78,12 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     resource = new Resource();
     // Set up x11 temporarily
     x11 = new X11(options->xdisplay);
-    mouse = new Mouse( x11, options->nodecorations );
     keyboard = new Keyboard( x11 );
 
     // Set up window with GL context
     SlopWindow* window = new SlopWindow();
+
+    mouse = new Mouse( x11, options->nodecorations, window->window );
 
     if ( options->shader != "textured" ) {
         window->framebuffer->setShader( options->shader );

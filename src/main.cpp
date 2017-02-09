@@ -112,7 +112,7 @@ void printHelp() {
 	std::cout << "                                  --color is set to a transparent color.\n";
 	std::cout << "                                  (default=off)\n";
 	std::cout << "      --shader=STRING           Sets the shader to load and use from\n";
-	std::cout << "                                  ~/.config/slop/ or /usr/share/.\n";
+	std::cout << "                                  ~/.config/slop/\n";
 	std::cout << "                                  (default=`simple')\n";
 	std::cout << "  -f, --format=STRING           Set the output format string. Format specifiers\n";
 	std::cout << "                                  are %x, %y, %w, %h, %i, %g, and %c.\n";
@@ -129,9 +129,6 @@ void printHelp() {
 	std::cout << "\n";
 	std::cout << "    $ # Classic Windows XP selection.\n";
 	std::cout << "    $ slop -l -c 0.3,0.4,0.6,0.4\n";
-	std::cout << "\n";
-	std::cout << "    $ # Wiggle wiggle!\n";
-	std::cout << "    $ slop --opengl --shader wiggle\n";
 	std::cout << "\n";
 	std::cout << "    $ # Change output format to use safer parsing\n";
 	std::cout << "    $ slopoutput=$(slop -f \"%x %y %w %h\")\n";

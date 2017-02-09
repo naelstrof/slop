@@ -65,11 +65,6 @@ SlopWindow::SlopWindow() {
     glViewport( 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
     camera = glm::ortho( 0.0f, (float)WidthOfScreen( x11->screen ), (float)HeightOfScreen( x11->screen ), 0.0f, -1.0f, 1.0f);
 
-    // Make it so all input falls through
-    XRectangle rect;
-    rect.x = rect.y = rect.width = rect.height = 0; 
-    XShapeCombineRectangles( x11->display, window, ShapeInput, 0, 0, &rect, 1, ShapeSet, 0);
-
     // Last, we actually display the window <:o)
 	XMapWindow( x11->display, window );
 }
