@@ -22,11 +22,10 @@
 #define N_SLOP_H_
 
 #include <string>
+#include <chrono>
+#include <thread>
 
-#include "window.hpp"
-#include "shader.hpp"
-#include "framebuffer.hpp"
-#include "rectangle.hpp"
+#include "xshaperectangle.hpp"
 #include "slopstates.hpp"
 #include "keyboard.hpp"
 #include "mouse.hpp"
@@ -42,7 +41,6 @@ public:
     float tolerance;
     bool highlight;
     bool nodecorations;
-    std::string shader;
     float r;
     float g;
     float b;

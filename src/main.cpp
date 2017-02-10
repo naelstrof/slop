@@ -20,7 +20,11 @@
 
 #include <iostream>
 #include <sstream>
-#include "slop.hpp"
+#ifdef SLOP_LEGACY_MODE
+#include "xslop.hpp"
+#else
+#include "glslop.hpp"
+#endif
 #include "options.hpp"
 
 SlopOptions* getOptions( Options& options ) {
@@ -31,12 +35,14 @@ SlopOptions* getOptions( Options& options ) {
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     options.getColor("color", 'c', color);
     options.getString( "xdisplay", 'x', foo->xdisplay );
+#ifndef SLOP_LEGACY_MODE
     options.getString( "shader", 's', foo->shader );
+#endif
     foo->r = color.r;
     foo->g = color.g;
     foo->b = color.b;
     foo->a = color.a;
-    options.getBool("highlight", 'h', foo->highlight);
+    options.getBool("highlight", 'l', foo->highlight);
     options.getBool("nodecorations", 'n', foo->nodecorations);
     return foo;
 }
@@ -111,8 +117,10 @@ void printHelp() {
 	std::cout << "                                  highlights it. This is only useful when\n";
 	std::cout << "                                  --color is set to a transparent color.\n";
 	std::cout << "                                  (default=off)\n";
+#ifndef SLOP_LEGACY_MODE
 	std::cout << "      --shader=STRING           Sets the shader to load and use from\n";
 	std::cout << "                                  ~/.config/slop/\n";
+#endif
 	std::cout << "                                  (default=`simple')\n";
 	std::cout << "  -f, --format=STRING           Set the output format string. Format specifiers\n";
 	std::cout << "                                  are %x, %y, %w, %h, %i, %g, and %c.\n";

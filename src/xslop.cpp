@@ -1,4 +1,4 @@
-#include "slop.hpp"
+#include "xslop.hpp"
 
 X11* x11;
 Mouse* mouse;
@@ -11,7 +11,6 @@ SlopOptions::SlopOptions() {
     nodecorations = false;
     tolerance = 2;
     padding = 0;
-    shader = "textured";
     highlight = false;
     xdisplay = ":0";
     r = 0.5;
@@ -80,18 +79,11 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     x11 = new X11(options->xdisplay);
     keyboard = new Keyboard( x11 );
 
-    // Set up window with GL context
-    SlopWindow* window = new SlopWindow();
-
-    mouse = new Mouse( x11, options->nodecorations, window->window );
-
-    if ( options->shader != "textured" ) {
-        window->framebuffer->setShader( options->shader );
-    }
-
     // Init our little state machine, memory is a tad of a misnomer
     SlopMemory memory( options );
+    mouse = new Mouse( x11, options->nodecorations, memory.rectangle->window );
 
+    glm::mat4 fake;
     // This is where we'll run through all of our stuffs
     while( memory.running ) {
         mouse->update();
@@ -99,20 +91,15 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
         // We move our statemachine forward.
         memory.update( 1 );
 
-        // Then we draw our junk to a framebuffer.
-        window->framebuffer->bind();
-        glClearColor (0.0, 0.0, 0.0, 0.0);
-        glClear (GL_COLOR_BUFFER_BIT);
-        memory.draw( window->camera );
-        window->framebuffer->unbind();
+        // We don't actually draw anything, but the state machine uses
+        // this to know when to spawn the window.
+        memory.draw( fake );
+
+        // X11 explodes if we update as fast as possible, here's a tiny sleep.
+        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        XFlush(x11->display);
 
         // Then we draw the framebuffer to the screen
-        window->framebuffer->draw();
-        window->display();
-        GLenum err = glGetError();
-        if ( err != GL_NO_ERROR ) {
-            throw err;
-        }
         if ( keyboard->anyKeyDown() || mouse->getButton( 3 ) ) {
             memory.running = false;
             if ( cancelled ) {
@@ -128,13 +115,7 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
 
     // Lets now clear both front and back buffers before closing.
     // hopefully it'll be completely transparent while closing!
-    glClearColor (0.0, 0.0, 0.0, 0.0);
-    glClear (GL_COLOR_BUFFER_BIT);
-    window->display();
-    glClear (GL_COLOR_BUFFER_BIT);
-    window->display();
     // Then we clean up.
-    delete window;
     delete mouse;
     delete x11;
     delete resource;

@@ -22,9 +22,15 @@
 #define N_SLOPSTATES_H_
 
 #include "mouse.hpp"
-#include "rectangle.hpp"
 #include "windowhelper.hpp"
-#include "slop.hpp"
+
+#ifdef SLOP_LEGACY_MODE
+#include "xslop.hpp"
+#include "xshaperectangle.hpp"
+#else
+#include "glslop.hpp"
+#include "rectangle.hpp"
+#endif
 
 class SlopMemory;
 
