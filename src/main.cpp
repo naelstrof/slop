@@ -32,9 +32,7 @@ SlopOptions* getOptions( Options& options ) {
     options.getColor("color", 'c', color);
     options.getBool("nokeyboard", 'k', foo->nokeyboard);
     options.getString( "xdisplay", 'x', foo->xdisplay );
-#ifndef SLOP_LEGACY_MODE
     options.getString( "shader", 's', foo->shader );
-#endif
     foo->r = color.r;
     foo->g = color.g;
     foo->b = color.b;
@@ -114,10 +112,8 @@ void printHelp() {
 	std::cout << "                                  highlights it. This is only useful when\n";
 	std::cout << "                                  --color is set to a transparent color.\n";
 	std::cout << "                                  (default=off)\n";
-#ifndef SLOP_LEGACY_MODE
 	std::cout << "      --shader=STRING           Sets the shader to load and use from\n";
 	std::cout << "                                  ~/.config/slop/\n";
-#endif
 	std::cout << "                                  (default=`simple')\n";
 	std::cout << "  -f, --format=STRING           Set the output format string. Format specifiers\n";
 	std::cout << "                                  are %x, %y, %w, %h, %i, %g, and %c.\n";

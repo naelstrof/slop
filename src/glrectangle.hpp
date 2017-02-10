@@ -1,4 +1,4 @@
-/* xshaperectangle.hpp: A rectangle that doesn't use OpenGL to function.
+/* rectangle.hpp: generates a vertex mesh and draws it.
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -18,42 +18,49 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef N_XSHAPERECTANGLE_H_
-#define N_XSHAPERECTANGLE_H_
+#ifndef N_GLRECTANGLE_H_
+#define N_GLRECTANGLE_H_
 
+#include "gl_core_3_3.h"
 #include <iostream>
 #include <glm/glm.hpp>
+#include <GL/gl.h>
 #include <vector>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#include <X11/extensions/shape.h>
 
-#include "x.hpp"
+#include "shader.hpp"
 #include "rectangle.hpp"
 
-class XShapeRectangle : public Rectangle {
+struct RectangleBuffer {
+    unsigned int corner_verts;
+    unsigned int corner_uvs;
+    unsigned int rectangle_verts;
+    unsigned int rectangle_uvs;
+    unsigned int center_verts;
+    unsigned int center_uvs;
+};
+
+class GLRectangle : public Rectangle {
 private:
     glm::vec2 ul, oul;
     glm::vec2 bl, obl;
     glm::vec2 ur, our;
     glm::vec2 br, obr;
-    bool createdWindow;
     bool highlight;
+    void generateBuffers();
+    RectangleBuffer buffer;
+    unsigned int corner_vertCount;
+    unsigned int rectangle_vertCount;
+    unsigned int center_vertCount;
     float border;
     float padding;
-    XColor color;
-    float alpha;
-    XColor convertColor( glm::vec4 color );
-    void generateHoles();
-    void createWindow();
+    Shader* shader;
+    glm::vec4 color;
 public:
-    Window window;
     glm::vec4 getRect();
-    XShapeRectangle(glm::vec2 p1, glm::vec2 p2, float border = 1, float padding = 0, glm::vec4 color = glm::vec4(1,1,1,1), bool highlight = false );
-    ~XShapeRectangle();
+    GLRectangle(glm::vec2 p1, glm::vec2 p2, float border = 1, float padding = 0, glm::vec4 color = glm::vec4(1,1,1,1), bool highlight = false );
+    ~GLRectangle();
     void setPoints( glm::vec2 p1, glm::vec2 p2 );
     void draw(glm::mat4& matrix);
 };
 
-#endif // N_XSHAPERECTANGLE_H_
+#endif // N_RECTANGLE_H_

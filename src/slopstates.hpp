@@ -32,6 +32,7 @@
 #endif
 
 class SlopMemory;
+class SlopOptions;
 
 class SlopState {
 public:
@@ -72,7 +73,7 @@ private:
     SlopState* state;
     SlopState* nextState;
 public:
-    SlopMemory( SlopOptions* options );
+    SlopMemory( SlopOptions* options, Rectangle* rect );
     ~SlopMemory();
     Window selectedWindow;
     bool running;
@@ -83,6 +84,5 @@ public:
     void update( double dt );
     void draw( glm::mat4& matrix );
 };
-
 
 #endif // N_SLOPSTATES_H_

@@ -1,12 +1,12 @@
 #include "slopstates.hpp"
 
-SlopMemory::SlopMemory( SlopOptions* options ) {
+SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
     running = true;
     state = (SlopState*)new SlopStart();
     nextState = NULL;
     tolerance = options->tolerance;
     nodecorations = options->nodecorations;
-    rectangle = new Rectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight);
+    rectangle = rect;
     selectedWindow = x11->root;
     state->onEnter( *this );
 }
