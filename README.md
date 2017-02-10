@@ -15,7 +15,7 @@ TODO:
 - [x] Mouse stuff
 - [x] Drawing stuff
 - [x] Printing stuff
-- [ ] Librarify (so I can plug it into maim)
+- [x] Librarify
 
 Avoiding:
 - [ ] Themes (Not going to happen. It'd add a texture library dependency.)
