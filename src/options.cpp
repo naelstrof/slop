@@ -30,8 +30,25 @@ int Options::parseCharOption( int argc, char** argv, int argumentIndex, int vali
     // If we're a flag, we take no arguments, nor do we allow = signs or whatever.
     if ( isFlagArgument[validIndex] ) {
         if ( argument != std::string()+"-"+validCharArguments[validIndex] ) {
-            throw new std::invalid_argument( std::string()+"Unexpected characters around flag `" + argument + "`." );
-            return 0;
+            for( int o=1;o<argument.length();o++ ) {
+                bool isValid = false;
+                for( int i=0;i<validArgumentCount&&!isValid;i++ ) {
+                    if ( argument[o] == validCharArguments[i] ) {
+                        if ( isFlagArgument[i] ) {
+                            isValid = true;
+                            arguments.push_back( std::string()+validCharArguments[i] );
+                            values.push_back("");
+                            break;
+                        } else {
+                            throw new std::invalid_argument( std::string()+"Truncating non-flag arguments is not allowed. Split this up: `" + argument + "`." );
+                        }
+                    }
+                }
+                if (!isValid) {
+                    throw new std::invalid_argument( std::string()+"Unexpected characters around flag `" + argument + "`." );
+                }
+            }
+            return 1;
         } else {
             arguments.push_back( std::string()+argument[1] );
             values.push_back("");
