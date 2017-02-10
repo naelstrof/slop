@@ -23,12 +23,11 @@
 
 #include "mouse.hpp"
 #include "windowhelper.hpp"
+#include "slop.hpp"
 
 #ifdef SLOP_LEGACY_MODE
-#include "xslop.hpp"
 #include "xshaperectangle.hpp"
 #else
-#include "glslop.hpp"
 #include "rectangle.hpp"
 #endif
 
@@ -67,5 +66,23 @@ class SlopEndDrag : SlopState {
 public:
     virtual void onEnter( SlopMemory& memory );
 };
+
+class SlopMemory {
+private:
+    SlopState* state;
+    SlopState* nextState;
+public:
+    SlopMemory( SlopOptions* options );
+    ~SlopMemory();
+    Window selectedWindow;
+    bool running;
+    float tolerance;
+    bool nodecorations;
+    Rectangle* rectangle;
+    void setState( SlopState* state );
+    void update( double dt );
+    void draw( glm::mat4& matrix );
+};
+
 
 #endif // N_SLOPSTATES_H_

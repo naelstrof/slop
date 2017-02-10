@@ -20,11 +20,7 @@
 
 #include <iostream>
 #include <sstream>
-#ifdef SLOP_LEGACY_MODE
-#include "xslop.hpp"
-#else
-#include "glslop.hpp"
-#endif
+#include "slop.hpp"
 #include "options.hpp"
 
 SlopOptions* getOptions( Options& options ) {
@@ -34,6 +30,7 @@ SlopOptions* getOptions( Options& options ) {
     options.getFloat("tolerance", 't', foo->tolerance);
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     options.getColor("color", 'c', color);
+    options.getBool("nokeyboard", 'k', foo->nokeyboard);
     options.getString( "xdisplay", 'x', foo->xdisplay );
 #ifndef SLOP_LEGACY_MODE
     options.getString( "shader", 's', foo->shader );

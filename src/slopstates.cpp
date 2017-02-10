@@ -1,5 +1,47 @@
 #include "slopstates.hpp"
 
+SlopMemory::SlopMemory( SlopOptions* options ) {
+    running = true;
+    state = (SlopState*)new SlopStart();
+    nextState = NULL;
+    tolerance = options->tolerance;
+    nodecorations = options->nodecorations;
+    rectangle = new Rectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight);
+    selectedWindow = x11->root;
+    state->onEnter( *this );
+}
+
+SlopMemory::~SlopMemory() {
+    delete state;
+    if ( nextState ) {
+        delete nextState;
+    }
+    delete rectangle;
+}
+
+void SlopMemory::update( double dt ) {
+    state->update( *this, dt );
+    if ( nextState ) {
+        state->onExit( *this );
+        delete state;
+        state = nextState;
+        state->onEnter( *this );
+        nextState = NULL;
+    }
+}
+
+void SlopMemory::setState( SlopState* state ) {
+    if ( nextState ) {
+        delete nextState;
+    }
+    nextState = state;
+}
+
+void SlopMemory::draw( glm::mat4& matrix ) {
+    state->draw( *this, matrix );
+}
+
+
 SlopState::~SlopState() {
 }
 void SlopState::onEnter( SlopMemory& memory ) {

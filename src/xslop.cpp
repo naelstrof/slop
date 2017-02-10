@@ -1,4 +1,12 @@
-#include "xslop.hpp"
+#include "slop.hpp"
+
+#include "slopstates.hpp"
+#include "mouse.hpp"
+#include "resource.hpp"
+#include "keyboard.hpp"
+#include <chrono>
+#include <thread>
+#include "xshaperectangle.hpp"
 
 X11* x11;
 Mouse* mouse;
@@ -19,53 +27,12 @@ SlopOptions::SlopOptions() {
     a = 1;
 }
 
-SlopSelection::SlopSelection( float x, float y, float w, float h, Window id ) {
+SlopSelection::SlopSelection( float x, float y, float w, float h, int id ) {
     this->x = x;
     this->y = y;
     this->w = w;
     this->h = h;
     this->id = id;
-}
-
-SlopMemory::SlopMemory( SlopOptions* options ) {
-    running = true;
-    state = (SlopState*)new SlopStart();
-    nextState = NULL;
-    tolerance = options->tolerance;
-    nodecorations = options->nodecorations;
-    rectangle = new Rectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight);
-    selectedWindow = x11->root;
-    state->onEnter( *this );
-}
-
-SlopMemory::~SlopMemory() {
-    delete state;
-    if ( nextState ) {
-        delete nextState;
-    }
-    delete rectangle;
-}
-
-void SlopMemory::update( double dt ) {
-    state->update( *this, dt );
-    if ( nextState ) {
-        state->onExit( *this );
-        delete state;
-        state = nextState;
-        state->onEnter( *this );
-        nextState = NULL;
-    }
-}
-
-void SlopMemory::setState( SlopState* state ) {
-    if ( nextState ) {
-        delete nextState;
-    }
-    nextState = state;
-}
-
-void SlopMemory::draw( glm::mat4& matrix ) {
-    state->draw( *this, matrix );
 }
 
 SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {

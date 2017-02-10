@@ -52,7 +52,7 @@ if ( SLOP_LEGACY_MODE )
     # Install targets
     install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
     install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
-    install( FILES ${CMAKE_SOURCE_DIR}/src/xslop.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/include" )
+    install( FILES ${CMAKE_SOURCE_DIR}/src/slop.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/include" )
 else()
     add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
                                         src/keyboard.cpp
@@ -87,5 +87,5 @@ else()
     # Install targets
     install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
     install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
-    install( FILES ${CMAKE_SOURCE_DIR}/src/glslop.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/include" )
+    install( FILES ${CMAKE_SOURCE_DIR}/src/slop.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/include" )
 endif()

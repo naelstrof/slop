@@ -1,4 +1,4 @@
-/* slop.hpp: exposes a selection interface
+/* glslop.hpp: exposes an opengl selection interface
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -22,16 +22,6 @@
 #define N_SLOP_H_
 
 #include <string>
-#include <chrono>
-#include <thread>
-
-#include "xshaperectangle.hpp"
-#include "slopstates.hpp"
-#include "keyboard.hpp"
-#include "mouse.hpp"
-#include "resource.hpp"
-
-class SlopState;
 
 class SlopOptions {
 public:
@@ -40,7 +30,9 @@ public:
     float padding;
     float tolerance;
     bool highlight;
+    bool nokeyboard;
     bool nodecorations;
+    std::string shader;
     float r;
     float g;
     float b;
@@ -50,29 +42,13 @@ public:
 
 class SlopSelection {
 public:
-    SlopSelection( float x, float y, float w, float h, Window id );
+    SlopSelection( float x, float y, float w, float h, int id );
     float x;
     float y;
     float w;
     float h;
-    Window id;
-};
-
-class SlopMemory {
-private:
-    SlopState* state;
-    SlopState* nextState;
-public:
-    SlopMemory( SlopOptions* options );
-    ~SlopMemory();
-    Window selectedWindow;
-    bool running;
-    float tolerance;
-    bool nodecorations;
-    Rectangle* rectangle;
-    void setState( SlopState* state );
-    void update( double dt );
-    void draw( glm::mat4& matrix );
+// This is an X11 Window ID
+    int id;
 };
 
 SlopSelection SlopSelect( SlopOptions* options = NULL, bool* cancelled = NULL );
