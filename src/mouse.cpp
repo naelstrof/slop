@@ -91,6 +91,11 @@ Window Mouse::findWindow( Window foo ) {
         if ( children[i] == ignoreWindow ) {
             continue;
         }
+        XWindowAttributes attr;         
+        XGetWindowAttributes( x11->display, children[i], &attr );
+        if ( attr.map_state != IsViewable ) {
+            continue;
+        }
         glm::vec4 rect = getWindowGeometry(children[i], false);
         float a = pos.x - rect.x;
         float b = pos.y - rect.y;

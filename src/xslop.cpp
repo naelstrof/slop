@@ -96,8 +96,8 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
         memory.draw( fake );
 
         // X11 explodes if we update as fast as possible, here's a tiny sleep.
-        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
         XFlush(x11->display);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         // Then we draw the framebuffer to the screen
         if ( keyboard->anyKeyDown() || mouse->getButton( 3 ) ) {
