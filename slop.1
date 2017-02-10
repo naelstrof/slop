@@ -1,0 +1,71 @@
+.\" Manpage for slop.
+.\" Contact naelstrof@gmail.com to correct errors or typos.
+.TH SLOP 1 2017-03-21 Linux "slop man page"
+.SH NAME
+slop \- select operation
+.SH SYNOPSIS
+slop [OPTIONS]
+.SH DESCRIPTION
+slop is an application that queries for a selection from the user and prints the region to stdout. It grabs the mouse and turns it into a crosshair, lets the user click and drag to make a selection (or click on a window) while drawing a pretty box around it, then finally prints the selection's dimensions to stdout.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Print help and exit.
+.TP
+.BR \-v ", " \-\-version
+Print version and exit.
+.TP
+.BR \-x ", " \-\-xdisplay=\fIhostname:number.screen_number\fR
+Sets the xdisplay to use.
+.TP
+.BR \-k ", " \-\-nokeyboard
+Disables the ability to cancel selections with the keyboard.
+.TP
+.BR \-b ", " \-\-bordersize=\fIFLOAT\fR
+Sets the selection rectangle's thickness.
+.TP
+.BR \-p ", " \-\-padding=\fIFLOAT\fR
+Sets the padding size for the selection, this can be negative.
+.TP
+.BR \-t ", " \-\-tolerance=\fIFLOAT\fR
+How far in pixels the mouse can move after clicking, and still be detected as a normal click instead of a click-and-drag. Setting this to 0 will disable window selections. Alternatively setting it to 9999999 would force a window selection.
+.TP
+.BR \-c ", " \-\-color=\fIFLOAT,FLOAT,FLOAT,FLOAT\fR
+Sets the selection rectangle's color. Supports RGB or RGBA input. Depending on the system's window manager/OpenGL support, the opacity may be ignored.
+.TP
+.BR \-s ", " \-\-shader=\fISTRING\fR
+This sets the vertex shader, and fragment shader combo to use when drawing the final framebuffer to the screen. This obviously only works when OpenGL is enabled. The shaders are loaded from ~/.config/slop. See https://github.com/naelstrof/slop for more information on how to create your own shaders.
+.TP
+.BR \-f ", " \-\-format=\fISTRING\fR
+Sets the output format for slop. Format specifiers are %x, %y, %w, %h, %i, and %g. If actual percentage signs are desired in output, use a double percentage sign like so `%%`.
+.TP
+.BR \-n ", " \-\-nodecorations
+Attempt to select child windows, instead of the surface-level windows. This will typically avoid window decorations.
+.TP
+.BR \-l ", " \-\-highlight
+Instead of outlining a selection, slop will highlight it instead. This is particularly useful if the color is set to an opacity lower than 1.
+.SH EXAMPLES
+To emulate a windows XP selection, you can use something like this:
+.PP
+.nf
+.RS
+slop --highlight --tolerance=0 --color=0.3,0.4,0.6,0.4
+.RE
+.fi
+.PP
+In order to avoid using
+.BR eval(1)
+in your scripts (pretty big security issue), you can use slop like this instead:
+.PP
+.nf
+.RS
+read -r X Y W H G ID < <(slop -f "%x %y %w %h %g %i")
+.RE
+.fi
+.PP
+.SH SEE ALSO
+.BR maim(1) 
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Dalton Nell (naelstrof@gmail.com)

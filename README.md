@@ -9,7 +9,7 @@ TODO:
 - [x] Keyboard
 - [x] Shaders
 - [x] Custom output formatting
-- [ ] Manpages
+- [x] Manpages
 - [x] Option parsing
 - [x] Highlighting
 - [x] Mouse stuff

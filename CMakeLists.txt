@@ -9,6 +9,16 @@ project(slop)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/")
 
+set( CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Directory where man pages reside. (/usr/share/man, /usr/local/share/man, etc.)" )
+
+set( CMAKE_COMPRESS_MAN TRUE CACHE BOOL "Whether or not to compress the man pages for install." )
+
+if ( CMAKE_COMPRESS_MAN )
+    set( MANTARGET "slop.1.gz" )
+else()
+    set( MANTARGET "slop.1" )
+endif()
+
 include_directories("${PROJECT_BINARY_DIR}")
 
 add_definitions(-DSLOP_VERSION="v5.3.21")
@@ -39,11 +49,13 @@ add_executable(${EXECUTABLE_NAME} src/options.cpp
                                   src/main.cpp)
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules" )
+
 find_package(GLM REQUIRED)
 find_package(X11 REQUIRED)
 find_package(XExt REQUIRED)
 find_package(GLX REQUIRED)
 find_package(OpenGL REQUIRED)
+
 include_directories(${X11_INCLUDE_DIR}
                     ${GLM_INCLUDE_DIR}
                     ${XEXT_INCLUDE_DIR}
@@ -59,4 +71,5 @@ target_link_libraries(${EXECUTABLE_NAME} ${X11_LIBRARIES}
 
 install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
 install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
-install( FILES ${CMAKE_SOURCE_DIR}/src/slop.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/include" )
+install( FILES ${CMAKE_SOURCE_DIR}/src/slop.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/include" COMPONENT development )
+install( FILES "${CMAKE_SOURCE_DIR}/${MANTARGET}" DESTINATION  "${CMAKE_INSTALL_MANDIR}/man1" COMPONENT doc )
