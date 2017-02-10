@@ -91,6 +91,7 @@ Window Mouse::findWindow( Window foo ) {
         if ( children[i] == ignoreWindow ) {
             continue;
         }
+        // We need to make sure the window isn't something that currently isn't mapped.
         XWindowAttributes attr;         
         XGetWindowAttributes( x11->display, children[i], &attr );
         if ( attr.map_state != IsViewable ) {
