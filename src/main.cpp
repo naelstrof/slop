@@ -42,7 +42,7 @@ SlopOptions* getOptions( Options& options ) {
     return foo;
 }
 
-std::string formatOutput( std::string input, SlopSelection selection ) {
+std::string formatOutput( std::string input, SlopSelection selection, bool cancelled ) {
     std::stringstream output;
     for( unsigned int i=0;i<input.length();i++) {
         if ( input[i] == '%' ) {
@@ -56,6 +56,8 @@ std::string formatOutput( std::string input, SlopSelection selection ) {
                 case 'Y': output << round(selection.y); break;
                 case 'w':
                 case 'W': output << round(selection.w); break;
+                case 'c':
+                case 'C': output << cancelled; break;
                 case 'h':
                 case 'H': output << round(selection.h); break;
                 case 'g':
@@ -64,7 +66,7 @@ std::string formatOutput( std::string input, SlopSelection selection ) {
                 case 'i':
                 case 'I': output << selection.id; break;
                 case '%': output << "%"; break;
-                default: throw new std::invalid_argument( std::string()+"Expected x, y, w, h, g, i, or % after % in format. Got `" + input[i+1] + "`." );
+                default: throw new std::invalid_argument( std::string()+"Expected x, y, w, h, g, i, c, or % after % in format. Got `" + input[i+1] + "`." );
              }
             i++;
             continue;
@@ -163,7 +165,7 @@ int app( int argc, char** argv ) {
     std::string format;
     bool gotFormat = options.getString("format", 'f', format);
     if ( gotFormat ) {
-        formatOutput( format, selection );
+        formatOutput( format, selection, false );
     }
 
     // Finally we do the real selection.
@@ -179,10 +181,10 @@ int app( int argc, char** argv ) {
     }
     // If we recieved a format option, we output the specified output.
     if ( gotFormat ) {
-        std::cout << formatOutput( format, selection );
+        std::cout << formatOutput( format, selection, cancelled );
         return 0;
     }
-    std::cout << formatOutput( "%g\n", selection );
+    std::cout << formatOutput( "%g\n", selection, cancelled );
     return 0;
 }
 
