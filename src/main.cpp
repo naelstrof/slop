@@ -117,7 +117,7 @@ void printHelp() {
 	std::cout << "                                  (default=`simple')\n";
 	std::cout << "  -f, --format=STRING           Set the output format string. Format specifiers\n";
 	std::cout << "                                  are %x, %y, %w, %h, %i, %g, and %c.\n";
-	std::cout << "                                  (default=`X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\nCancel=%c\n')\n";
+	std::cout << "                                  (default=`%g\n')\n";
 	std::cout << "Examples\n";
 	std::cout << "    $ # Gray, thick, transparent border for maximum visiblity.\n";
 	std::cout << "    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n";
@@ -131,12 +131,8 @@ void printHelp() {
 	std::cout << "    $ # Classic Windows XP selection.\n";
 	std::cout << "    $ slop -l -c 0.3,0.4,0.6,0.4\n";
 	std::cout << "\n";
-	std::cout << "    $ # Change output format to use safer parsing\n";
-	std::cout << "    $ slopoutput=$(slop -f \"%x %y %w %h\")\n";
-	std::cout << "    $ X=$(echo $slopoutput | awk '{print $1}')\n";
-	std::cout << "    $ Y=$(echo $slopoutput | awk '{print $2}')\n";
-	std::cout << "    $ W=$(echo $slopoutput | awk '{print $3}')\n";
-	std::cout << "    $ H=$(echo $slopoutput | awk '{print $4}')\n";
+	std::cout << "    $ # Read slop output for use in scripts.\n";
+	std::cout << "    $ read -r X Y W H G ID < <(slop -f '%x %y %w %h %g %i')\n";
 	std::cout << "\n";
 	std::cout << "Tips\n";
 	std::cout << "    * If you don't like a selection: you can cancel it by right-clicking\n";
@@ -186,8 +182,7 @@ int app( int argc, char** argv ) {
         std::cout << formatOutput( format, selection );
         return 0;
     }
-    // Otherwise we default to an `eval` compatible format.
-    std::cout << formatOutput( "X=%x\nY=%y\nW=%w\nH=%h\nG=%g\nID=%i\n", selection );
+    std::cout << formatOutput( "%g\n", selection );
     return 0;
 }
 
