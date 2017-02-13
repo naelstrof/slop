@@ -36,12 +36,12 @@ private:
     Cursor xcursor;
     int currentCursor;
     Window findWindow( Window foo );
-    bool nodecorations;
+    int nodecorations;
     Window ignoreWindow;
 public:
 	Window hoverWindow;
 	void update();
-    Mouse( X11* x11, bool nodecorations, Window ignoreWindow );
+    Mouse( X11* x11, int nodecorations, Window ignoreWindow );
     ~Mouse();
     void setCursor( int cursor );
     glm::vec2 getMousePos();

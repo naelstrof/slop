@@ -39,7 +39,7 @@ void Mouse::setCursor( int cursor ) {
                               xcursor, CurrentTime );
 }
 
-Mouse::Mouse(X11* x11, bool nodecorations, Window ignoreWindow ) {
+Mouse::Mouse(X11* x11, int nodecorations, Window ignoreWindow ) {
     this->x11 = x11;
     currentCursor = XC_cross;
     xcursor = XCreateFontCursor( x11->display, XC_cross );
@@ -83,10 +83,10 @@ Window Mouse::findWindow( Window foo ) {
     unsigned int nchildren;
     Window selectedWindow;
     XQueryTree( x11->display, foo, &root, &parent, &children, &nchildren );
-    // The children are ordered, so we traverse backwards.
     if ( !children || nchildren <= 0 ) {
         return foo;
     }
+    // The children are ordered, so we traverse backwards.
     for( int i=nchildren-1;i>=0;i-- ) {
         if ( children[i] == ignoreWindow ) {
             continue;
@@ -103,12 +103,20 @@ Window Mouse::findWindow( Window foo ) {
         if ( a <= rect.z && a >= 0 ) {
             if ( b <= rect.w && b >= 0 ) {
                 selectedWindow = children[i];
-                if ( !nodecorations ) {
-                    XFree(children);
-                    return selectedWindow;
-                } else {
-                    XFree(children);
-                    return findWindow( selectedWindow );
+                switch( nodecorations ) {
+                    case 0:
+                        XFree(children);
+                        return selectedWindow;
+                    case 1:
+                        XFree(children);
+                        //return findWindow( selectedWindow );
+                        XQueryTree( x11->display, selectedWindow, &root, &parent, &children, &nchildren );
+                        if ( !children || nchildren <= 0 ) {
+                            return selectedWindow;
+                        }
+                        return children[nchildren-1];
+                    case 2:
+                        return findWindow( selectedWindow );
                 }
             }
         }

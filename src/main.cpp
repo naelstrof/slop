@@ -38,7 +38,7 @@ SlopOptions* getOptions( Options& options ) {
     foo->b = color.b;
     foo->a = color.a;
     options.getBool("highlight", 'l', foo->highlight);
-    options.getBool("nodecorations", 'n', foo->nodecorations);
+    options.getInt("nodecorations", 'n', foo->nodecorations);
     return foo;
 }
 
@@ -108,8 +108,12 @@ void printHelp() {
 	std::cout << "                                Set the selection rectangle's color. Supports\n";
 	std::cout << "                                  RGB or RGBA values.\n";
 	std::cout << "                                  (default=`0.5,0.5,0.5,1')\n";
-	std::cout << "  -n, --nodecorations           Attempt to select child windows in order to\n";
-	std::cout << "                                  avoid window decorations.  (default=off)\n";
+	std::cout << "  -n, --nodecorations=INT           Attempt to select child windows in order to\n";
+	std::cout << "                                  avoid window decorations. Setting this to\n";
+    std::cout << "                                  1 will enable a light attempt to\n";
+    std::cout << "                                  remove decorations. Setting this to 2 will\n";
+    std::cout << "                                  enable an aggressive decoration removal.\n";
+    std::cout << "                                  (default=`0')\n";
 	std::cout << "  -l, --highlight               Instead of outlining selections, slop\n";
 	std::cout << "                                  highlights it. This is only useful when\n";
 	std::cout << "                                  --color is set to a transparent color.\n";

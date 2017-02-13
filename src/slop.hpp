@@ -44,7 +44,7 @@ public:
     float tolerance;
     bool highlight;
     bool nokeyboard;
-    bool nodecorations;
+    int nodecorations;
     std::string shader;
     float r;
     float g;
