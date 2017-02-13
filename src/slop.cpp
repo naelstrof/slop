@@ -42,14 +42,19 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     // Set up x11 temporarily
     x11 = new X11(options->xdisplay);
     keyboard = new Keyboard( x11 );
-    // First we try to make an OpenGL enabled window
     bool success = false;
     SlopWindow* window;
-    try {
-        window = new SlopWindow();
-        success = true;
-    } catch (...) {
-        success = false;
+    // First we check if we have a compositor available
+	if ( x11->hasCompositor() ) {
+        // If we have a compositor, we try using OpenGL
+        try {
+            window = new SlopWindow();
+            success = true;
+        } catch (...) {
+            success = false;
+        }
+    } else {
+        std::cerr << "Failed to detect a compositor, OpenGL hardware-accelleration disabled...\n";
     }
     if ( !success ) {
         // If we fail, we launch the XShape version of slop.

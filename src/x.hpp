@@ -24,10 +24,13 @@
 #include <iostream>
 #include <X11/Xlib.h>
 #include <string>
+#include <sstream>
 #include <stdexcept>
+#include <X11/Xatom.h>
 
 class X11 {
 public:
+    bool hasCompositor();
     X11( std::string displayName );
     ~X11();
     Display* display;

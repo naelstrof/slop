@@ -1,5 +1,12 @@
 #include "x.hpp"
 
+bool X11::hasCompositor() {
+    std::stringstream prop_name;
+    prop_name << "_NET_WM_CM_S" << XScreenNumberOfScreen( screen );
+    Atom prop_atom = XInternAtom(display, prop_name.str().c_str(), False);
+    return XGetSelectionOwner(display, prop_atom) != None;
+}
+
 X11::X11( std::string displayName ) {
     // Initialize display
     display = XOpenDisplay( displayName.c_str() );
