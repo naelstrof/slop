@@ -31,7 +31,7 @@ SlopSelection::SlopSelection( float x, float y, float w, float h, int id ) {
 SlopSelection GLSlopSelect( SlopOptions* options, bool* cancelled, SlopWindow* window );
 SlopSelection XShapeSlopSelect( SlopOptions* options, bool* cancelled);
 
-SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
+SlopSelection SlopSelect( SlopOptions* options, bool* cancelled, bool quiet) {
     SlopSelection returnval(0,0,0,0,0);
     bool deleteOptions = false;
     if ( !options ) {
@@ -59,11 +59,13 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled ) {
     }
     if ( !success ) {
         // If we fail, we launch the XShape version of slop.
-        if ( errorstring.length() <= 0 ) {
-            errorstring += "Failed to launch OpenGL context, --shader parameter will be ignored.\n";
-            std::cerr << errorstring;
-        } else {
-            std::cerr << errorstring;
+        if ( !quiet ) {
+            if ( errorstring.length() <= 0 ) {
+                errorstring += "Failed to launch OpenGL context, --shader parameter will be ignored.\n";
+                std::cerr << errorstring;
+            } else {
+                std::cerr << errorstring;
+            }
         }
         returnval = XShapeSlopSelect( options, cancelled );
     } else {

@@ -108,12 +108,14 @@ void printHelp() {
 	std::cout << "                                Set the selection rectangle's color. Supports\n";
 	std::cout << "                                  RGB or RGBA values.\n";
 	std::cout << "                                  (default=`0.5,0.5,0.5,1')\n";
-	std::cout << "  -n, --nodecorations=INT           Attempt to select child windows in order to\n";
+	std::cout << "  -n, --nodecorations=INT       Attempt to select child windows in order to\n";
 	std::cout << "                                  avoid window decorations. Setting this to\n";
     std::cout << "                                  1 will enable a light attempt to\n";
     std::cout << "                                  remove decorations. Setting this to 2 will\n";
-    std::cout << "                                  enable an aggressive decoration removal.\n";
+    std::cout << "                                  enable aggressive decoration removal.\n";
     std::cout << "                                  (default=`0')\n";
+	std::cout << "  -q, --quiet                   Disable any unnecessary cerr output. Any\n";
+	std::cout << "                                  warnings simply won't print.\n";
 	std::cout << "  -l, --highlight               Instead of outlining selections, slop\n";
 	std::cout << "                                  highlights it. This is only useful when\n";
 	std::cout << "                                  --color is set to a transparent color.\n";
@@ -151,7 +153,9 @@ void printHelp() {
 int app( int argc, char** argv ) {
     // Options just validates all of our input from argv
     Options options( argc, argv );
-    bool help;
+    bool quiet = false;
+    options.getBool( "quiet", 'q', quiet );
+    bool help = false;
     if ( options.getBool( "help", 'h', help ) ) {
         printHelp();
         return 0;
@@ -174,13 +178,15 @@ int app( int argc, char** argv ) {
 
     // Finally we do the real selection.
     bool cancelled = false;
-    selection = SlopSelect(parsedOptions, &cancelled);
+    selection = SlopSelect(parsedOptions, &cancelled, quiet);
     
     // Here we're done with the parsed option data.
     delete parsedOptions;
     // We know if we cancelled or not
     if ( cancelled ) {
-        std::cerr << "Selection was cancelled by keystroke or right-click.\n";
+        if ( !quiet ) {
+            std::cerr << "Selection was cancelled by keystroke or right-click.\n";
+        }
         return 1;
     }
     // If we recieved a format option, we output the specified output.
