@@ -1,3 +1,16 @@
+#include <chrono>
+#include <thread>
+
+#include "slopstates.hpp"
+#include "mouse.hpp"
+#include "resource.hpp"
+#include "keyboard.hpp"
+
+#include "window.hpp"
+#include "shader.hpp"
+#include "framebuffer.hpp"
+#include "glrectangle.hpp"
+#include "xshaperectangle.hpp"
 #include "slop.hpp"
 
 X11* x11;
