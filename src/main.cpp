@@ -31,6 +31,7 @@ SlopOptions* getOptions( Options& options ) {
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     options.getColor("color", 'c', color);
     options.getBool("nokeyboard", 'k', foo->nokeyboard);
+    std::cout << foo->nokeyboard << "\n";
     options.getString( "xdisplay", 'x', foo->xdisplay );
     options.getString( "shader", 's', foo->shader );
     foo->r = color.r;
@@ -89,7 +90,7 @@ void printHelp() {
     std::cout << "-h, --help                    Print help and exit\n";
     std::cout << "-v, --version                 Print version and exit\n";
     std::cout << "Options\n";
-    std::cout << "  -x, --xdisplay=hostname:number.screen_number\n";
+    std::cout << "  -d, --xdisplay=hostname:number.screen_number\n";
     std::cout << "                                Sets the x display.\n";
 	std::cout << "  -k, --nokeyboard              Disables the ability to cancel selections with\n";
 	std::cout << "                                  the keyboard.  (default=off)\n";
@@ -120,9 +121,8 @@ void printHelp() {
 	std::cout << "                                  highlights it. This is only useful when\n";
 	std::cout << "                                  --color is set to a transparent color.\n";
 	std::cout << "                                  (default=off)\n";
-	std::cout << "      --shader=STRING           Sets the shader to load and use from\n";
+	std::cout << "  -r, --shader=STRING           Sets the shader to load and use from\n";
 	std::cout << "                                  ~/.config/slop/\n";
-	std::cout << "                                  (default=`simple')\n";
 	std::cout << "  -f, --format=STRING           Set the output format string. Format specifiers\n";
 	std::cout << "                                  are %x, %y, %w, %h, %i, %g, and %c.\n";
 	std::cout << "                                  (default=`%g\n')\n";

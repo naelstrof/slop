@@ -21,6 +21,7 @@ Resource* resource;
 // Defaults!
 SlopOptions::SlopOptions() {
     borderSize = 1;
+    nokeyboard = false;
     nodecorations = false;
     tolerance = 2;
     padding = 0;
@@ -115,7 +116,7 @@ SlopSelection XShapeSlopSelect( SlopOptions* options, bool* cancelled ) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         // Then we draw the framebuffer to the screen
-        if ( keyboard->anyKeyDown() || mouse->getButton( 3 ) ) {
+        if ( (keyboard->anyKeyDown() && !options->nokeyboard) || mouse->getButton( 3 ) ) {
             memory.running = false;
             if ( cancelled ) {
                 *cancelled = true;
@@ -167,7 +168,7 @@ SlopSelection GLSlopSelect( SlopOptions* options, bool* cancelled, SlopWindow* w
         if ( err != GL_NO_ERROR ) {
             throw err;
         }
-        if ( keyboard->anyKeyDown() || mouse->getButton( 3 ) ) {
+        if ( (keyboard->anyKeyDown() && !options->nokeyboard) || mouse->getButton( 3 ) ) {
             memory.running = false;
             if ( cancelled ) {
                 *cancelled = true;

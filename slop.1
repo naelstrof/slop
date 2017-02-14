@@ -4,7 +4,7 @@
 .SH NAME
 slop \- select operation
 .SH SYNOPSIS
-slop [OPTIONS]
+slop [-klqn] [OPTIONS]
 .SH DESCRIPTION
 slop is an application that queries for a selection from the user and prints the region to stdout. It grabs the mouse and turns it into a crosshair, lets the user click and drag to make a selection (or click on a window) while drawing a pretty box around it, then finally prints the selection's dimensions to stdout.
 .SH OPTIONS
@@ -15,11 +15,8 @@ Print help and exit.
 .BR \-v ", " \-\-version
 Print version and exit.
 .TP
-.BR \-x ", " \-\-xdisplay=\fIhostname:number.screen_number\fR
+.BR \-d ", " \-\-xdisplay=\fIhostname:number.screen_number\fR
 Sets the xdisplay to use.
-.TP
-.BR \-k ", " \-\-nokeyboard
-Disables the ability to cancel selections with the keyboard.
 .TP
 .BR \-b ", " \-\-bordersize=\fIFLOAT\fR
 Sets the selection rectangle's thickness.
@@ -33,7 +30,7 @@ How far in pixels the mouse can move after clicking, and still be detected as a 
 .BR \-c ", " \-\-color=\fIFLOAT,FLOAT,FLOAT,FLOAT\fR
 Sets the selection rectangle's color. Supports RGB or RGBA input. Depending on the system's window manager/OpenGL support, the opacity may be ignored.
 .TP
-.BR \-s ", " \-\-shader=\fISTRING\fR
+.BR \-r ", " \-\-shader=\fISTRING\fR
 This sets the vertex shader, and fragment shader combo to use when drawing the final framebuffer to the screen. This obviously only works when OpenGL is enabled. The shaders are loaded from ~/.config/slop. See https://github.com/naelstrof/slop for more information on how to create your own shaders.
 .TP
 .BR \-f ", " \-\-format=\fISTRING\fR
@@ -47,6 +44,9 @@ Instead of outlining a selection, slop will highlight it instead. This is partic
 .TP
 .BR \-q ", " \-\-quiet
 Disable any unnecessary cerr output. Any warnings simply won't print.
+.TP
+.BR \-k ", " \-\-nokeyboard
+Disables the ability to cancel selections with the keyboard.
 .SH EXAMPLES
 To emulate a windows XP selection, you can use something like this:
 .PP
