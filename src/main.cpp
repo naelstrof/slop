@@ -89,7 +89,7 @@ void printHelp() {
     std::cout << "-h, --help                    Print help and exit\n";
     std::cout << "-v, --version                 Print version and exit\n";
     std::cout << "Options\n";
-    std::cout << "  -d, --xdisplay=hostname:number.screen_number\n";
+    std::cout << "  -x, --xdisplay=hostname:number.screen_number\n";
     std::cout << "                                Sets the x display.\n";
 	std::cout << "  -k, --nokeyboard              Disables the ability to cancel selections with\n";
 	std::cout << "                                  the keyboard.  (default=off)\n";

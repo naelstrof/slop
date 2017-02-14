@@ -29,7 +29,7 @@
 #include <glm/glm.hpp>
 
 static std::string validStringArguments[] = { "bordersize", "padding", "color", "shader", "highlight", "format", "tolerance", "nodecorations", "nokeyboard", "help", "xdisplay", "version", "quiet" };
-static char validCharArguments[] = { 'b', 'p', 'c', 'r', 'l', 'f', 't', 'n', 'k', 'h', 'd', 'v', 'q' };
+static char validCharArguments[] = { 'b', 'p', 'c', 'r', 'l', 'f', 't', 'n', 'k', 'h', 'x', 'v', 'q' };
 static unsigned int isFlagArgument[] = { false, false, false, false, true, false, false, false, true, true, false, true, true };
 static unsigned int validArgumentCount = 13;
 static unsigned int maxFloatingValues = 0;
