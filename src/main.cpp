@@ -31,7 +31,6 @@ SlopOptions* getOptions( Options& options ) {
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     options.getColor("color", 'c', color);
     options.getBool("nokeyboard", 'k', foo->nokeyboard);
-    std::cout << foo->nokeyboard << "\n";
     options.getString( "xdisplay", 'x', foo->xdisplay );
     options.getString( "shader", 's', foo->shader );
     foo->r = color.r;
