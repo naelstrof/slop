@@ -28,6 +28,8 @@
 
 #include "shader.hpp"
 
+namespace slop {
+
 class Framebuffer {
 private:
     unsigned int fbuffer;
@@ -44,5 +46,7 @@ public:
     void bind();
     void unbind();
 };
+
+}
 
 #endif

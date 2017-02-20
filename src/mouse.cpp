@@ -1,6 +1,6 @@
 #include "mouse.hpp"
 
-void Mouse::setButton( int button, int state ) {
+void slop::Mouse::setButton( int button, int state ) {
     for (unsigned int i=0;i<buttons.size();i++ ) {
         if ( buttons[i].x == button ) {
             buttons[i].y = state;
@@ -10,7 +10,7 @@ void Mouse::setButton( int button, int state ) {
     buttons.push_back(glm::ivec2(button,state));
 }
 
-int Mouse::getButton( int button ) {
+int slop::Mouse::getButton( int button ) {
     for (unsigned int i=0;i<buttons.size();i++ ) {
         if ( buttons[i].x == button ) {
             return buttons[i].y;
@@ -19,7 +19,7 @@ int Mouse::getButton( int button ) {
     return 0;
 }
 
-glm::vec2 Mouse::getMousePos() {
+glm::vec2 slop::Mouse::getMousePos() {
     Window root, child;
     int mx, my;
     int wx, wy;
@@ -28,7 +28,7 @@ glm::vec2 Mouse::getMousePos() {
     return glm::vec2( mx, my );
 }
 
-void Mouse::setCursor( int cursor ) {
+void slop::Mouse::setCursor( int cursor ) {
     if ( currentCursor == cursor ) {
         return;
     }
@@ -39,7 +39,7 @@ void Mouse::setCursor( int cursor ) {
                               xcursor, CurrentTime );
 }
 
-Mouse::Mouse(X11* x11, int nodecorations, Window ignoreWindow ) {
+slop::Mouse::Mouse(X11* x11, int nodecorations, Window ignoreWindow ) {
     this->x11 = x11;
     currentCursor = XC_cross;
     xcursor = XCreateFontCursor( x11->display, XC_cross );
@@ -52,11 +52,11 @@ Mouse::Mouse(X11* x11, int nodecorations, Window ignoreWindow ) {
     hoverWindow = findWindow(x11->root);
 }
 
-Mouse::~Mouse() {
+slop::Mouse::~Mouse() {
 	XUngrabPointer( x11->display, CurrentTime );
 }
 
-void Mouse::update() {
+void slop::Mouse::update() {
     XEvent event;
     while ( XCheckTypedEvent( x11->display, ButtonPress, &event ) ) {
 		setButton( event.xbutton.button, 1 );
@@ -76,7 +76,7 @@ void Mouse::update() {
 	}
 }
 
-Window Mouse::findWindow( Window foo ) {
+Window slop::Mouse::findWindow( Window foo ) {
     glm::vec2 pos = getMousePos();
     Window root, parent;
     Window* children;

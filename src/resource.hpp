@@ -33,6 +33,8 @@
 #include <sys/stat.h>
 #include <pwd.h>
 
+namespace slop {
+
 class Resource {
 public:
     Resource();
@@ -43,5 +45,7 @@ private:
 };
 
 extern Resource* resource;
+
+}
 
 #endif // IS_RESOURCE_H_

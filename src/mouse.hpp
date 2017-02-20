@@ -27,7 +27,8 @@
 #include <iostream>
 
 #include "x.hpp"
-#include "windowhelper.hpp"
+
+namespace slop {
 
 class Mouse {
 private:
@@ -50,5 +51,7 @@ public:
 };
 
 extern Mouse* mouse;
+
+}
 
 #endif // N_MOUSE_H_

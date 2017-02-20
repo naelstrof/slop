@@ -1,6 +1,6 @@
 #include "glrectangle.hpp"
 
-GLRectangle::GLRectangle( glm::vec2 p1, glm::vec2 p2, float border, float padding, glm::vec4 color, bool highlight ) {
+slop::GLRectangle::GLRectangle( glm::vec2 p1, glm::vec2 p2, float border, float padding, glm::vec4 color, bool highlight ) {
     this->color = color;
     this->border = border;
     this->padding = padding;
@@ -27,7 +27,7 @@ GLRectangle::GLRectangle( glm::vec2 p1, glm::vec2 p2, float border, float paddin
     shader = new Shader( vert, frag, false );
 }
 
-void GLRectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
+void slop::GLRectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
     // Find each corner of the rectangle
     ul = glm::vec2( glm::min( p1.x, p2.x ), glm::max( p1.y, p2.y ) ) ;
     bl = glm::vec2( glm::min( p1.x, p2.x ), glm::min( p1.y, p2.y ) ) ;
@@ -46,7 +46,7 @@ void GLRectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
     generateBuffers();
 }
 
-void GLRectangle::generateBuffers() {
+void slop::GLRectangle::generateBuffers() {
     std::vector<glm::vec2> rectangle_verts;
     std::vector<glm::vec2> rectangle_uvs;
     std::vector<glm::vec2> corner_verts;
@@ -208,12 +208,12 @@ void GLRectangle::generateBuffers() {
     center_vertCount = center_verts.size();
 }
 
-GLRectangle::~GLRectangle() {
+slop::GLRectangle::~GLRectangle() {
     delete shader;
     glDeleteBuffers( 6, (GLuint*)&buffer );
 }
 
-void GLRectangle::draw( glm::mat4& matrix ) {
+void slop::GLRectangle::draw( glm::mat4& matrix ) {
     glEnable( GL_BLEND );
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     shader->bind();
@@ -241,6 +241,6 @@ void GLRectangle::draw( glm::mat4& matrix ) {
     glDisable( GL_BLEND );
 }
 
-glm::vec4 GLRectangle::getRect() {
+glm::vec4 slop::GLRectangle::getRect() {
     return glm::vec4( bl.x, bl.y, ur.x-ul.x, ul.y-bl.y );
 }

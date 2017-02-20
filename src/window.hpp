@@ -35,7 +35,8 @@
 #include "x.hpp"
 #include "framebuffer.hpp"
 
-// Gotta name it SlopWindow since Window and GLXWindow are taken... :/
+namespace slop {
+
 class SlopWindow {
 public:
     Framebuffer* framebuffer;
@@ -48,5 +49,7 @@ public:
     void setCurrent();
     void display();
 };
+
+}
 
 #endif // N_WINDOW_H_

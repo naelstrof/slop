@@ -1,6 +1,6 @@
 #include "shader.hpp"
 
-Shader::Shader( std::string vert, std::string frag, bool file ) {
+slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
     std::string vert_contents;
     std::string frag_contents;
     if ( file ) {
@@ -73,19 +73,19 @@ Shader::Shader( std::string vert, std::string frag, bool file ) {
     glUseProgram( 0 );
 }
 
-Shader::~Shader() {
+slop::Shader::~Shader() {
     glDeleteProgram( program );
 }
 
-unsigned int Shader::getProgram() {
+unsigned int slop::Shader::getProgram() {
     return program;
 }
 
-void Shader::bind() {
+void slop::Shader::bind() {
     glUseProgram( program );
 }
 
-int Shader::compile( unsigned int shader, std::string& error ) {
+int slop::Shader::compile( unsigned int shader, std::string& error ) {
     glCompileShader( shader );
 
     // Compiling the shader is the easy part, all this junk down here is for printing the error it might generate.
@@ -103,7 +103,7 @@ int Shader::compile( unsigned int shader, std::string& error ) {
     return 0;
 }
 
-int Shader::link( unsigned int vertshader, unsigned int fragshader, std::string& error ) {
+int slop::Shader::link( unsigned int vertshader, unsigned int fragshader, std::string& error ) {
     glAttachShader( program, vertshader );
     glAttachShader( program, fragshader );
     glLinkProgram( program );
@@ -123,32 +123,32 @@ int Shader::link( unsigned int vertshader, unsigned int fragshader, std::string&
     return 0;
 }
 
-unsigned int Shader::getUniformLocation( std::string name ) {
+unsigned int slop::Shader::getUniformLocation( std::string name ) {
     glUseProgram( program );
     return glGetUniformLocation( program, name.c_str() );
 }
 
-void Shader::setParameter( std::string name, int foo ) {
+void slop::Shader::setParameter( std::string name, int foo ) {
     glUniform1i( getUniformLocation( name ), foo );
 }
 
-void Shader::setParameter( std::string name, float foo ) {
+void slop::Shader::setParameter( std::string name, float foo ) {
     glUniform1f( getUniformLocation( name ), foo );
 }
 
-void Shader::setParameter( std::string name, glm::mat4& foo ) {
+void slop::Shader::setParameter( std::string name, glm::mat4& foo ) {
     glUniformMatrix4fv( getUniformLocation( name ), 1, GL_FALSE, glm::value_ptr( foo ) );
 }
 
-void Shader::setParameter( std::string name, glm::vec4 foo ) {
+void slop::Shader::setParameter( std::string name, glm::vec4 foo ) {
     glUniform4f( getUniformLocation( name ), foo.x, foo.y, foo.z, foo.w );
 }
 
-void Shader::setParameter( std::string name, glm::vec2 foo ) {
+void slop::Shader::setParameter( std::string name, glm::vec2 foo ) {
     glUniform2f( getUniformLocation( name ), foo.x, foo.y );
 }
 
-void Shader::setAttribute( std::string name, unsigned int buffer, unsigned int stepsize ) {
+void slop::Shader::setAttribute( std::string name, unsigned int buffer, unsigned int stepsize ) {
     unsigned int a = glGetAttribLocation( program, name.c_str() );
     glEnableVertexAttribArray( a );
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
@@ -156,7 +156,7 @@ void Shader::setAttribute( std::string name, unsigned int buffer, unsigned int s
     activeAttributes.push_back( a );
 }
 
-void Shader::unbind() {
+void slop::Shader::unbind() {
     for ( unsigned int i=0; i<activeAttributes.size(); i++ ) {
         glDisableVertexAttribArray( activeAttributes[i] );
     }

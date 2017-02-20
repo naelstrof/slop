@@ -23,6 +23,8 @@
 #include "slop.hpp"
 #include "options.hpp"
 
+using namespace slop;
+
 SlopOptions* getOptions( Options& options ) {
     SlopOptions* foo = new SlopOptions();
     options.getFloat("bordersize", 'b', foo->borderSize);

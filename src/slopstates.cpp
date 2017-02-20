@@ -1,6 +1,8 @@
 #include "slopstates.hpp"
 
-SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
+using namespace slop;
+
+slop::SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
     running = true;
     state = (SlopState*)new SlopStart();
     nextState = NULL;
@@ -11,7 +13,7 @@ SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
     state->onEnter( *this );
 }
 
-SlopMemory::~SlopMemory() {
+slop::SlopMemory::~SlopMemory() {
     delete state;
     if ( nextState ) {
         delete nextState;
@@ -19,7 +21,7 @@ SlopMemory::~SlopMemory() {
     delete rectangle;
 }
 
-void SlopMemory::update( double dt ) {
+void slop::SlopMemory::update( double dt ) {
     state->update( *this, dt );
     if ( nextState ) {
         state->onExit( *this );
@@ -30,33 +32,33 @@ void SlopMemory::update( double dt ) {
     }
 }
 
-void SlopMemory::setState( SlopState* state ) {
+void slop::SlopMemory::setState( SlopState* state ) {
     if ( nextState ) {
         delete nextState;
     }
     nextState = state;
 }
 
-void SlopMemory::draw( glm::mat4& matrix ) {
+void slop::SlopMemory::draw( glm::mat4& matrix ) {
     state->draw( *this, matrix );
 }
 
 
-SlopState::~SlopState() {
+slop::SlopState::~SlopState() {
 }
-void SlopState::onEnter( SlopMemory& memory ) {
+void slop::SlopState::onEnter( SlopMemory& memory ) {
 }
-void SlopState::onExit( SlopMemory& memory ) {
+void slop::SlopState::onExit( SlopMemory& memory ) {
 }
-void SlopState::update( SlopMemory& memory, double dt ) {
+void slop::SlopState::update( SlopMemory& memory, double dt ) {
 }
-void SlopState::draw( SlopMemory& memory, glm::mat4 matrix ) {
+void slop::SlopState::draw( SlopMemory& memory, glm::mat4 matrix ) {
 }
 
-void SlopStart::onEnter( SlopMemory& memory ) {
+void slop::SlopStart::onEnter( SlopMemory& memory ) {
     setStartPos = false;
 }
-void SlopStart::update( SlopMemory& memory, double dt ) {
+void slop::SlopStart::update( SlopMemory& memory, double dt ) {
     if ( mouse->getButton( 1 ) && !setStartPos ) {
         startPos = mouse->getMousePos();
         setStartPos = true;
@@ -74,21 +76,21 @@ void SlopStart::update( SlopMemory& memory, double dt ) {
     }
 }
 
-void SlopStart::draw( SlopMemory& memory, glm::mat4 matrix ) {
+void slop::SlopStart::draw( SlopMemory& memory, glm::mat4 matrix ) {
     if ( memory.tolerance > 0 ) {
         memory.rectangle->draw( matrix );
     }
 }
 
-SlopStartDrag::SlopStartDrag( glm::vec2 point ) {
+slop::SlopStartDrag::SlopStartDrag( glm::vec2 point ) {
     startPoint = point;
 }
 
-void SlopStartDrag::onEnter( SlopMemory& memory ) {
+void slop::SlopStartDrag::onEnter( SlopMemory& memory ) {
     memory.rectangle->setPoints(startPoint, startPoint);
 }
 
-void SlopStartDrag::update( SlopMemory& memory, double dt ) {
+void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
     char a = startPoint.y > mouse->getMousePos().y;
     char b = startPoint.x > mouse->getMousePos().x;
     char c = (a << 1) | b;
@@ -111,10 +113,10 @@ void SlopStartDrag::update( SlopMemory& memory, double dt ) {
     }
 }
 
-void SlopStartDrag::draw( SlopMemory& memory, glm::mat4 matrix ) {
+void slop::SlopStartDrag::draw( SlopMemory& memory, glm::mat4 matrix ) {
     memory.rectangle->draw( matrix );
 }
 
-void SlopEndDrag::onEnter( SlopMemory& memory ) {
+void slop::SlopEndDrag::onEnter( SlopMemory& memory ) {
     memory.running = false;
 }

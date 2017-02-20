@@ -23,6 +23,8 @@
 
 #include <string>
 
+namespace slop {
+
 class SlopOptions {
 public:
     SlopOptions();
@@ -52,5 +54,7 @@ public:
 };
 
 SlopSelection SlopSelect( SlopOptions* options = NULL, bool* cancelled = NULL, bool quiet = false );
+
+}
 
 #endif // N_SLOP_H_

@@ -34,6 +34,8 @@
 
 #include "resource.hpp"
 
+namespace slop {
+
 class Shader {
 public:
     Shader( std::string vert, std::string frag, bool file = true );
@@ -54,5 +56,7 @@ private:
     int                         link( unsigned int vert, unsigned int frag, std::string& error );
     unsigned int                program;
 };
+
+}
 
 #endif // N_SHADER_H_

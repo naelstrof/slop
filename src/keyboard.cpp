@@ -1,6 +1,6 @@
 #include "keyboard.hpp"
 
-bool Keyboard::getKey( KeySym key ) {
+bool slop::Keyboard::getKey( KeySym key ) {
     KeyCode keycode = XKeysymToKeycode( x11->display, key );
     if ( keycode != 0 ) {
         // Get the whole keyboard state
@@ -13,11 +13,11 @@ bool Keyboard::getKey( KeySym key ) {
     }
 }
 
-bool Keyboard::anyKeyDown() {
+bool slop::Keyboard::anyKeyDown() {
     return keyDown;
 }
 
-void Keyboard::update() {
+void slop::Keyboard::update() {
     char keys[32];
     XQueryKeymap( x11->display, keys );
     keyDown = false;
@@ -38,7 +38,7 @@ void Keyboard::update() {
     }
 }
 
-Keyboard::Keyboard( X11* x11 ) {
+slop::Keyboard::Keyboard( X11* x11 ) {
     this->x11 = x11;
     int err = XGrabKeyboard( x11->display, x11->root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
     if ( err != GrabSuccess ) {
@@ -48,6 +48,6 @@ Keyboard::Keyboard( X11* x11 ) {
     keyDown = false;
 }
 
-Keyboard::~Keyboard() {
+slop::Keyboard::~Keyboard() {
     XUngrabKeyboard( x11->display, CurrentTime );
 }

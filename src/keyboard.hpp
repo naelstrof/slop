@@ -23,6 +23,8 @@
 
 #include "x.hpp"
 
+namespace slop {
+
 class Keyboard {
 private:
     char deltaState[32];
@@ -37,5 +39,7 @@ public:
 };
 
 extern Keyboard* keyboard;
+
+}
 
 #endif // N_KEYBOARD_H_

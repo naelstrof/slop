@@ -32,6 +32,8 @@
 #include "x.hpp"
 #include "rectangle.hpp"
 
+namespace slop {
+
 class XShapeRectangle : public Rectangle {
 private:
     glm::vec2 ul, oul;
@@ -55,5 +57,7 @@ public:
     void setPoints( glm::vec2 p1, glm::vec2 p2 );
     void draw(glm::mat4& matrix);
 };
+
+}
 
 #endif // N_XSHAPERECTANGLE_H_

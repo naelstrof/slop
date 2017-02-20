@@ -32,7 +32,6 @@ add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
                                     src/x.cpp
                                     src/slopstates.cpp
                                     src/framebuffer.cpp
-                                    src/windowhelper.cpp
                                     src/resource.cpp
                                     src/gl_core_3_3.c
                                     src/shader.cpp

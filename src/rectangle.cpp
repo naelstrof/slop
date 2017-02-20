@@ -1,13 +1,13 @@
 #include "rectangle.hpp"
 
-Rectangle::Rectangle() {
+slop::Rectangle::Rectangle() {
 }
-Rectangle::~Rectangle() {
+slop::Rectangle::~Rectangle() {
 }
-void Rectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
+void slop::Rectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
 }
-void Rectangle::draw(glm::mat4& matrix) {
+void slop::Rectangle::draw(glm::mat4& matrix) {
 }
-glm::vec4 Rectangle::getRect() {
+glm::vec4 slop::Rectangle::getRect() {
     return glm::vec4();
 }

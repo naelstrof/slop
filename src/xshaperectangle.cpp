@@ -1,6 +1,6 @@
 #include "xshaperectangle.hpp"
 
-XShapeRectangle::XShapeRectangle( glm::vec2 p1, glm::vec2 p2, float border, float padding, glm::vec4 color, bool highlight ) {
+slop::XShapeRectangle::XShapeRectangle( glm::vec2 p1, glm::vec2 p2, float border, float padding, glm::vec4 color, bool highlight ) {
     this->color = convertColor( color );
     this->border = border;
     this->padding = padding;
@@ -51,7 +51,7 @@ XShapeRectangle::XShapeRectangle( glm::vec2 p1, glm::vec2 p2, float border, floa
     createdWindow = false;
 }
 
-void XShapeRectangle::createWindow() {
+void slop::XShapeRectangle::createWindow() {
     if ( createdWindow ) {
         return;
     }
@@ -59,7 +59,7 @@ void XShapeRectangle::createWindow() {
     createdWindow = true;
 }
 
-void XShapeRectangle::generateHoles() {
+void slop::XShapeRectangle::generateHoles() {
     if ( !highlight ) {
         XRectangle rects[4];
         // Left
@@ -93,7 +93,7 @@ void XShapeRectangle::generateHoles() {
     XShapeCombineRectangles( x11->display, window, ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
 }
 
-void XShapeRectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
+void slop::XShapeRectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
     // Find each corner of the rectangle
     ul = glm::vec2( glm::min( p1.x, p2.x ), glm::max( p1.y, p2.y ) ) ;
     bl = glm::vec2( glm::min( p1.x, p2.x ), glm::min( p1.y, p2.y ) ) ;
@@ -112,19 +112,19 @@ void XShapeRectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
     generateHoles();
 }
 
-XShapeRectangle::~XShapeRectangle() {
+slop::XShapeRectangle::~XShapeRectangle() {
 }
 
-void XShapeRectangle::draw( glm::mat4& matrix ) {
+void slop::XShapeRectangle::draw( glm::mat4& matrix ) {
     // We don't want to be visible until we're asked to draw.
     createWindow();
 }
 
-glm::vec4 XShapeRectangle::getRect() {
+glm::vec4 slop::XShapeRectangle::getRect() {
     return glm::vec4( bl.x, bl.y, ur.x-ul.x, ul.y-bl.y );
 }
 
-XColor XShapeRectangle::convertColor( glm::vec4 color ) {
+XColor slop::XShapeRectangle::convertColor( glm::vec4 color ) {
     // Convert float colors to shorts.
     short red   = short( floor( color.r * 65535.f ) );
     short green = short( floor( color.g * 65535.f ) );

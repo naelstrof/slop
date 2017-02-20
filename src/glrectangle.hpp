@@ -30,6 +30,8 @@
 #include "shader.hpp"
 #include "rectangle.hpp"
 
+namespace slop {
+
 struct RectangleBuffer {
     unsigned int corner_verts;
     unsigned int corner_uvs;
@@ -62,5 +64,7 @@ public:
     void setPoints( glm::vec2 p1, glm::vec2 p2 );
     void draw(glm::mat4& matrix);
 };
+
+}
 
 #endif // N_RECTANGLE_H_

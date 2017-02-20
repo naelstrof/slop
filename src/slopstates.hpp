@@ -22,14 +22,11 @@
 #define N_SLOPSTATES_H_
 
 #include "mouse.hpp"
-#include "windowhelper.hpp"
 #include "slop.hpp"
 
-#ifdef SLOP_LEGACY_MODE
-#include "xshaperectangle.hpp"
-#else
 #include "rectangle.hpp"
-#endif
+
+namespace slop {
 
 class SlopMemory;
 class SlopOptions;
@@ -84,5 +81,7 @@ public:
     void update( double dt );
     void draw( glm::mat4& matrix );
 };
+
+}
 
 #endif // N_SLOPSTATES_H_

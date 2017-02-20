@@ -27,6 +27,11 @@
 #include <sstream>
 #include <stdexcept>
 #include <X11/Xatom.h>
+#include <glm/glm.hpp>
+
+namespace slop {
+
+glm::vec4 getWindowGeometry( Window win, bool removeDecoration );
 
 class X11 {
 public:
@@ -40,5 +45,7 @@ public:
 };
 
 extern X11* x11;
+
+}
 
 #endif

@@ -1,6 +1,6 @@
 #include "framebuffer.hpp"
 
-Framebuffer::Framebuffer( int w, int h ) {
+slop::Framebuffer::Framebuffer( int w, int h ) {
     std::string vert = "#version 130\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 uvCoord;\nvoid main()\n{\nuvCoord = uv;\ngl_Position = vec4(position,0,1);\n}\n";
     std::string frag = "#version 130\nuniform sampler2D texture;\nvarying vec2 uvCoord;\nout vec4 outColor;void main()\n{\noutColor = texture2D( texture, uvCoord );\n}\n";
     shader = new Shader( vert, frag, false );
@@ -38,19 +38,19 @@ Framebuffer::Framebuffer( int w, int h ) {
     vertCount = verts.size();
 }
 
-void Framebuffer::setShader( std::string name ) {
+void slop::Framebuffer::setShader( std::string name ) {
     delete shader;
     shader = new Shader( name + ".vert", name + ".frag" );
 }
 
-Framebuffer::~Framebuffer() {
+slop::Framebuffer::~Framebuffer() {
     glDeleteTextures(1, &image);
     glDeleteFramebuffers(1,&fbuffer);
     glDeleteBuffers(2,buffers);
     delete shader;
 }
 
-void Framebuffer::resize( int w, int h ) {
+void slop::Framebuffer::resize( int w, int h ) {
     // Regenerate the image
     glDeleteTextures(1, &image);
     glBindTexture(GL_TEXTURE_2D, image);
@@ -64,15 +64,15 @@ void Framebuffer::resize( int w, int h ) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::bind() {
+void slop::Framebuffer::bind() {
     glBindFramebuffer( GL_FRAMEBUFFER, fbuffer );
 }
 
-void Framebuffer::unbind() {
+void slop::Framebuffer::unbind() {
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 }
 
-void Framebuffer::draw(){
+void slop::Framebuffer::draw(){
     shader->bind();
     shader->setParameter( "texture", 0 );
     shader->setAttribute( "position", buffers[0], 2 );

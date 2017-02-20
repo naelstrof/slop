@@ -13,13 +13,22 @@
 #include "xshaperectangle.hpp"
 #include "slop.hpp"
 
+namespace slop {
+
 X11* x11;
 Mouse* mouse;
 Keyboard* keyboard;
 Resource* resource;
 
+SlopSelection GLSlopSelect( slop::SlopOptions* options, bool* cancelled, slop::SlopWindow* window );
+SlopSelection XShapeSlopSelect( slop::SlopOptions* options, bool* cancelled);
+
+}
+
+using namespace slop;
+
 // Defaults!
-SlopOptions::SlopOptions() {
+slop::SlopOptions::SlopOptions() {
     borderSize = 1;
     nokeyboard = false;
     nodecorations = false;
@@ -34,7 +43,7 @@ SlopOptions::SlopOptions() {
     a = 1;
 }
 
-SlopSelection::SlopSelection( float x, float y, float w, float h, int id ) {
+slop::SlopSelection::SlopSelection( float x, float y, float w, float h, int id ) {
     this->x = x;
     this->y = y;
     this->w = w;
@@ -42,15 +51,12 @@ SlopSelection::SlopSelection( float x, float y, float w, float h, int id ) {
     this->id = id;
 }
 
-SlopSelection GLSlopSelect( SlopOptions* options, bool* cancelled, SlopWindow* window );
-SlopSelection XShapeSlopSelect( SlopOptions* options, bool* cancelled);
-
-SlopSelection SlopSelect( SlopOptions* options, bool* cancelled, bool quiet) {
-    SlopSelection returnval(0,0,0,0,0);
+slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelled, bool quiet) {
+    slop::SlopSelection returnval(0,0,0,0,0);
     bool deleteOptions = false;
     if ( !options ) {
         deleteOptions = true;
-        options = new SlopOptions();
+        options = new slop::SlopOptions();
     }
     resource = new Resource();
     // Set up x11 temporarily
@@ -81,29 +87,29 @@ SlopSelection SlopSelect( SlopOptions* options, bool* cancelled, bool quiet) {
                 std::cerr << errorstring;
             }
         }
-        returnval = XShapeSlopSelect( options, cancelled );
+        returnval = slop::XShapeSlopSelect( options, cancelled );
     } else {
-        returnval = GLSlopSelect( options, cancelled, window );
+        returnval = slop::GLSlopSelect( options, cancelled, window );
     }
     delete x11;
-    delete resource;
+    delete slop::resource;
     if ( deleteOptions ) {
         delete options;
     }
     return returnval;
 }
 
-SlopSelection XShapeSlopSelect( SlopOptions* options, bool* cancelled ) {
+slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* cancelled ) {
     // Init our little state machine, memory is a tad of a misnomer
-    SlopMemory memory( options, new XShapeRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
-    mouse = new Mouse( x11, options->nodecorations, ((XShapeRectangle*)memory.rectangle)->window );
+    slop::SlopMemory memory( options, new XShapeRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
+    slop::mouse = new slop::Mouse( x11, options->nodecorations, ((XShapeRectangle*)memory.rectangle)->window );
 
     // We have no GL context, so the matrix is useless...
     glm::mat4 fake;
     // This is where we'll run through all of our stuffs
     while( memory.running ) {
-        mouse->update();
-        keyboard->update();
+        slop::mouse->update();
+        slop::keyboard->update();
         // We move our statemachine forward.
         memory.update( 1 );
 
@@ -116,7 +122,7 @@ SlopSelection XShapeSlopSelect( SlopOptions* options, bool* cancelled ) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         // Then we draw the framebuffer to the screen
-        if ( (keyboard->anyKeyDown() && !options->nokeyboard) || mouse->getButton( 3 ) ) {
+        if ( (slop::keyboard->anyKeyDown() && !options->nokeyboard) || slop::mouse->getButton( 3 ) ) {
             memory.running = false;
             if ( cancelled ) {
                 *cancelled = true;
@@ -132,25 +138,25 @@ SlopSelection XShapeSlopSelect( SlopOptions* options, bool* cancelled ) {
     // Lets now clear both front and back buffers before closing.
     // hopefully it'll be completely transparent while closing!
     // Then we clean up.
-    delete mouse;
+    delete slop::mouse;
     // Finally return the data.
-    return SlopSelection( output.x, output.y, output.z, output.w, memory.selectedWindow );
+    return slop::SlopSelection( output.x, output.y, output.z, output.w, memory.selectedWindow );
 }
 
-SlopSelection GLSlopSelect( SlopOptions* options, bool* cancelled, SlopWindow* window ) {
-    mouse = new Mouse( x11, options->nodecorations, window->window );
+slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancelled, SlopWindow* window ) {
+    slop::mouse = new slop::Mouse( x11, options->nodecorations, window->window );
 
     if ( options->shader != "textured" ) {
         window->framebuffer->setShader( options->shader );
     }
 
     // Init our little state machine, memory is a tad of a misnomer
-    SlopMemory memory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
+    slop::SlopMemory memory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
 
     // This is where we'll run through all of our stuffs
     while( memory.running ) {
-        mouse->update();
-        keyboard->update();
+        slop::mouse->update();
+        slop::keyboard->update();
         // We move our statemachine forward.
         memory.update( 1 );
 
@@ -168,7 +174,7 @@ SlopSelection GLSlopSelect( SlopOptions* options, bool* cancelled, SlopWindow* w
         if ( err != GL_NO_ERROR ) {
             throw err;
         }
-        if ( (keyboard->anyKeyDown() && !options->nokeyboard) || mouse->getButton( 3 ) ) {
+        if ( (slop::keyboard->anyKeyDown() && !options->nokeyboard) || slop::mouse->getButton( 3 ) ) {
             memory.running = false;
             if ( cancelled ) {
                 *cancelled = true;
@@ -190,7 +196,7 @@ SlopSelection GLSlopSelect( SlopOptions* options, bool* cancelled, SlopWindow* w
     window->display();
     // Then we clean up.
     delete window;
-    delete mouse;
+    delete slop::mouse;
     // Finally return the data.
-    return SlopSelection( output.x, output.y, output.z, output.w, memory.selectedWindow );
+    return slop::SlopSelection( output.x, output.y, output.z, output.w, memory.selectedWindow );
 }

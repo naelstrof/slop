@@ -1,6 +1,8 @@
 #include "window.hpp"
 
-SlopWindow::SlopWindow() {
+using namespace slop;
+
+slop::SlopWindow::SlopWindow() {
     XVisualInfo visual;
     XMatchVisualInfo(x11->display, DefaultScreen(x11->display), 32, TrueColor, &visual);
 
@@ -16,7 +18,7 @@ SlopWindow::SlopWindow() {
 
 
     // Create the window
-    window = XCreateWindow( x11->display, x11->root, 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ),
+    window = XCreateWindow( slop::x11->display, x11->root, 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ),
                             0, visual.depth, InputOutput,
                             visual.visual, valueMask, &attributes );
 
@@ -69,7 +71,7 @@ SlopWindow::SlopWindow() {
 	XMapWindow( x11->display, window );
 }
 
-SlopWindow::~SlopWindow() {
+slop::SlopWindow::~SlopWindow() {
     delete framebuffer;
     // Try to erase the window before destroying it.
     glClearColor( 0, 0, 0, 0 );
@@ -82,11 +84,11 @@ SlopWindow::~SlopWindow() {
     XDestroyWindow( x11->display, window );
 }
 
-void SlopWindow::display() {
+void slop::SlopWindow::display() {
     glXSwapBuffers( x11->display, window );
     glXWaitGL();
 }
 
-void SlopWindow::setCurrent() {
+void slop::SlopWindow::setCurrent() {
     glXMakeCurrent( x11->display, window, context ) ;
 }

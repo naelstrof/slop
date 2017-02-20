@@ -23,6 +23,8 @@
 
 #include <glm/glm.hpp>
 
+namespace slop {
+
 class Rectangle {
 public:
     Rectangle();
@@ -31,5 +33,7 @@ public:
     virtual void setPoints( glm::vec2 p1, glm::vec2 p2 );
     virtual void draw(glm::mat4& matrix);
 };
+
+}
 
 #endif // N_RECTANGLE_H_

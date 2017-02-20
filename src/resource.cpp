@@ -20,7 +20,7 @@
 
 #include "resource.hpp"
 
-Resource::Resource() {
+slop::Resource::Resource() {
     // Find the configuration directory.
     // usually ~/.config/slop and /usr/share/slop
     char* config = getenv( "XDG_CONFIG_HOME" );
@@ -34,7 +34,7 @@ Resource::Resource() {
     usrconfig += "/slop/";
 }
 
-std::string Resource::getRealPath( std::string localpath ) {
+std::string slop::Resource::getRealPath( std::string localpath ) {
     if ( validatePath( usrconfig + localpath ) ) {
         return usrconfig + localpath;
     }
@@ -43,7 +43,7 @@ std::string Resource::getRealPath( std::string localpath ) {
     return localpath;
 }
 
-bool Resource::validatePath( std::string path ) {
+bool slop::Resource::validatePath( std::string path ) {
     struct stat st;
     const char* dirname = path.c_str();
     if ( stat( dirname, &st ) != 0 ) {
