@@ -50,6 +50,9 @@ slop::SlopWindow::SlopWindow() {
     XSetClassHint( x11->display, window, &classhints );
     XSetWMProperties( x11->display, window, &textprop, &textprop, NULL, 0, &sizehints, startup_state, NULL );
     XFree( startup_state );
+	// Keep the window on top of all other windows.
+	Atom stateAbove = XInternAtom(x11->display, "_NET_WM_STATE_ABOVE", False);
+	XChangeProperty(x11->display, window, XInternAtom(x11->display, "_NET_WM_STATE", False), XA_ATOM, 32, PropModeReplace, (unsigned char *) &stateAbove, 1);
 
     // Load up a opengl context
     context = glXCreateContext( x11->display, &visual, 0, True );
