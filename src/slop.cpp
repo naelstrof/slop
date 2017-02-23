@@ -1,6 +1,8 @@
 #include <chrono>
 #include <thread>
 
+#include <stdlib.h>
+
 #include "slopstates.hpp"
 #include "mouse.hpp"
 #include "resource.hpp"
@@ -36,11 +38,16 @@ slop::SlopOptions::SlopOptions() {
     padding = 0;
     shader = "textured";
     highlight = false;
-    xdisplay = ":0";
     r = 0.5;
     g = 0.5;
     b = 0.5;
     a = 1;
+
+    char * envdisplay = getenv("DISPLAY");
+    if (envdisplay == NULL)
+        xdisplay = ":0";
+    else
+        xdisplay = envdisplay;
 }
 
 slop::SlopSelection::SlopSelection( float x, float y, float w, float h, int id ) {
