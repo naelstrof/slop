@@ -175,6 +175,8 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         window->framebuffer->unbind();
 
         // Then we draw the framebuffer to the screen
+        glClearColor (0.0, 0.0, 0.0, 0.0);
+        glClear (GL_COLOR_BUFFER_BIT);
         window->framebuffer->draw();
         window->display();
         GLenum err = glGetError();

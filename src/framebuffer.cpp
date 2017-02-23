@@ -73,6 +73,8 @@ void slop::Framebuffer::unbind() {
 }
 
 void slop::Framebuffer::draw(){
+    glEnable( GL_BLEND );
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     shader->bind();
     shader->setParameter( "texture", 0 );
     shader->setAttribute( "position", buffers[0], 2 );
@@ -82,5 +84,6 @@ void slop::Framebuffer::draw(){
     glEnable( GL_TEXTURE_2D );
     glDrawArrays( GL_TRIANGLES, 0, vertCount );
     glDisable( GL_TEXTURE_2D );
+    glDisable( GL_BLEND );
     shader->unbind();
 }
