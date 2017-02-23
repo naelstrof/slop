@@ -10,6 +10,7 @@ Options::Options( int argc, char** argv ) {
     validArguments.push_back( Argument( "tolerance",    't', false ) );
     validArguments.push_back( Argument( "nodecorations", 'n', false ) );
     validArguments.push_back( Argument( "nokeyboard",   'k', true ) );
+    validArguments.push_back( Argument( "noopengl",     'o', true ) );
     validArguments.push_back( Argument( "help",         'h', true ) );
     validArguments.push_back( Argument( "xdisplay",     'x', false ) );
     validArguments.push_back( Argument( "version",      'v', true ) );

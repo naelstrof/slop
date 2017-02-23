@@ -33,6 +33,7 @@ SlopOptions* getOptions( Options& options ) {
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     options.getColor("color", 'c', color);
     options.getBool("nokeyboard", 'k', foo->nokeyboard);
+    options.getBool("noopengl", 'o', foo->noopengl);
     options.getString( "xdisplay", 'x', foo->xdisplay );
     options.getString( "shader", 's', foo->shader );
     foo->r = color.r;
@@ -127,6 +128,7 @@ void printHelp() {
 	std::cout << "  -f, --format=STRING           Set the output format string. Format specifiers\n";
 	std::cout << "                                  are %x, %y, %w, %h, %i, %g, and %c.\n";
 	std::cout << "                                  (default=`%g\n')\n";
+	std::cout << "  -o, --noopengl                Disable graphics acceleration.\n";
 	std::cout << "Examples\n";
 	std::cout << "    $ # Gray, thick, transparent border for maximum visiblity.\n";
 	std::cout << "    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n";

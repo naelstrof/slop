@@ -32,6 +32,7 @@ public:
     float padding;
     float tolerance;
     bool highlight;
+    bool noopengl;
     bool nokeyboard;
     int nodecorations;
     std::string shader;

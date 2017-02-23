@@ -33,6 +33,7 @@ using namespace slop;
 slop::SlopOptions::SlopOptions() {
     borderSize = 1;
     nokeyboard = false;
+    noopengl = false;
     nodecorations = false;
     tolerance = 2;
     padding = 0;
@@ -73,7 +74,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
     std::string errorstring = "";
     SlopWindow* window;
     // First we check if we have a compositor available
-	if ( x11->hasCompositor() ) {
+	if ( x11->hasCompositor() && !options->noopengl ) {
         // If we have a compositor, we try using OpenGL
         try {
             window = new SlopWindow();
@@ -86,7 +87,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
     }
     if ( !success ) {
         // If we fail, we launch the XShape version of slop.
-        if ( !quiet ) {
+        if ( !quiet && !options->noopengl ) {
             if ( errorstring.length() <= 0 ) {
                 errorstring += "Failed to launch OpenGL context, --shader parameter will be ignored.\n";
                 std::cerr << errorstring;
