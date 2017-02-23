@@ -1,4 +1,4 @@
-/* framebuffer.hpp: Creates and manages an off-screen framebuffer. Uses supplied shader to draw it to the screen.
+/* rectangle.hpp: Rectangle generic
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -18,35 +18,22 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef N_FRAMEBUFFER_H_
-#define N_FRAMEBUFFER_H_
+#ifndef N_RECTANGLE_H_
+#define N_RECTANGLE_H_
 
-#include "gl_core_3_3.h"
 #include <glm/glm.hpp>
-#include <GL/gl.h>
-#include <vector>
-
-#include "shader.hpp"
 
 namespace slop {
 
-class Framebuffer {
-private:
-    unsigned int fbuffer;
-    unsigned int image;
-    unsigned int buffers[2];
-    unsigned int vertCount;
-    Shader* shader;
+class Rectangle {
 public:
-    Framebuffer( int w, int h );
-    ~Framebuffer();
-    void setShader( std::string );
-    void draw();
-    void resize( int w, int h );
-    void bind();
-    void unbind();
+    Rectangle();
+    virtual glm::vec4 getRect();
+    virtual ~Rectangle();
+    virtual void setPoints( glm::vec2 p1, glm::vec2 p2 );
+    virtual void draw(glm::mat4& matrix);
 };
 
 }
 
-#endif
+#endif // N_RECTANGLE_H_

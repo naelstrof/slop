@@ -1,172 +1,74 @@
-cmake_minimum_required( VERSION 2.8 )
+cmake_minimum_required(VERSION 2.6)
 
-project( "slop" )
-set( slop_VERSION_MAJOR 4 )
-set( slop_VERSION_MINOR 3 )
-set( slop_VERSION_PATCH 21 )
-
-set( CMAKE_OPENGL_SUPPORT FALSE CACHE BOOL "Whether or not to compile with OpenGL, shaders, magnification, and theming support." )
-
-set( BIN_TARGET     "${PROJECT_NAME}" )
-if( NOT CMAKE_INSTALL_PREFIX )
-   set( CMAKE_INSTALL_PREFIX "/usr" )
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)")
+if ( NOT CMAKE_INSTALL_PREFIX )
+    set(CMAKE_INSTALL_PREFIX "/usr")
 endif()
 
-if( NOT INSTALL_PREFIX )
-   set( INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "The path where slop thinks it resides in, so that it can find the shaders. This is not necessarily the CMAKE_INSTALL_PREFIX. For example if the shaders will exist in /usr/share/slop, INSTALL_PREFIX should be \"/usr\"." )
-endif()
+project(slop)
 
-if( NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE )
-   set( CMAKE_BUILD_TYPE RelWithDebInfo )
-endif()
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/")
 
-# Linux compiler initialization.
-if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
-     "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
-     "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" )
-     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-parameter" )
-     set( CMAKE_CXX_FLAGS_DEBUG "-Wextra -pedantic-errors -O0 -g" )
-     set( CMAKE_CXX_FLAGS_RELEASE "-O2" )
-     set( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" )
-         # -Wall:   Enable all warnings.
-         # -Wextra: Enable some more warnings.
-         # -Werror: Have errors on warnings.
-         # -pedantic-errors: Even more errors.
-         # -Wno-unused-parameter: Prevent unused variable warning. (Several functions are required to have unecessary variables because X11.)
+set( CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Directory where man pages reside. (/usr/share/man, /usr/local/share/man, etc.)" )
+
+set( CMAKE_COMPRESS_MAN TRUE CACHE BOOL "Whether or not to compress the man pages for install." )
+
+if ( CMAKE_COMPRESS_MAN )
+    set( MANTARGET "slop.1.gz" )
 else()
-    message( FATAL_ERROR "Your operating system isn't supported yet! CMake will now exit." )
+    set( MANTARGET "slop.1" )
 endif()
 
-# Add a check target for our makefile.
-find_program( CPPCHECK_EXECUTABLE cppcheck
-              DOC "A tool for static C/C++ code analysis." )
-if (CPPCHECK_EXECUTABLE)
-    add_custom_target( "check"
-                       COMMAND "${CPPCHECK_EXECUTABLE}" "--enable=all" "*"
-                       WORKING_DIRECTORY src VERBATIM )
-endif()
+include_directories("${PROJECT_BINARY_DIR}")
 
-# Here we generate some of our code if we can. I package it pre-generated
-# so nobody has to go find and install gengetopt if they don't want to.
-find_program( GENGETOPT_EXECUTABLE gengetopt
-              DOC "A tool to generate code to grab command line options." )
-find_program( SED_EXECUTABLE sed )
-if ( GENGETOPT_EXECUTABLE AND SED_EXECUTABLE )
-    message( "-- Regenerating cmdline.in" )
-    # gengetopt generates cmdline.h, then we move it to cmdline.in.
-    execute_process( COMMAND "${GENGETOPT_EXECUTABLE}" "--input=options.ggo"
-                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src" )
-    file( RENAME "${CMAKE_CURRENT_SOURCE_DIR}/src/cmdline.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/cmdline.in" )
-    # Due to a bug in gengetopt, we have to manually insert some code.
-    # Replace the first instance of REPLACEME with some text.
-    # Eight backslashes = two in the code because of how many instances of escaping is happening.
-    execute_process( COMMAND "${SED_EXECUTABLE}" "-i" "0,/REPLACEME/{s/REPLACEME/X=%x\\\\\\\\nY=%y\\\\\\\\nW=%w\\\\\\\\nH=%h\\\\\\\\nG=%g\\\\\\\\nID=%i\\\\\\\\nCancel=%c\\\\\\\\n/}" "cmdline.c"
-                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src" )
-    # Then replace remaining instances.
-    execute_process( COMMAND "${SED_EXECUTABLE}" "-i" "s/REPLACEME/X=%x\\\\nY=%y\\\\nW=%w\\\\nH=%h\\\\nG=%g\\\\nID=%i\\\\nCancel=%c\\\\n/" "cmdline.c"
-                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src" )
-else()
-    message( "Warning: Command gengetopt or sed not found! Won't regenerate command line code. (If you're just compiling this doesn't matter.)" )
-endif()
+add_definitions(-DSLOP_VERSION="v5.3.21")
 
-# By default our src/options.ggo has our cmake versions variables for
-# the 'version ""' line. We replace them here.
-# The ${CMAKE_SOURCE_DIR} is there to fix problems with OpenBSD's out-of-source build black magic.
-configure_file( "src/cmdline.in" "${CMAKE_SOURCE_DIR}/src/cmdline.h" )
+# The names have to be unique unfortunately.
+set(EXECUTABLE_NAME "slop")
+set(LIBRARY_NAME "slopy")
 
-# This allows for "make README.md" to be ran to update the README's help
-# section automatically. We don't add it to ALL because running arbitrary
-# scripts is unsafe and I don't know if systems will actually have it
-# be executbable.
-add_custom_target( README.md "./generateReadme.sh" DEPENDS "slop" )
+add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
+                                    src/keyboard.cpp
+                                    src/x.cpp
+                                    src/slopstates.cpp
+                                    src/framebuffer.cpp
+                                    src/resource.cpp
+                                    src/gl_core_3_3.c
+                                    src/shader.cpp
+                                    src/window.cpp
+                                    src/slop.cpp
+                                    src/rectangle.cpp
+                                    src/xshaperectangle.cpp
+                                    src/glrectangle.cpp)
 
-# Sources
-if( CMAKE_OPENGL_SUPPORT )
-    set( source
-         src/cmdline.c
-         src/selectrectangle.cpp
-         src/glselectrectangle.cpp
-         src/shader.cpp
-         src/framebuffer.cpp
-         src/resource.cpp
-         src/xselectrectangle.cpp
-         src/x.cpp
-         src/main.cpp )
-else()
-    set( source
-         src/cmdline.c
-         src/selectrectangle.cpp
-         src/xselectrectangle.cpp
-         src/x.cpp
-         src/main.cpp )
-endif()
+set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 
-# Obtain library paths and make sure they exist.
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmakemodules" )
-find_package( Imlib2    REQUIRED )
-find_package( X11       REQUIRED )
-find_package( XExt      REQUIRED )
-# This library is needed only for Ubuntu it seems, some platforms don't even
-# ship with it. I couldn't find a way to do a test compile to check if librt
-# was needed, so instead I just didn't mark it as REQUIRED.
-find_package( RT )
+add_executable(${EXECUTABLE_NAME} src/options.cpp
+                                  src/main.cpp)
 
-set( CMAKE_CXX_FLAGS
-     "${CMAKE_CXX_FLAGS} ${CMAKE_IMLIB2_CXX_FLAGS}" )
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules" )
 
-# Includes
-include_directories( "${X11_INCLUDE_DIR}"
-                     "${XEXT_INCLUDE_DIR}" )
+find_package(GLM REQUIRED)
+find_package(X11 REQUIRED)
+find_package(XExt REQUIRED)
+find_package(GLX REQUIRED)
+find_package(OpenGL REQUIRED)
 
-if ( CMAKE_OPENGL_SUPPORT )
-find_package( OpenGL    REQUIRED )
-find_package( GLX       REQUIRED )
-find_package( XRender   REQUIRED )
-find_package( XRandr    REQUIRED )
-find_package( GLEW      REQUIRED )
-include_directories( "${IMLIB2_INCLUDE_DIR}"
-                     "${XRANDR_INCLUDE_DIR}"
-                     "${OPENGL_INCLUDE_DIR}"
-                     "${GLX_INCLUDE_DIR}"
-                     ${GLEW_INCLUDE_DIRS}
-                     ${XRENDER_INCLUDE_DIRS} )
-endif()
+include_directories(${X11_INCLUDE_DIR}
+                    ${GLM_INCLUDE_DIR}
+                    ${XEXT_INCLUDE_DIR}
+                    ${GLX_INCLUDE_DIR}
+                    ${OPENGL_INCLUDE_DIR})
 
-if ( RT_INCLUDE_DIR )
-    include_directories( ${RT_INCLUDE_DIR} )
-endif()
+target_link_libraries(${EXECUTABLE_NAME} ${X11_LIBRARIES}
+                                         ${GLM_LIBRARIES}
+                                         ${OPENGL_LIBRARIES}
+                                         ${GLX_LIBRARY}
+                                         ${XEXT_LIBRARIES}
+                                         ${LIBRARY_NAME})
 
-# Executable
-add_executable( "${BIN_TARGET}" ${source} )
-
-# Libraries
-target_link_libraries( "${BIN_TARGET}"
-                       ${X11_LIBRARIES}
-                       "${XEXT_LIBRARY}" )
-
-if ( CMAKE_OPENGL_SUPPORT )
-    target_link_libraries( "${BIN_TARGET}"
-                           ${IMLIB2_LIBRARIES}
-                           ${OPENGL_LIBRARIES}
-                           ${GLX_LIBRARIES}
-                           ${GLEW_LIBRARIES}
-                           ${XRENDER_LIBRARIES}
-                           "${XRANDR_LIBRARY}" )
-endif()
-
-
-if ( RT_LIBRARY )
-    target_link_libraries( "${BIN_TARGET}"
-                           "${RT_LIBRARY}" )
-endif()
-
-install( TARGETS ${BIN_TARGET}
-         DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
-
-add_definitions(-DINSTALL_PREFIX="${INSTALL_PREFIX}")
-
-if( CMAKE_OPENGL_SUPPORT )
-    install( DIRECTORY "${CMAKE_SOURCE_DIR}/share"
-             DESTINATION "${CMAKE_INSTALL_PREFIX}" )
-    add_definitions(-DOPENGL_ENABLED=1)
-endif()
+install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
+install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+install( FILES ${CMAKE_SOURCE_DIR}/src/slop.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/include" COMPONENT development )
+install( FILES "${CMAKE_SOURCE_DIR}/${MANTARGET}" DESTINATION  "${CMAKE_INSTALL_MANDIR}/man1" COMPONENT doc )

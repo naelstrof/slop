@@ -1,4 +1,4 @@
-/* selectrectangle.hpp: Handles creating rectangles on the screen.
+/* window.hpp: Spawns and manages windows. By default it creates an OpenGL context with them.
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -18,43 +18,38 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IS_SELECT_RECTANGLE_H_
-#define IS_SELECT_RECTANGLE_H_
+#ifndef N_WINDOW_H_
+#define N_WINDOW_H_
 
-#include "x.hpp"
-#include "selectrectangle.hpp"
-#include "shader.hpp"
+#include <string>
+#include <exception>
 
-#include <unistd.h>
-
-#include <X11/Xlib.h>
-#include <X11/extensions/shape.h>
+#include <iostream>
+#include "gl_core_3_3.h"
+#include <GL/gl.h>
+#include <GL/glx.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-#include <cstdlib>
-#include <cmath>
-#include <cstdio>
-#include <string>
-#include <vector>
+#include "x.hpp"
+#include "framebuffer.hpp"
 
 namespace slop {
 
-class SelectRectangle {
+class SlopWindow {
 public:
-    virtual ~SelectRectangle();
-    virtual void    setGeo( int x, int y, int w, int h );
-    virtual void    update( double dt );
-    Window          m_window;
-    int             m_x;
-    int             m_y;
-    int             m_width;
-    int             m_height;
-    int             m_border;
-    bool            m_highlight;
+    Framebuffer* framebuffer;
+    int width, height;
+    glm::mat4 camera;
+    GLXWindow window;
+    GLXContext context;
+    SlopWindow();
+    ~SlopWindow();
+    void setCurrent();
+    void display();
 };
-
-bool isSelectRectangleSupported();
 
 }
 
-#endif // IS_SELECT_RECTANGLE_H_
+#endif // N_WINDOW_H_

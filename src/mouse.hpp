@@ -1,4 +1,4 @@
-/* selectrectangle.cpp: Handles creating rectangles on the screen.
+/* mouse.hpp: Interfaces with x11 to grab mouse information.
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -17,20 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "selectrectangle.hpp"
 
-bool slop::isSelectRectangleSupported() {
-    int event_base;
-    int error_base;
-    return XShapeQueryExtension( xengine->m_display, &event_base, &error_base );
+#ifndef N_MOUSE_H_
+#define N_MOUSE_H_
+
+#include <vector>
+#include <glm/glm.hpp>
+#include <X11/cursorfont.h>
+#include <iostream>
+
+#include "x.hpp"
+
+namespace slop {
+
+class Mouse {
+private:
+    X11* x11;
+    std::vector<glm::ivec2> buttons;
+    Cursor xcursor;
+    int currentCursor;
+    Window findWindow( Window foo );
+    int nodecorations;
+    Window ignoreWindow;
+public:
+	Window hoverWindow;
+	void update();
+    Mouse( X11* x11, int nodecorations, Window ignoreWindow );
+    ~Mouse();
+    void setCursor( int cursor );
+    glm::vec2 getMousePos();
+    void setButton( int button, int state );
+    int getButton( int button );
+};
+
+extern Mouse* mouse;
+
 }
 
-slop::SelectRectangle::~SelectRectangle() {
-}
-
-void slop::SelectRectangle::update( double dt ) {
-}
-
-void slop::SelectRectangle::setGeo( int sx, int sy, int ex, int ey ) {
-    fprintf( stderr, "Tried to use a class function that's meant to be overridden!\n");
-}
+#endif // N_MOUSE_H_

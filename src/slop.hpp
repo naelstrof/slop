@@ -1,4 +1,4 @@
-/* framebuffer.hpp: Creates and manages an off-screen framebuffer. Uses supplied shader to draw it to the screen.
+/* glslop.hpp: exposes an opengl selection interface
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -18,35 +18,43 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef N_FRAMEBUFFER_H_
-#define N_FRAMEBUFFER_H_
+#ifndef N_SLOP_H_
+#define N_SLOP_H_
 
-#include "gl_core_3_3.h"
-#include <glm/glm.hpp>
-#include <GL/gl.h>
-#include <vector>
-
-#include "shader.hpp"
+#include <string>
 
 namespace slop {
 
-class Framebuffer {
-private:
-    unsigned int fbuffer;
-    unsigned int image;
-    unsigned int buffers[2];
-    unsigned int vertCount;
-    Shader* shader;
+class SlopOptions {
 public:
-    Framebuffer( int w, int h );
-    ~Framebuffer();
-    void setShader( std::string );
-    void draw();
-    void resize( int w, int h );
-    void bind();
-    void unbind();
+    SlopOptions();
+    float borderSize;
+    float padding;
+    float tolerance;
+    bool highlight;
+    bool nokeyboard;
+    int nodecorations;
+    std::string shader;
+    float r;
+    float g;
+    float b;
+    float a;
+    std::string xdisplay;
 };
+
+class SlopSelection {
+public:
+    SlopSelection( float x, float y, float w, float h, int id );
+    float x;
+    float y;
+    float w;
+    float h;
+// This is an X11 Window ID
+    int id;
+};
+
+SlopSelection SlopSelect( SlopOptions* options = NULL, bool* cancelled = NULL, bool quiet = false );
 
 }
 
-#endif
+#endif // N_SLOP_H_

@@ -18,9 +18,10 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IS_RESOURCE_H_
-#define IS_RESOURCE_H_
+#ifndef N_RESOURCE_H_
+#define N_RESOURCE_H_
 
+#include <stdexcept>
 #include <stdlib.h>
 #include <cassert>
 #include <cstdio>
@@ -36,18 +37,15 @@ namespace slop {
 
 class Resource {
 public:
-
-                    Resource();
-                    ~Resource();
-    std::string     getRealPath( std::string localpath );
-    bool            validatePath( std::string path );
+    Resource();
+    std::string getRealPath( std::string localpath );
 private:
-    std::string     m_usrconfig;
-    std::string     m_sysconfig;
+    bool validatePath( std::string path );
+    std::string usrconfig;
 };
 
-}
+extern Resource* resource;
 
-extern slop::Resource* resource;
+}
 
 #endif // IS_RESOURCE_H_

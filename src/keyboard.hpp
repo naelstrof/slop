@@ -1,4 +1,4 @@
-/* framebuffer.hpp: Creates and manages an off-screen framebuffer. Uses supplied shader to draw it to the screen.
+/* keyboard.hpp: Interfaces with x11 to grab key press information.
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -18,35 +18,28 @@
  * along with Slop.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef N_FRAMEBUFFER_H_
-#define N_FRAMEBUFFER_H_
+#ifndef N_KEYBOARD_H_
+#define N_KEYBOARD_H_
 
-#include "gl_core_3_3.h"
-#include <glm/glm.hpp>
-#include <GL/gl.h>
-#include <vector>
-
-#include "shader.hpp"
+#include "x.hpp"
 
 namespace slop {
 
-class Framebuffer {
+class Keyboard {
 private:
-    unsigned int fbuffer;
-    unsigned int image;
-    unsigned int buffers[2];
-    unsigned int vertCount;
-    Shader* shader;
+    char deltaState[32];
+    X11* x11;
+    bool keyDown;
 public:
-    Framebuffer( int w, int h );
-    ~Framebuffer();
-    void setShader( std::string );
-    void draw();
-    void resize( int w, int h );
-    void bind();
-    void unbind();
+    Keyboard( X11* x11 );
+    ~Keyboard();
+    void update();
+    bool getKey( KeySym key );
+    bool anyKeyDown();
 };
+
+extern Keyboard* keyboard;
 
 }
 
-#endif
+#endif // N_KEYBOARD_H_
