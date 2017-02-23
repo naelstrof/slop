@@ -47,6 +47,8 @@ set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 add_executable(${EXECUTABLE_NAME} src/options.cpp
                                   src/main.cpp)
 
+set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD 11)
+
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules" )
 
 find_package(GLM REQUIRED)
@@ -61,12 +63,13 @@ include_directories(${X11_INCLUDE_DIR}
                     ${GLX_INCLUDE_DIR}
                     ${OPENGL_INCLUDE_DIR})
 
-target_link_libraries(${EXECUTABLE_NAME} ${X11_LIBRARIES}
-                                         ${GLM_LIBRARIES}
-                                         ${OPENGL_LIBRARIES}
-                                         ${GLX_LIBRARY}
-                                         ${XEXT_LIBRARIES}
-                                         ${LIBRARY_NAME})
+target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES}
+                                      ${GLM_LIBRARIES}
+                                      ${OPENGL_LIBRARIES}
+                                      ${GLX_LIBRARY}
+                                      ${XEXT_LIBRARIES})
+
+target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME})
 
 install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
 install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
