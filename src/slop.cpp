@@ -74,7 +74,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
     std::string errorstring = "";
     SlopWindow* window;
     // First we check if we have a compositor available
-	if ( x11->hasCompositor() && !options->noopengl ) {
+    if ( x11->hasCompositor() && !options->noopengl ) {
         // If we have a compositor, we try using OpenGL
         try {
             window = new SlopWindow();

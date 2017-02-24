@@ -11,7 +11,7 @@ slop::SlopWindow::SlopWindow() {
                                    GLX_GREEN_SIZE, 1,
                                    GLX_BLUE_SIZE, 1,
                                    GLX_ALPHA_SIZE, 1,
-				   GLX_DEPTH_SIZE, 1,
+                                   GLX_DEPTH_SIZE, 1,
                                    None };
     int nelements;
     int render_event_base, render_error_base;
@@ -38,7 +38,7 @@ slop::SlopWindow::SlopWindow() {
         }
     }
     if (i == nelements ) {
-	    throw new std::runtime_error( "No matching visuals available" );
+        throw new std::runtime_error( "No matching visuals available" );
     }
 
     XSetWindowAttributes attributes;

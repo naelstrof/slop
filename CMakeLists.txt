@@ -21,7 +21,7 @@ endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_definitions(-DSLOP_VERSION="v5.3.26")
+add_definitions(-DSLOP_VERSION="v5.3.27")
 
 # The names have to be unique unfortunately.
 set(EXECUTABLE_NAME "slop")
@@ -62,14 +62,14 @@ include_directories(${X11_INCLUDE_DIR}
                     ${GLM_INCLUDE_DIR}
                     ${XEXT_INCLUDE_DIR}
                     ${GLX_INCLUDE_DIR}
-		    ${XRENDER_INCLUDE_DIR}
+                    ${XRENDER_INCLUDE_DIR}
                     ${OPENGL_INCLUDE_DIR})
 
 target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES}
                                       ${GLM_LIBRARIES}
                                       ${OPENGL_LIBRARIES}
                                       ${GLX_LIBRARY}
-				      ${XRENDER_LIBRARY}
+                                      ${XRENDER_LIBRARY}
                                       ${XEXT_LIBRARIES})
 
 target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME})

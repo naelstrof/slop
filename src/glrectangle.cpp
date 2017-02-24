@@ -214,8 +214,8 @@ slop::GLRectangle::~GLRectangle() {
 }
 
 void slop::GLRectangle::draw( glm::mat4& matrix ) {
-    //glEnable( GL_BLEND );
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable( GL_BLEND );
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     shader->bind();
     shader->setParameter( "projection", matrix );
     if ( highlight ) {
@@ -238,7 +238,7 @@ void slop::GLRectangle::draw( glm::mat4& matrix ) {
         glDrawArrays(GL_TRIANGLES, 0, rectangle_vertCount );
     }
     shader->unbind();
-    //glDisable( GL_BLEND );
+    glDisable( GL_BLEND );
 }
 
 glm::vec4 slop::GLRectangle::getRect() {
