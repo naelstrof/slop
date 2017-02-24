@@ -79,6 +79,9 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
         try {
             window = new SlopWindow();
             success = true;
+        } catch( std::exception* e ) {
+            errorstring += std::string(e->what()) + "\n";
+            success = false;
         } catch (...) {
             success = false;
         }
