@@ -78,7 +78,11 @@ int Options::parseCharOption( int argc, char** argv, int argumentIndex, int vali
     arguments.push_back( std::string()+argument[1] );
     // If they supplied the parameters with spaces
     if ( argument == std::string()+"-"+check.cname ) {
-        values.push_back(argv[argumentIndex+1]);
+        if ( argumentIndex+1 < argc ) {
+            values.push_back(argv[argumentIndex+1]);
+        } else {
+            values.push_back("");
+        }
         return 2;
     }
     // If they didn't supply the parameters with spaces

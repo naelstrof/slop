@@ -41,7 +41,15 @@ SlopOptions* getOptions( Options& options ) {
     foo->b = color.b;
     foo->a = color.a;
     options.getBool("highlight", 'l', foo->highlight);
-    options.getInt("nodecorations", 'n', foo->nodecorations);
+    try {
+        bool test = false;
+        options.getBool("nodecorations", 'n', test);
+        if ( test ) {
+            foo->nodecorations = 1;
+        }
+    } catch( ... ) {
+        options.getInt("nodecorations", 'n', foo->nodecorations);
+    }
     return foo;
 }
 
@@ -116,6 +124,8 @@ void printHelp() {
     std::cout << "                                  1 will enable a light attempt to\n";
     std::cout << "                                  remove decorations. Setting this to 2 will\n";
     std::cout << "                                  enable aggressive decoration removal.\n";
+    std::cout << "                                  Supplying slop with just `-n` is\n";
+    std::cout << "                                  equivalent to supplying `-n1`.\n";
     std::cout << "                                  (default=`0')\n";
 	std::cout << "  -q, --quiet                   Disable any unnecessary cerr output. Any\n";
 	std::cout << "                                  warnings simply won't print.\n";
