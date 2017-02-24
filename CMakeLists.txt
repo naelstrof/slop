@@ -56,17 +56,20 @@ find_package(X11 REQUIRED)
 find_package(XExt REQUIRED)
 find_package(GLX REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(XRender REQUIRED)
 
 include_directories(${X11_INCLUDE_DIR}
                     ${GLM_INCLUDE_DIR}
                     ${XEXT_INCLUDE_DIR}
                     ${GLX_INCLUDE_DIR}
+		    ${XRENDER_INCLUDE_DIR}
                     ${OPENGL_INCLUDE_DIR})
 
 target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES}
                                       ${GLM_LIBRARIES}
                                       ${OPENGL_LIBRARIES}
                                       ${GLX_LIBRARY}
+				      ${XRENDER_LIBRARY}
                                       ${XEXT_LIBRARIES})
 
 target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME})

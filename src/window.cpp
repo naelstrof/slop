@@ -3,11 +3,46 @@
 using namespace slop;
 
 slop::SlopWindow::SlopWindow() {
-    XVisualInfo visual;
-    XMatchVisualInfo(x11->display, DefaultScreen(x11->display), 32, TrueColor, &visual);
+    // Load up a opengl context
+    static int attributeList[] = { GLX_RENDER_TYPE, GLX_RGBA_BIT,
+                                   GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+                                   GLX_DOUBLEBUFFER, True,
+                                   GLX_RED_SIZE, 1,
+                                   GLX_GREEN_SIZE, 1,
+                                   GLX_BLUE_SIZE, 1,
+                                   GLX_ALPHA_SIZE, 1,
+				   GLX_DEPTH_SIZE, 1,
+                                   None };
+    int nelements;
+    int render_event_base, render_error_base;
+    if(!XRenderQueryExtension(x11->display, &render_event_base, &render_error_base)) {
+        throw new std::runtime_error("No XRENDER extension found\n");
+    }
+
+    GLXFBConfig* fbc = glXChooseFBConfig(x11->display, DefaultScreen(x11->display), attributeList, &nelements);
+    GLXFBConfig fbconfig;
+    if ( !fbc ) {
+        throw new std::runtime_error("No matching visuals available.\n");
+    }
+    XVisualInfo* vi ;
+    XRenderPictFormat *pictFormat;
+    int i;
+    for (i=0; i<nelements; i++) {
+        vi = glXGetVisualFromFBConfig(x11->display, fbc[i]);
+        if (!vi) { continue; }
+        pictFormat = XRenderFindVisualFormat(x11->display, vi->visual);
+        if (!pictFormat) { continue; }
+        if(pictFormat->direct.alphaMask > 0) {
+            fbconfig = fbc[i];
+            break;
+        }
+    }
+    if (i == nelements ) {
+	    throw new std::runtime_error( "No matching visuals available" );
+    }
 
     XSetWindowAttributes attributes;
-    attributes.colormap = XCreateColormap( x11->display, x11->root, visual.visual, AllocNone );
+    attributes.colormap = XCreateColormap(x11->display, RootWindow(x11->display, vi->screen), vi->visual, AllocNone);
     attributes.background_pixmap = None;
     attributes.border_pixel = 0;
     // Disable window decorations.
@@ -18,15 +53,15 @@ slop::SlopWindow::SlopWindow() {
 
 
     // Create the window
-    window = XCreateWindow( slop::x11->display, x11->root, 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ),
-                            0, visual.depth, InputOutput,
-                            visual.visual, valueMask, &attributes );
+    window = XCreateWindow( x11->display, x11->root, 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ),
+                            0, vi->depth, InputOutput,
+                            vi->visual, valueMask, &attributes );
 
     if ( !window ) {
         throw new std::runtime_error( "Couldn't create a GL window!" );
     }
 
-	// Prep some hints for the window
+    // Prep some hints for the window
     static char title[] = "slop";
     XWMHints* startup_state = XAllocWMHints();
     startup_state->initial_state = NormalState;
@@ -46,18 +81,17 @@ slop::SlopWindow::SlopWindow() {
     char name[] = "slop";
     classhints.res_name = name;
     classhints.res_class = name;
-	// Finally send it all over...
+    // Finally send it all over...
     XSetClassHint( x11->display, window, &classhints );
     XSetWMProperties( x11->display, window, &textprop, &textprop, NULL, 0, &sizehints, startup_state, NULL );
     XFree( startup_state );
-	// Keep the window on top of all other windows.
-	Atom stateAbove = XInternAtom(x11->display, "_NET_WM_STATE_ABOVE", False);
-	XChangeProperty(x11->display, window, XInternAtom(x11->display, "_NET_WM_STATE", False), XA_ATOM, 32, PropModeReplace, (unsigned char *) &stateAbove, 1);
+    // Keep the window on top of all other windows.
+    Atom stateAbove = XInternAtom(x11->display, "_NET_WM_STATE_ABOVE", False);
+    XChangeProperty(x11->display, window, XInternAtom(x11->display, "_NET_WM_STATE", False), XA_ATOM, 32, PropModeReplace, (unsigned char *) &stateAbove, 1);
 
-    // Load up a opengl context
-    context = glXCreateContext( x11->display, &visual, 0, True );
+    context = glXCreateNewContext( x11->display, fbconfig, GLX_RGBA_TYPE, 0, True );
     if ( !context ) {
-		throw new std::runtime_error( "Failed to create an OpenGL context." );
+        throw new std::runtime_error( "Failed to create an OpenGL context." );
     }
     setCurrent();
     // Finally we grab some OpenGL 3.3 stuffs.
@@ -71,7 +105,7 @@ slop::SlopWindow::SlopWindow() {
     camera = glm::ortho( 0.0f, (float)WidthOfScreen( x11->screen ), (float)HeightOfScreen( x11->screen ), 0.0f, -1.0f, 1.0f);
 
     // Last, we actually display the window <:o)
-	XMapWindow( x11->display, window );
+    XMapWindow( x11->display, window );
 }
 
 slop::SlopWindow::~SlopWindow() {

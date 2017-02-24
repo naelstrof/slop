@@ -21,8 +21,8 @@ slop::GLRectangle::GLRectangle( glm::vec2 p1, glm::vec2 p2, float border, float 
     our = ur + glm::vec2(border,border);
     obr = br + glm::vec2(border,-border);
     generateBuffers();
-    std::string vert = "#version 130\nin vec2 position;\nuniform mat4 projection;\nvoid main() {\ngl_Position = projection*vec4(position,0,1);\n }";
-    std::string frag = "#version 130\nuniform vec4 color;\nout vec4 outColor;\nvoid main() {\noutColor = color;\n}";
+    std::string vert = "#version 130\n in vec2 position;\n uniform mat4 projection;\n void main() {\n gl_Position = projection*vec4(position,0,1);\n }";
+    std::string frag = "#version 130\n uniform vec4 color;\n out vec4 outColor;\n void main() {\n outColor = color;\n }";
 
     shader = new Shader( vert, frag, false );
 }
@@ -214,8 +214,8 @@ slop::GLRectangle::~GLRectangle() {
 }
 
 void slop::GLRectangle::draw( glm::mat4& matrix ) {
-    glEnable( GL_BLEND );
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable( GL_BLEND );
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     shader->bind();
     shader->setParameter( "projection", matrix );
     if ( highlight ) {
@@ -238,7 +238,7 @@ void slop::GLRectangle::draw( glm::mat4& matrix ) {
         glDrawArrays(GL_TRIANGLES, 0, rectangle_vertCount );
     }
     shader->unbind();
-    glDisable( GL_BLEND );
+    //glDisable( GL_BLEND );
 }
 
 glm::vec4 slop::GLRectangle::getRect() {

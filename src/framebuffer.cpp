@@ -2,7 +2,7 @@
 
 slop::Framebuffer::Framebuffer( int w, int h ) {
     std::string vert = "#version 130\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 uvCoord;\nvoid main()\n{\nuvCoord = uv;\ngl_Position = vec4(position,0,1);\n}\n";
-    std::string frag = "#version 130\nuniform sampler2D texture;\nvarying vec2 uvCoord;\nout vec4 outColor;void main()\n{\noutColor = texture2D( texture, uvCoord );\n}\n";
+    std::string frag = "#version 130\n uniform sampler2D texture;\n varying vec2 uvCoord;\n out vec4 outColor;\n void main()\n {\n outColor = texture2D( texture, uvCoord );\n }\n";
     shader = new Shader( vert, frag, false );
     glGenFramebuffers( 1, &fbuffer );
     glBindFramebuffer( GL_FRAMEBUFFER, fbuffer );
@@ -73,8 +73,6 @@ void slop::Framebuffer::unbind() {
 }
 
 void slop::Framebuffer::draw(){
-    glEnable( GL_BLEND );
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     shader->bind();
     shader->setParameter( "texture", 0 );
     shader->setAttribute( "position", buffers[0], 2 );
@@ -84,6 +82,5 @@ void slop::Framebuffer::draw(){
     glEnable( GL_TEXTURE_2D );
     glDrawArrays( GL_TRIANGLES, 0, vertCount );
     glDisable( GL_TEXTURE_2D );
-    glDisable( GL_BLEND );
     shader->unbind();
 }

@@ -27,10 +27,14 @@
 #include <iostream>
 #include "gl_core_3_3.h"
 #include <GL/gl.h>
+#define GL_GLEXT_PROTOTYPES
+#define GLX_GLXEXT_PROTOTYPES
 #include <GL/glx.h>
+#include <GL/glxext.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/Xrender.h>
 
 #include "x.hpp"
 #include "framebuffer.hpp"
