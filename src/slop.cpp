@@ -73,9 +73,11 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
     resource = new Resource();
     // Set up x11 temporarily
     x11 = new X11(options->xdisplay);
-    XErrorHandler ph = XSetErrorHandler(slop::TmpXError);
-    keyboard = new Keyboard( x11 );
-    XSetErrorHandler(ph);
+
+    if ( !options->nokeyboard ) {
+        keyboard = new Keyboard( x11 );
+    }
+
     bool success = false;
     std::string errorstring = "";
     SlopWindow* window;
@@ -126,7 +128,11 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
     // This is where we'll run through all of our stuffs
     while( memory.running ) {
         slop::mouse->update();
-        slop::keyboard->update();
+
+        if ( !options->nokeyboard) {
+            slop::keyboard->update();
+        }
+
         // We move our statemachine forward.
         memory.update( 1 );
 
@@ -139,7 +145,7 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         // Then we draw the framebuffer to the screen
-        if ( (slop::keyboard->anyKeyDown() && !options->nokeyboard) || slop::mouse->getButton( 3 ) ) {
+        if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
             memory.running = false;
             if ( cancelled ) {
                 *cancelled = true;
@@ -173,7 +179,11 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
     // This is where we'll run through all of our stuffs
     while( memory.running ) {
         slop::mouse->update();
-        slop::keyboard->update();
+
+        if ( !options->nokeyboard ) {
+            slop::keyboard->update();
+        }
+
         // We move our statemachine forward.
         memory.update( 1 );
 
@@ -191,7 +201,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         if ( err != GL_NO_ERROR ) {
             throw err;
         }
-        if ( (slop::keyboard->anyKeyDown() && !options->nokeyboard) || slop::mouse->getButton( 3 ) ) {
+        if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
             memory.running = false;
             if ( cancelled ) {
                 *cancelled = true;
