@@ -74,13 +74,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
     // Set up x11 temporarily
     x11 = new X11(options->xdisplay);
     XErrorHandler ph = XSetErrorHandler(slop::TmpXError);
-    try {
-        keyboard = new Keyboard( x11 );
-    } catch (...) {
-        if ( !quiet && !options->nokeyboard) {
-            std::cerr << "Failed to grab keyboard, continuing...\n";
-        }
-    }
+    keyboard = new Keyboard( x11 );
     XSetErrorHandler(ph);
     bool success = false;
     std::string errorstring = "";

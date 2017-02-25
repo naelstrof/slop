@@ -42,7 +42,7 @@ slop::Keyboard::Keyboard( X11* x11 ) {
     this->x11 = x11;
     int err = XGrabKeyboard( x11->display, x11->root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
     if ( err != GrabSuccess ) {
-        throw new std::runtime_error( "Failed to grab keyboard.\n" );
+        //throw new std::runtime_error( "Failed to grab keyboard.\n" );
     }
     XQueryKeymap( x11->display, deltaState );
     keyDown = false;
