@@ -25,6 +25,10 @@ Resource* resource;
 SlopSelection GLSlopSelect( slop::SlopOptions* options, bool* cancelled, slop::SlopWindow* window );
 SlopSelection XShapeSlopSelect( slop::SlopOptions* options, bool* cancelled);
 
+static int TmpXError(Display * d, XErrorEvent * ev) {
+    return 0;
+}
+
 }
 
 using namespace slop;
@@ -69,7 +73,15 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
     resource = new Resource();
     // Set up x11 temporarily
     x11 = new X11(options->xdisplay);
-    keyboard = new Keyboard( x11 );
+    XErrorHandler ph = XSetErrorHandler(slop::TmpXError);
+    try {
+        keyboard = new Keyboard( x11 );
+    } catch (...) {
+        if ( !quiet && !options->nokeyboard) {
+            std::cerr << "Failed to grab keyboard, continuing...\n";
+        }
+    }
+    XSetErrorHandler(ph);
     bool success = false;
     std::string errorstring = "";
     SlopWindow* window;
