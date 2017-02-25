@@ -1,3 +1,5 @@
+#include <chrono>
+#include <thread>
 #include "keyboard.hpp"
 
 bool slop::Keyboard::getKey( KeySym key ) {
@@ -41,8 +43,15 @@ void slop::Keyboard::update() {
 slop::Keyboard::Keyboard( X11* x11 ) {
     this->x11 = x11;
     int err = XGrabKeyboard( x11->display, x11->root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
+    int tries = 0;
+    while( err != GrabSuccess && tries < 5 ) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        err = XGrabKeyboard( x11->display, x11->root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
+        tries++;
+    }
+    // Non-fatal.
     if ( err != GrabSuccess ) {
-        //throw new std::runtime_error( "Failed to grab keyboard.\n" );
+        //throw new std::runtime_error( "Couldn't grab the keyboard after 10 tries." );
     }
     XQueryKeymap( x11->display, deltaState );
     keyDown = false;
