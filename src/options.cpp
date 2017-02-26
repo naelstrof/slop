@@ -1,6 +1,7 @@
 #include "options.hpp"
 
 Options::Options( int argc, char** argv ) {
+    validArguments.push_back( Argument( "nodecorations", 'n', true ) );
     validArguments.push_back( Argument( "bordersize",   'b', false ) );
     validArguments.push_back( Argument( "padding",      'p', false ) );
     validArguments.push_back( Argument( "color",        'c', false ) );
@@ -8,14 +9,21 @@ Options::Options( int argc, char** argv ) {
     validArguments.push_back( Argument( "highlight",    'l', true ) );
     validArguments.push_back( Argument( "format",       'f', false ) );
     validArguments.push_back( Argument( "tolerance",    't', false ) );
-    validArguments.push_back( Argument( "nodecorations", 'n', false ) );
     validArguments.push_back( Argument( "nokeyboard",   'k', true ) );
     validArguments.push_back( Argument( "noopengl",     'o', true ) );
     validArguments.push_back( Argument( "help",         'h', true ) );
     validArguments.push_back( Argument( "xdisplay",     'x', false ) );
     validArguments.push_back( Argument( "version",      'v', true ) );
     validArguments.push_back( Argument( "quiet",        'q', true ) );
-    validate( argc, argv );
+    try {
+        validate( argc, argv );
+    } catch( ... ) {
+        arguments.clear();
+        values.clear();
+        floatingValues.clear();
+        validArguments[0].isFlagArgument = false;
+        validate( argc, argv );
+    }
 }
 
 

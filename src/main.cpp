@@ -50,6 +50,9 @@ SlopOptions* getOptions( Options& options ) {
     } catch( ... ) {
         options.getInt("nodecorations", 'n', foo->nodecorations);
     }
+    if ( foo->nodecorations < 0 || foo->nodecorations > 2 ) {
+        throw new std::invalid_argument( "--nodecorations must be between 0 and 2. Or be used as a flag." );
+    }
     return foo;
 }
 
