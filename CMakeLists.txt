@@ -27,6 +27,8 @@ add_definitions(-DSLOP_VERSION="v5.3.35")
 set(EXECUTABLE_NAME "slop")
 set(LIBRARY_NAME "slopy")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
                                     src/keyboard.cpp
                                     src/x.cpp
