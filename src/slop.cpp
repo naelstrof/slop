@@ -41,7 +41,7 @@ slop::SlopOptions::SlopOptions() {
     nodecorations = false;
     tolerance = 2;
     padding = 0;
-    shader = "textured";
+    shaders.push_back("textured");
     highlight = false;
     r = 0.5;
     g = 0.5;
@@ -167,14 +167,28 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
 slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancelled, SlopWindow* window ) {
     slop::mouse = new slop::Mouse( x11, options->nodecorations, window->window );
 
-    if ( options->shader != "textured" ) {
-        window->framebuffer->setShader( options->shader );
+    std::string vert = "#version 130\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 uvCoord;\nvoid main()\n{\nuvCoord = uv;\ngl_Position = vec4(position,0,1);\n}\n";
+    std::string frag = "#version 130\n uniform sampler2D texture;\n varying vec2 uvCoord;\n out vec4 outColor;\n void main()\n {\n outColor = texture2D( texture, uvCoord );\n }\n";
+    slop::Shader* textured = new slop::Shader( vert, frag, false );
+    std::vector<slop::Shader*> shaders;
+    for( int i=0;i<options->shaders.size();i++ ) {
+        std::string sn = options->shaders[i];
+        if ( sn != "textured" ) {
+            shaders.push_back( new slop::Shader( sn + ".vert", sn + ".frag" ) );
+        } else {
+            shaders.push_back( textured );
+        }
     }
-
     // Init our little state machine, memory is a tad of a misnomer
     slop::SlopMemory memory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
 
+    slop::Framebuffer* pingpong;
+    if ( shaders.size() > 1 ) {
+        pingpong = new slop::Framebuffer(WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
+    }
+
     // This is where we'll run through all of our stuffs
+    auto start = std::chrono::high_resolution_clock::now();
     while( memory.running ) {
         slop::mouse->update();
         if ( !options->nokeyboard ) {
@@ -184,18 +198,63 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         memory.update( 1 );
 
         // Then we draw our junk to a framebuffer.
+        window->framebuffer->setShader( textured );
         window->framebuffer->bind();
         glClearColor (0.0, 0.0, 0.0, 0.0);
         glClear (GL_COLOR_BUFFER_BIT);
         memory.draw( window->camera );
         window->framebuffer->unbind();
 
-        // Then we draw the framebuffer to the screen
-        window->framebuffer->draw();
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> elapsed = end-start;
+        if ( shaders.size() > 1 ) {
+            int i;
+            // We have our clean buffer, now to slather it with some juicy shader chains.
+            for (i=0;i<=(int)shaders.size()-2;i+=2) {
+                pingpong->bind();
+                glClearColor (0.0, 0.0, 0.0, 0.0);
+                glClear (GL_COLOR_BUFFER_BIT);
+                window->framebuffer->setShader( shaders[i] );
+                window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+                pingpong->unbind();
+
+                window->framebuffer->bind();
+                glClearColor (0.0, 0.0, 0.0, 0.0);
+                glClear (GL_COLOR_BUFFER_BIT);
+                pingpong->setShader( shaders[i+1] );
+                pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+                window->framebuffer->unbind();
+            }
+            for (;i<shaders.size();i++) {
+                pingpong->bind();
+                glClearColor (0.0, 0.0, 0.0, 0.0);
+                glClear (GL_COLOR_BUFFER_BIT);
+                window->framebuffer->setShader( shaders[i] );
+                window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+                pingpong->unbind();
+            }
+            if ( i%2 != 0 ) {
+                window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+            } else {
+                pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+            }
+        } else {
+            window->framebuffer->setShader( shaders[0] );
+            window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+        }
+
         window->display();
         GLenum err = glGetError();
         if ( err != GL_NO_ERROR ) {
-            throw err;
+            std::string error;
+            switch(err) {
+                case GL_INVALID_OPERATION: error="INVALID_OPERATION"; break;
+                case GL_INVALID_ENUM: error="INVALID_ENUM"; break;
+                case GL_INVALID_VALUE: error="INVALID_VALUE"; break;
+                case GL_OUT_OF_MEMORY: error="OUT_OF_MEMORY"; break;
+                case GL_INVALID_FRAMEBUFFER_OPERATION: error="INVALID_FRAMEBUFFER_OPERATION"; break;
+            }
+            throw new std::runtime_error( "OpenGL threw an error: " + error );
         }
         if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
             memory.running = false;

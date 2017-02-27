@@ -7,9 +7,15 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
         vert = resource->getRealPath(vert);
         frag = resource->getRealPath(frag);
         std::ifstream v( vert.c_str() );
+        if (!v.is_open()) {
+            throw new std::runtime_error( "Failed to open " + vert );
+        }
         vert_contents = std::string((std::istreambuf_iterator<char>(v)),
                                    std::istreambuf_iterator<char>());
         std::ifstream f( frag.c_str() );
+        if (!f.is_open()) {
+            throw new std::runtime_error( "Failed to open " + frag );
+        }
         frag_contents = std::string((std::istreambuf_iterator<char>(f)),
                                   std::istreambuf_iterator<char>());
     } else {
@@ -126,6 +132,11 @@ int slop::Shader::link( unsigned int vertshader, unsigned int fragshader, std::s
 unsigned int slop::Shader::getUniformLocation( std::string name ) {
     glUseProgram( program );
     return glGetUniformLocation( program, name.c_str() );
+}
+
+bool slop::Shader::hasParameter( std::string name ) {
+    glUseProgram( program );
+    return glGetUniformLocation( program, name.c_str() ) != -1;
 }
 
 void slop::Shader::setParameter( std::string name, int foo ) {

@@ -22,6 +22,7 @@
 #define N_SLOP_H_
 
 #include <string>
+#include <vector>
 
 namespace slop {
 
@@ -35,7 +36,7 @@ public:
     bool noopengl;
     bool nokeyboard;
     int nodecorations;
-    std::string shader;
+    std::vector<std::string> shaders;
     float r;
     float g;
     float b;

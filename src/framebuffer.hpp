@@ -36,12 +36,14 @@ private:
     unsigned int image;
     unsigned int buffers[2];
     unsigned int vertCount;
+    unsigned int desktopImage;
+    bool generatedDesktopImage;
     Shader* shader;
 public:
     Framebuffer( int w, int h );
     ~Framebuffer();
-    void setShader( std::string );
-    void draw();
+    void setShader( slop::Shader* shader );
+    void draw(glm::vec2 mouse, float time, glm::vec4 color);
     void resize( int w, int h );
     void bind();
     void unbind();

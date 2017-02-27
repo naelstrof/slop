@@ -33,6 +33,7 @@
 #include <GL/gl.h>
 
 #include "resource.hpp"
+#include "x.hpp"
 
 namespace slop {
 
@@ -43,6 +44,7 @@ public:
     unsigned int    getProgram();
     void            bind();
     void            unbind();
+    bool            hasParameter( std::string name );
     void            setParameter( std::string name, int foo );
     void            setParameter( std::string name, float foo );
     void            setParameter( std::string name, glm::mat4& foo );
