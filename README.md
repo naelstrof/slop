@@ -75,7 +75,7 @@ Slop allows for chained post-processing shaders. Shaders are written in a langua
 | texture    | sampler2D      | The current pixel values of slop's frame buffer. Usually just contains the selection rectangle. |
 | screenSize | vec2           | The dimensions of the screen, where the x value is the width.                                   |
 | position   | vec2 attribute | This contains the vertex data for the rectangle. Only contains (0,0), (1,0), (1,1), and (0,1).  |
-| uv         | vec2 attribute | Same as the position, this contians the UV information of each vertext.                         |
+| uv         | vec2 attribute | Same as the position, this contians the UV information of each vertex.                          |
 
 The desktop texture is upside-down because flipping it would cost valuable time.
 
@@ -83,7 +83,7 @@ Shaders must be placed in your `${XDG_CONFIG_HOME}/slop` directory, where *XDG_C
 
 Shaders are loaded from the `--shader` flag in slop. They are delimited by commas, and rendered in order from left to right. This way you can combine multiple shaders for interesting effects! For example, `slop -rblur1,wiggle` would load `~/.config/slop/blur1{.frag,.vert}` and `~/.config/slop/wiggle{.frag,.vert}`. Then render the selection rectangle twice, each time accumulating the changes from the different shaders.
 
-Enough chatting about it though, here's some example shaders you can copy to `~/.config/slop` to try out!
+Enough chatting about it though, here's some example shaders you can from [shaderexamples](https://github.com/naelstrof/slop/tree/master/shaderexamples) to `~/.config/slop` to try out!
 
 * `slop -rblur1,blur2 -b100` | `~/.config/slop/{blur1,blur2}{.frag,.vert}`
 ![slop blur](https://my.mixtape.moe/bvsrzr.png)
