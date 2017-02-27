@@ -94,18 +94,20 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
     char a = startPoint.y > mouse->getMousePos().y;
     char b = startPoint.x > mouse->getMousePos().x;
     char c = (a << 1) | b;
+    int xm = (mouse->getMousePos().x == 0 || mouse->getMousePos().x == WidthOfScreen(x11->screen)-1);
+    int ym = (mouse->getMousePos().y == 0 || mouse->getMousePos().y == HeightOfScreen(x11->screen)-1);
     switch ( c ) {
         case 0: mouse->setCursor( XC_lr_angle );
-                memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1,1));
+                memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1*xm,1*ym));
                 break;
         case 1: mouse->setCursor( XC_ll_angle );
-                memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1,1));
+                memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1*xm,1*ym));
                 break;
         case 2: mouse->setCursor( XC_ur_angle );
-                memory.rectangle->setPoints(startPoint+glm::vec2(0,1), mouse->getMousePos()+glm::vec2(1,0));
+                memory.rectangle->setPoints(startPoint+glm::vec2(0,1*ym), mouse->getMousePos()+glm::vec2(1*xm,0));
                 break;
         case 3: mouse->setCursor( XC_ul_angle );
-                memory.rectangle->setPoints(startPoint+glm::vec2(1,1), mouse->getMousePos()+glm::vec2(0,0));
+                memory.rectangle->setPoints(startPoint+glm::vec2(1*xm,1*ym), mouse->getMousePos()+glm::vec2(0,0));
                 break;
     }
     if ( !mouse->getButton( 1 ) ) {

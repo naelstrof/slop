@@ -6,8 +6,8 @@ slop::Framebuffer::Framebuffer( int w, int h ) {
     glGenTextures(1, &image);
     glBindTexture(GL_TEXTURE_2D, image);
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image, 0);
@@ -41,7 +41,10 @@ slop::Framebuffer::Framebuffer( int w, int h ) {
 void slop::Framebuffer::setShader( slop::Shader* shader ) {
     this->shader = shader;
     if ( shader->hasParameter( "desktop" ) && !generatedDesktopImage ) {
+        // Try to keep the image from being changed under our feet.
+        XGrabServer(x11->display);
         XImage* image = XGetImage( x11->display, x11->root, 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ), 0xffffffff, ZPixmap );
+        XUngrabServer(x11->display);
         glEnable(GL_TEXTURE_2D);
         glGenTextures(1, &desktopImage);
         glBindTexture(GL_TEXTURE_2D, desktopImage);
