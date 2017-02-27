@@ -67,6 +67,7 @@ make && sudo make install
 ### Shaders
 
 Slop allows for chained post-processing shaders. Shaders are written in a language called GLSL, and have access to the following data from slop:
+
 | GLSL Name  | Data Type      | Bound to                                                                                        |
 |------------|----------------|-------------------------------------------------------------------------------------------------|
 | mouse      | vec2           | The mouse position on the screen.                                                               |
@@ -75,6 +76,7 @@ Slop allows for chained post-processing shaders. Shaders are written in a langua
 | screenSize | vec2           | The dimensions of the screen, where the x value is the width.                                   |
 | position   | vec2 attribute | This contains the vertex data for the rectangle. Only contains (0,0), (1,0), (1,1), and (0,1).  |
 | uv         | vec2 attribute | Same as the position, this contians the UV information of each vertext.                         |
+
 The desktop texture is upside-down because flipping it would cost valuable time.
 
 Shaders must be placed in your `${XDG_CONFIG_HOME}/slop` directory, where *XDG_CONFIG_HOME* is typically `~/.config/`. This folder won't exist unless you make it yourself.
