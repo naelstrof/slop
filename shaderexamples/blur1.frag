@@ -22,5 +22,13 @@ void main()
     color += texture2D(desktop, upsideDownUV - (off2 / screenSize)) * 0.09447039785044732;
     color += texture2D(desktop, upsideDownUV + (off3 / screenSize)) * 0.010381362401148057;
     color += texture2D(desktop, upsideDownUV - (off3 / screenSize)) * 0.010381362401148057;
-    gl_FragColor = (texture2D(texture, uvCoord) * color);
+    vec4 tcolor = vec4(0.0);
+    tcolor += texture2D(texture, uvCoord) * 0.1964825501511404;
+    tcolor += texture2D(texture, uvCoord + (off1 / screenSize)) * 0.2969069646728344;
+    tcolor += texture2D(texture, uvCoord - (off1 / screenSize)) * 0.2969069646728344;
+    tcolor += texture2D(texture, uvCoord + (off2 / screenSize)) * 0.09447039785044732;
+    tcolor += texture2D(texture, uvCoord - (off2 / screenSize)) * 0.09447039785044732;
+    tcolor += texture2D(texture, uvCoord + (off3 / screenSize)) * 0.010381362401148057;
+    tcolor += texture2D(texture, uvCoord - (off3 / screenSize)) * 0.010381362401148057;
+    gl_FragColor = (tcolor * color);
 }

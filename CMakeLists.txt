@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1.3)
 
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)")
 if ( NOT CMAKE_INSTALL_PREFIX )
@@ -21,7 +21,7 @@ endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_definitions(-DSLOP_VERSION="v5.3.36")
+add_definitions(-DSLOP_VERSION="v5.3.37")
 
 # The names have to be unique unfortunately.
 set(EXECUTABLE_NAME "slop")
@@ -41,12 +41,13 @@ add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
                                     src/xshaperectangle.cpp
                                     src/glrectangle.cpp)
 
-set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 11)
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 11)
 
 add_executable(${EXECUTABLE_NAME} src/options.cpp
                                   src/main.cpp)
 
+set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD 11)
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules" )

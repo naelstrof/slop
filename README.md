@@ -87,18 +87,21 @@ Enough chatting about it though, here's some example shaders you can copy from [
 
 The files listed to the right of the `|` are the required files for the command to the left to work correctly.
 * `slop -rblur1,blur2 -b100` | `~/.config/slop/{blur1,blur2}{.frag,.vert}`
+
 ![slop blur](https://my.mixtape.moe/bvsrzr.png)
 
 * `slop -rwiggle -b10` | `~/.config/slop/wiggle{.frag,.vert}`
+
 ![slop animation](http://i.giphy.com/12vjSbFZ0CWDW8.gif)
 
 And all together now...
-
 * `slop -rblur1,blur2,wiggle -b50 -c1,1,1` | `~/.config/slop/{blur1,blur2,wiggle}{.frag,.vert}`
+
 ![slop animation](http://i.giphy.com/kfBLafeJfLs2Y.gif)
 
 Finally here's an example of a magnifying glass.
 * `slop -rcrosshair` | `~/.config/slop/crosshair{.frag,.vert}`
+
 ![slop animation](http://i.giphy.com/2xy0fC2LOFQfm.gif)
 
 It's fairly easy to adjust how the shaders work by editing them with your favourite text editor. Or even make your own!
