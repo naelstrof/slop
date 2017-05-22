@@ -21,7 +21,7 @@ endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_definitions(-DSLOP_VERSION="v5.3.37")
+add_definitions(-DSLOP_VERSION="v5.3.38")
 
 # The names have to be unique unfortunately.
 set(EXECUTABLE_NAME "slop")

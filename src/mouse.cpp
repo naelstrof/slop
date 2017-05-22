@@ -104,12 +104,17 @@ Window slop::Mouse::findWindow( Window foo ) {
         if ( children[i] == ignoreWindow ) {
             continue;
         }
-        // We need to make sure the window isn't something that currently isn't mapped.
+        // We need to make sure the window is mapped.
         XWindowAttributes attr;         
         XGetWindowAttributes( x11->display, children[i], &attr );
         if ( attr.map_state != IsViewable ) {
             continue;
         }
+        // We need to make sure we can get pixel data from it as well
+        if ( attr.c_class == InputOnly ) {
+          continue;
+        }
+
         glm::vec4 rect = getWindowGeometry(children[i], false);
         float a = pos.x - rect.x;
         float b = pos.y - rect.y;
