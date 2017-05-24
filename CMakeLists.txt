@@ -21,7 +21,7 @@ endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_definitions(-DSLOP_VERSION="v5.3.38")
+add_definitions(-DSLOP_VERSION="v6.3.38")
 
 # The names have to be unique unfortunately.
 set(EXECUTABLE_NAME "slop")
@@ -44,8 +44,7 @@ add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 11)
 
-add_executable(${EXECUTABLE_NAME} src/options.cpp
-                                  src/main.cpp)
+add_executable(${EXECUTABLE_NAME} src/main.cpp)
 
 set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD 11)

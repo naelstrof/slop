@@ -20,8 +20,12 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <vector>
+#include <glm/glm.hpp>
+
+#include "cxxopts.hpp"
 #include "slop.hpp"
-#include "options.hpp"
 
 using namespace slop;
 
@@ -34,41 +38,79 @@ static void split(const std::string &s, char delim, Out result) {
         *(result++) = item;
     }
 }
+
 static std::vector<std::string> split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     split(s, delim, std::back_inserter(elems));
     return elems;
 }
 
-SlopOptions* getOptions( Options& options ) {
-    SlopOptions* foo = new SlopOptions();
-    options.getFloat("bordersize", 'b', foo->borderSize);
-    options.getFloat("padding", 'p', foo->padding);
-    options.getFloat("tolerance", 't', foo->tolerance);
+glm::vec4 parseColor( std::string value ) {
+    std::string valuecopy = value;
+    glm::vec4 found;
+    std::string::size_type sz;
+    try {
+        found[0] = std::stof(value,&sz);
+        value = value.substr(sz+1);
+        found[1] = std::stof(value,&sz);
+        value = value.substr(sz+1);
+        found[2] = std::stof(value,&sz);
+        if ( value.size() != sz ) {
+            value = value.substr(sz+1);
+            found[3] = std::stof(value,&sz);
+            if ( value.size() != sz ) {
+                throw "dur";
+            }
+        } else {
+            found[3] = 1;
+        }
+    } catch ( ... ) {
+        throw new std::invalid_argument("Unable to parse value `" + valuecopy + "` as a color. Should be in the format r,g,b or r,g,b,a. Like 1,1,1,1.");
+    }
+    return found;
+}
+
+SlopOptions* getOptions( cxxopts::Options& options ) {
+    slop::SlopOptions* foo = new slop::SlopOptions();
+    if ( options.count( "bordersize" ) > 0 ) {
+        foo->borderSize = options["bordersize"].as<float>();
+    }
+    if ( options.count( "padding" ) > 0 ) {
+        foo->padding = options["padding"].as<float>();
+    }
+    if ( options.count( "tolerance" ) > 0 ) {
+        foo->tolerance = options["tolerance"].as<float>();
+    }
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
-    options.getColor("color", 'c', color);
-    options.getBool("nokeyboard", 'k', foo->nokeyboard);
-    options.getBool("noopengl", 'o', foo->noopengl);
-    options.getString( "xdisplay", 'x', foo->xdisplay );
-    std::string shaders = "textured";
-    options.getString( "shader", 'r', shaders );
-    foo->shaders = split( shaders, ',' );
+    if ( options.count( "color" ) > 0 ) {
+        color = parseColor( options["color"].as<std::string>() );
+    }
     foo->r = color.r;
     foo->g = color.g;
     foo->b = color.b;
     foo->a = color.a;
-    options.getBool("highlight", 'l', foo->highlight);
-    try {
-        bool test = false;
-        options.getBool("nodecorations", 'n', test);
-        if ( test ) {
-            foo->nodecorations = 1;
-        }
-    } catch( ... ) {
-        options.getInt("nodecorations", 'n', foo->nodecorations);
+    if ( options.count( "nokeyboard" ) > 0 ) {
+        foo->nokeyboard = options["nokeyboard"].as<bool>();
     }
-    if ( foo->nodecorations < 0 || foo->nodecorations > 2 ) {
-        throw new std::invalid_argument( "--nodecorations must be between 0 and 2. Or be used as a flag." );
+    if ( options.count( "xdisplay" ) > 0 ) {
+        foo->xdisplay = options["xdisplay"].as<std::string>();
+    }
+    std::string shaders = "textured";
+    if ( options.count( "shader" ) > 0 ) {
+        shaders = options["shader"].as<std::string>();
+    }
+    foo->shaders = split( shaders, ',' );
+    if ( options.count( "noopengl" ) > 0 ) {
+        foo->noopengl = options["noopengl"].as<bool>();
+    }
+    if ( options.count( "highlight" ) > 0 ) {
+        foo->highlight = options["highlight"].as<bool>();
+    }
+    if ( options.count( "nodecorations" ) > 0 ) {
+        foo->nodecorations = options["nodecorations"].as<int>();
+        if ( foo->nodecorations < 0 || foo->nodecorations > 2 ) {
+            throw new std::invalid_argument( "--nodecorations must be between 0 and 2. Or be used as a flag." );
+        }
     }
     return foo;
 }
@@ -184,16 +226,42 @@ void printHelp() {
 }
 
 int app( int argc, char** argv ) {
+    cxxopts::Options options("maim", "Screenshot application.");
+    options.add_options()
+    ("h,help", "Print help and exit.")
+    ("v,version", "Print version and exit.")
+    ("x,xdisplay", "Sets the xdisplay to use", cxxopts::value<std::string>())
+    ("f,format", "Sets the output format for slop. Format specifiers are  %x, %y, %w, %h, %i, %c, and %g. If actual percentage signs are desired in output, use a double percentage sign like so `%%`.", cxxopts::value<std::string>())
+    ("b,bordersize", "Sets the selection rectangle's thickness.", cxxopts::value<float>())
+    ("p,padding", "Sets the padding size for the selection, this can be negative.", cxxopts::value<float>())
+    ("t,tolerance", "How far in pixels the mouse can move after clicking, and still be detected as a normal click instead of a click-and-drag. Setting this to 0 will disable window selections. Alternatively setting it to 9999999 would force a window selection.", cxxopts::value<float>())
+    ("c,color", "Sets  the  selection  rectangle's  color.  Supports  RGB or RGBA input. Depending on the system's window manager/OpenGL  support, the opacity may be ignored.", cxxopts::value<std::string>())
+    ("r,shader", "This  sets  the  vertex shader, and fragment shader combo to use when drawing the final framebuffer to the screen. This obviously only  works  when OpenGL is enabled. The shaders are loaded from ~/.config/maim. See https://github.com/naelstrof/slop for more information on how to create your own shaders.", cxxopts::value<std::string>())
+    ("n,nodecorations", "Sets the level of aggressiveness when trying to remove window decroations. `0' is off, `1' will try lightly to remove decorations, and `2' will recursively descend into the root tree until it gets the deepest available visible child under the mouse. Defaults to `0'.", cxxopts::value<int>()->implicit_value("1"))
+    ("l,highlight", "Instead of outlining a selection, maim will highlight it instead. This is particularly useful if the color is set to an opacity lower than 1.")
+    ("q,quiet", "Disable any unnecessary cerr output. Any warnings or info simply won't print.")
+    ("k,nokeyboard", "Disables the ability to cancel selections with the keyboard.")
+    ("o,noopengl", "Disables graphics hardware acceleration.")
+    ;
+    options.parse(argc, argv);
     // Options just validates all of our input from argv
-    Options options( argc, argv );
     bool quiet = false;
-    options.getBool( "quiet", 'q', quiet );
+    if ( options.count( "quiet" ) > 0 ) {
+        quiet = options["quiet"].as<bool>();
+    }
     bool help = false;
-    if ( options.getBool( "help", 'h', help ) ) {
+    if ( options.count( "help" ) > 0 ) {
+        help = options["help"].as<bool>();
+    }
+    if ( help ) {
         printHelp();
         return 0;
     }
-    if ( options.getBool( "version", 'v', help ) ) {
+    bool version = false;
+    if ( options.count( "version" ) > 0 ) {
+        version = options["version"].as<bool>();
+    }
+    if ( version ) {
         std::cout << SLOP_VERSION << "\n";
         return 0;
     }
@@ -204,8 +272,9 @@ int app( int argc, char** argv ) {
     // on a fake selection.
     SlopSelection selection(0,0,0,0,0);
     std::string format;
-    bool gotFormat = options.getString("format", 'f', format);
+    bool gotFormat = options.count( "format" ) > 0;
     if ( gotFormat ) {
+        format = options["format"].as<std::string>();
         formatOutput( format, selection, false );
     }
 
