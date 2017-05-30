@@ -186,10 +186,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
     // Init our little state machine, memory is a tad of a misnomer
     slop::SlopMemory memory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
 
-    slop::Framebuffer* pingpong;
-    if ( shaders.size() > 1 ) {
-        pingpong = new slop::Framebuffer(WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
-    }
+    slop::Framebuffer* pingpong = new slop::Framebuffer(WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
 
     // This is where we'll run through all of our stuffs
     auto start = std::chrono::high_resolution_clock::now();
@@ -214,40 +211,36 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         window->framebuffer->unbind();
 
         std::chrono::duration<double, std::milli> elapsed = current-start;
-        if ( shaders.size() > 1 ) {
-            int i;
-            // We have our clean buffer, now to slather it with some juicy shader chains.
-            for (i=0;i<=(int)shaders.size()-2;i+=2) {
-                pingpong->bind();
-                glClearColor (0.0, 0.0, 0.0, 0.0);
-                glClear (GL_COLOR_BUFFER_BIT);
-                window->framebuffer->setShader( shaders[i] );
-                window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-                pingpong->unbind();
-
-                window->framebuffer->bind();
-                glClearColor (0.0, 0.0, 0.0, 0.0);
-                glClear (GL_COLOR_BUFFER_BIT);
-                pingpong->setShader( shaders[i+1] );
-                pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-                window->framebuffer->unbind();
-            }
-            for (;i<shaders.size();i++) {
-                pingpong->bind();
-                glClearColor (0.0, 0.0, 0.0, 0.0);
-                glClear (GL_COLOR_BUFFER_BIT);
-                window->framebuffer->setShader( shaders[i] );
-                window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-                pingpong->unbind();
-            }
-            if ( i%2 != 0 ) {
-                window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-            } else {
-                pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-            }
-        } else {
-            window->framebuffer->setShader( shaders[0] );
+        
+        int i;
+        // We have our clean buffer, now to slather it with some juicy shader chains.
+        for (i=0;i<=(int)shaders.size()-2;i+=2) {
+            pingpong->bind();
+            glClearColor (0.0, 0.0, 0.0, 0.0);
+            glClear (GL_COLOR_BUFFER_BIT);
+            window->framebuffer->setShader( shaders[i] );
             window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+            pingpong->unbind();
+
+            window->framebuffer->bind();
+            glClearColor (0.0, 0.0, 0.0, 0.0);
+            glClear (GL_COLOR_BUFFER_BIT);
+            pingpong->setShader( shaders[i+1] );
+            pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+            window->framebuffer->unbind();
+        }
+        for (;i<shaders.size();i++) {
+            pingpong->bind();
+            glClearColor (0.0, 0.0, 0.0, 0.0);
+            glClear (GL_COLOR_BUFFER_BIT);
+            window->framebuffer->setShader( shaders[i] );
+            window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+            pingpong->unbind();
+        }
+        if ( i%2 != 0 ) {
+            window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+        } else {
+            pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
         }
 
         window->display();
