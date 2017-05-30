@@ -21,6 +21,9 @@
 #ifndef N_KEYBOARD_H_
 #define N_KEYBOARD_H_
 
+#define XK_MISCELLANY
+#include <X11/keysymdef.h>
+
 #include "x.hpp"
 
 namespace slop {

@@ -15,6 +15,9 @@ bool slop::Keyboard::getKey( KeySym key ) {
     }
 }
 
+// This returns if a key is currently pressed.
+// Ignores arrow key presses specifically so users can
+// adjust their selection.
 bool slop::Keyboard::anyKeyDown() {
     return keyDown;
 }
@@ -22,6 +25,16 @@ bool slop::Keyboard::anyKeyDown() {
 void slop::Keyboard::update() {
     char keys[32];
     XQueryKeymap( x11->display, keys );
+    // We first delete the arrow key buttons from the mapping.
+    // This allows the user to press the arrow keys without triggering anyKeyDown
+    KeyCode keycode = XKeysymToKeycode( x11->display, XK_Left );
+    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+    keycode = XKeysymToKeycode( x11->display, XK_Right );
+    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+    keycode = XKeysymToKeycode( x11->display, XK_Up );
+    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+    keycode = XKeysymToKeycode( x11->display, XK_Down );
+    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
     keyDown = false;
     for ( int i=0;i<32;i++ ) {
         if ( deltaState[i] == keys[i] ) {
