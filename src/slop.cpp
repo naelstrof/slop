@@ -171,8 +171,8 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
 slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancelled, SlopWindow* window ) {
     slop::mouse = new slop::Mouse( x11, options->nodecorations, window->window );
 
-    std::string vert = "#version 130\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 uvCoord;\nvoid main()\n{\nuvCoord = uv;\ngl_Position = vec4(position,0,1);\n}\n";
-    std::string frag = "#version 130\n uniform sampler2D texture;\n varying vec2 uvCoord;\n out vec4 outColor;\n void main()\n {\n outColor = texture2D( texture, uvCoord );\n }\n";
+    std::string vert = "#version 120\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 uvCoord;\nvoid main()\n{\nuvCoord = uv;\ngl_Position = vec4(position,0,1);\n}\n";
+    std::string frag = "#version 120\nuniform sampler2D texture;\nvarying vec2 uvCoord;\nvoid main()\n {\ngl_FragColor = texture2D( texture, uvCoord );\n}\n";
     slop::Shader* textured = new slop::Shader( vert, frag, false );
     std::vector<slop::Shader*> shaders;
     for( int i=0;i<options->shaders.size();i++ ) {

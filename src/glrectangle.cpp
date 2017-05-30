@@ -21,8 +21,8 @@ slop::GLRectangle::GLRectangle( glm::vec2 p1, glm::vec2 p2, float border, float 
     our = ur + glm::vec2(border,border);
     obr = br + glm::vec2(border,-border);
     generateBuffers();
-    std::string vert = "#version 130\n in vec2 position;\n uniform mat4 projection;\n void main() {\n gl_Position = projection*vec4(position,0,1);\n }";
-    std::string frag = "#version 130\n uniform vec4 color;\n out vec4 outColor;\n void main() {\n outColor = color;\n }";
+    std::string vert = "#version 120\nattribute vec2 position;\nuniform mat4 projection;\nvoid main() {\ngl_Position = projection*vec4(position,0,1);\n}";
+    std::string frag = "#version 120\nuniform vec4 color;\nvoid main() {\ngl_FragColor = color;\n}";
 
     shader = new Shader( vert, frag, false );
 }
