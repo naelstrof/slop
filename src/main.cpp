@@ -242,12 +242,18 @@ int app( int argc, char** argv ) {
     ("q,quiet", "Disable any unnecessary cerr output. Any warnings or info simply won't print.")
     ("k,nokeyboard", "Disables the ability to cancel selections with the keyboard.")
     ("o,noopengl", "Disables graphics hardware acceleration.")
+    ("positional", "Positional parameters", cxxopts::value<std::vector<std::string>>())
     ;
+    options.parse_positional("positional");
     options.parse(argc, argv);
     // Options just validates all of our input from argv
     bool quiet = false;
     if ( options.count( "quiet" ) > 0 ) {
         quiet = options["quiet"].as<bool>();
+    }
+    auto& positional = options["positional"].as<std::vector<std::string>>();
+    if ( positional.size() > 0 ) {
+        throw new std::invalid_argument("Unexpected positional argument: " + positional[0]);
     }
     bool help = false;
     if ( options.count( "help" ) > 0 ) {
