@@ -113,6 +113,8 @@ void slop::XShapeRectangle::setPoints( glm::vec2 p1, glm::vec2 p2 ) {
 }
 
 slop::XShapeRectangle::~XShapeRectangle() {
+    XUnmapWindow( x11->display, window );
+    XDestroyWindow( x11->display, window );
 }
 
 void slop::XShapeRectangle::draw( glm::mat4& matrix ) {

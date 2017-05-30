@@ -48,8 +48,8 @@ slop::SlopWindow::SlopWindow() {
     // Disable window decorations.
     attributes.override_redirect = True;
     // Make sure we know when we've been successfully destroyed later!
-    //attributes.event_mask = StructureNotifyMask;
-    unsigned long valueMask = CWOverrideRedirect | CWColormap | CWBackPixmap | CWBorderPixel;
+    attributes.event_mask = StructureNotifyMask;
+    unsigned long valueMask = CWOverrideRedirect | CWColormap | CWBackPixmap | CWBorderPixel | CWEventMask;
 
 
     // Create the window
@@ -118,6 +118,7 @@ slop::SlopWindow::~SlopWindow() {
     glClear( GL_COLOR_BUFFER_BIT );
     display();
     glXDestroyContext( x11->display, context );
+    XUnmapWindow( x11->display, window );
     XDestroyWindow( x11->display, window );
 }
 

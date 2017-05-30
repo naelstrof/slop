@@ -120,14 +120,14 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
 
 slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* cancelled ) {
     // Init our little state machine, memory is a tad of a misnomer
-    slop::SlopMemory memory( options, new XShapeRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
-    slop::mouse = new slop::Mouse( x11, options->nodecorations, ((XShapeRectangle*)memory.rectangle)->window );
+    slop::SlopMemory* memory = new slop::SlopMemory( options, new XShapeRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
+    slop::mouse = new slop::Mouse( x11, options->nodecorations, ((XShapeRectangle*)memory->rectangle)->window );
 
     // We have no GL context, so the matrix is useless...
     glm::mat4 fake;
     // This is where we'll run through all of our stuffs
     auto last = std::chrono::high_resolution_clock::now();
-    while( memory.running ) {
+    while( memory->running ) {
         slop::mouse->update();
         if ( !options->nokeyboard ) {
             slop::keyboard->update();
@@ -136,11 +136,11 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
         auto current = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> frametime = current-last;
         last = current;
-        memory.update( frametime.count()/1000.f );
+        memory->update( frametime.count()/1000.f );
 
         // We don't actually draw anything, but the state machine uses
         // this to know when to spawn the window.
-        memory.draw( fake );
+        memory->draw( fake );
 
         // X11 explodes if we update as fast as possible, here's a tiny sleep.
         XFlush(x11->display);
@@ -148,7 +148,7 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
 
         // Then we draw the framebuffer to the screen
         if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
-            memory.running = false;
+            memory->running = false;
             if ( cancelled ) {
                 *cancelled = true;
             }
@@ -158,14 +158,26 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
     }
 
     // Now we should have a selection! We parse everything we know about it here.
-    glm::vec4 output = memory.rectangle->getRect();
+    glm::vec4 output = memory->rectangle->getRect();
 
     // Lets now clear both front and back buffers before closing.
     // hopefully it'll be completely transparent while closing!
     // Then we clean up.
     delete slop::mouse;
+    Window selectedWindow = memory->selectedWindow;
+    delete memory;
+
+    // Try to detect the window dying.
+    int tries = 0;
+    while( tries < 50 ) {
+        XEvent event;
+        if ( XCheckTypedEvent( x11->display, UnmapNotify, &event ) ) { break; }
+        if ( XCheckTypedEvent( x11->display, DestroyNotify, &event ) ) { break; }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        tries++;
+    }
     // Finally return the data.
-    return slop::SlopSelection( output.x, output.y, output.z, output.w, memory.selectedWindow );
+    return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow );
 }
 
 slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancelled, SlopWindow* window ) {
@@ -184,14 +196,14 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         }
     }
     // Init our little state machine, memory is a tad of a misnomer
-    slop::SlopMemory memory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
+    slop::SlopMemory* memory = new slop::SlopMemory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
 
     slop::Framebuffer* pingpong = new slop::Framebuffer(WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
 
     // This is where we'll run through all of our stuffs
     auto start = std::chrono::high_resolution_clock::now();
     auto last = start;
-    while( memory.running ) {
+    while( memory->running ) {
         slop::mouse->update();
         if ( !options->nokeyboard ) {
             slop::keyboard->update();
@@ -200,14 +212,14 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         auto current = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> frametime = current-last;
         last = current;
-        memory.update( frametime.count()/1000.f );
+        memory->update( frametime.count()/1000.f );
 
         // Then we draw our junk to a framebuffer.
         window->framebuffer->setShader( textured );
         window->framebuffer->bind();
         glClearColor (0.0, 0.0, 0.0, 0.0);
         glClear (GL_COLOR_BUFFER_BIT);
-        memory.draw( window->camera );
+        memory->draw( window->camera );
         window->framebuffer->unbind();
 
         std::chrono::duration<double, std::milli> elapsed = current-start;
@@ -259,7 +271,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
             throw new std::runtime_error( "OpenGL threw an error: " + error );
         }
         if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
-            memory.running = false;
+            memory->running = false;
             if ( cancelled ) {
                 *cancelled = true;
             }
@@ -269,7 +281,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
     }
 
     // Now we should have a selection! We parse everything we know about it here.
-    glm::vec4 output = memory.rectangle->getRect();
+    glm::vec4 output = memory->rectangle->getRect();
 
     // Lets now clear both front and back buffers before closing.
     // hopefully it'll be completely transparent while closing!
@@ -281,6 +293,18 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
     // Then we clean up.
     delete window;
     delete slop::mouse;
+    Window selectedWindow = memory->selectedWindow;
+    delete memory;
+
+    // Try to detect the window dying.
+    int tries = 0;
+    while( tries < 50 ) {
+        XEvent event;
+        if ( XCheckTypedEvent( x11->display, UnmapNotify, &event ) ) { break; }
+        if ( XCheckTypedEvent( x11->display, DestroyNotify, &event ) ) { break; }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        tries++;
+    }
     // Finally return the data.
-    return slop::SlopSelection( output.x, output.y, output.z, output.w, memory.selectedWindow );
+    return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow );
 }
