@@ -244,6 +244,8 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         }
 
         window->display();
+        // Here we sleep just to prevent our CPU usage from going to 100%.
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         GLenum err = glGetError();
         if ( err != GL_NO_ERROR ) {
             std::string error;
