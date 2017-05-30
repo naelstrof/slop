@@ -22,6 +22,7 @@
 #define N_SLOPSTATES_H_
 
 #include "mouse.hpp"
+#include "keyboard.hpp"
 #include "slop.hpp"
 
 #include "rectangle.hpp"
@@ -53,6 +54,8 @@ public:
 class SlopStartDrag : SlopState {
 private:
     glm::vec2 startPoint;
+    float repeatTimer;
+    float multiplier;
 public:
     SlopStartDrag( glm::vec2 point );
     virtual void onEnter( SlopMemory& memory );

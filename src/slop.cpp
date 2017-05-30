@@ -126,13 +126,17 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
     // We have no GL context, so the matrix is useless...
     glm::mat4 fake;
     // This is where we'll run through all of our stuffs
+    auto last = std::chrono::high_resolution_clock::now();
     while( memory.running ) {
         slop::mouse->update();
         if ( !options->nokeyboard ) {
             slop::keyboard->update();
         }
         // We move our statemachine forward.
-        memory.update( 1 );
+        auto current = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> frametime = current-last;
+        last = current;
+        memory.update( frametime.count()/1000.f );
 
         // We don't actually draw anything, but the state machine uses
         // this to know when to spawn the window.
@@ -189,13 +193,17 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
 
     // This is where we'll run through all of our stuffs
     auto start = std::chrono::high_resolution_clock::now();
+    auto last = start;
     while( memory.running ) {
         slop::mouse->update();
         if ( !options->nokeyboard ) {
             slop::keyboard->update();
         }
         // We move our statemachine forward.
-        memory.update( 1 );
+        auto current = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> frametime = current-last;
+        last = current;
+        memory.update( frametime.count()/1000.f );
 
         // Then we draw our junk to a framebuffer.
         window->framebuffer->setShader( textured );
@@ -205,8 +213,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         memory.draw( window->camera );
         window->framebuffer->unbind();
 
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> elapsed = end-start;
+        std::chrono::duration<double, std::milli> elapsed = current-start;
         if ( shaders.size() > 1 ) {
             int i;
             // We have our clean buffer, now to slather it with some juicy shader chains.
