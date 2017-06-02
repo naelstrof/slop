@@ -113,7 +113,23 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
     if ( !mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
-    if ( keyboard->getKey( XK_Down ) ) {
+    if ( keyboard ) {
+        int arrows[2];
+        arrows[0] = keyboard->getKey(XK_Down)-keyboard->getKey(XK_Up);		
+        arrows[1] = keyboard->getKey(XK_Right)-keyboard->getKey(XK_Left);		
+        if ( arrows[0] || arrows[1] ) {		
+            if ( repeatTimer == 0 || repeatTimer > .4 ) {		
+                startPoint.y += arrows[0]*multiplier;		
+                startPoint.x += arrows[1]*multiplier;		
+            }		
+            if ( repeatTimer > 1 ) {		
+                multiplier += dt*2;		
+            }		
+            repeatTimer += dt;		
+        } else {		
+            repeatTimer = 0;		
+            multiplier = 1;		
+        }
     }
 }
 
