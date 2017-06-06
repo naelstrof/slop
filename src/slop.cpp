@@ -226,6 +226,8 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         
         int i;
         // We have our clean buffer, now to slather it with some juicy shader chains.
+        glEnable( GL_BLEND );
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         for (i=0;i<=(int)shaders.size()-2;i+=2) {
             pingpong->bind();
             glClearColor (0.0, 0.0, 0.0, 0.0);
@@ -249,6 +251,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
             window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
             pingpong->unbind();
         }
+        glDisable( GL_BLEND );
         if ( i%2 != 0 ) {
             window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
         } else {
