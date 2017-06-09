@@ -21,7 +21,7 @@
 #ifndef N_GLRECTANGLE_H_
 #define N_GLRECTANGLE_H_
 
-#include "gl_core_3_3.h"
+#include "gl_core_3_0.h"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <GL/gl.h>

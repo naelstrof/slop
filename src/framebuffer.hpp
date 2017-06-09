@@ -21,7 +21,7 @@
 #ifndef N_FRAMEBUFFER_H_
 #define N_FRAMEBUFFER_H_
 
-#include "gl_core_3_3.h"
+#include "gl_core_3_0.h"
 #include <glm/glm.hpp>
 #include <GL/gl.h>
 #include <vector>

@@ -21,7 +21,7 @@ endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_definitions(-DSLOP_VERSION="v6.3.42")
+add_definitions(-DSLOP_VERSION="v6.3.43")
 
 # The names have to be unique unfortunately.
 set(EXECUTABLE_NAME "slop")
@@ -33,7 +33,7 @@ add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
                                     src/slopstates.cpp
                                     src/framebuffer.cpp
                                     src/resource.cpp
-                                    src/gl_core_3_3.c
+                                    src/gl_core_3_0.c
                                     src/shader.cpp
                                     src/window.cpp
                                     src/slop.cpp
