@@ -26,7 +26,7 @@
 #include <string>
 #include <exception>
 
-#include "gl_core_3_0.h"
+#include "gl_core_3_0.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <EGL/egl.h>

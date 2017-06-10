@@ -27,7 +27,7 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
     const char* fragsrc = frag_contents.c_str();
 
     // Create the program to link to.
-    program = glCreateProgram();
+    program = gl::CreateProgram();
     
     if ( vert_contents.length() <= 0 ) {
         std::string errstring = "Failed to open file (or is empty) `" + vert + "`.\n";
@@ -40,26 +40,26 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
     }
 
     // Compile both shaders.
-    unsigned int vertShader = glCreateShader( GL_VERTEX_SHADER );
-    glShaderSource( vertShader, 1, &vertsrc , NULL );
+    unsigned int vertShader = gl::CreateShader( gl::VERTEX_SHADER );
+    gl::ShaderSource( vertShader, 1, &vertsrc , NULL );
     std::string errortxt;
     int err = compile( vertShader, errortxt );
 
     if ( err ) {
         std::string errstring = "Failed to compile shader `" + vert + "`:\n" + errortxt;
         throw new std::runtime_error(errstring);
-        glDeleteShader( vertShader );
+        gl::DeleteShader( vertShader );
         return;
     }
 
-    unsigned int fragShader = glCreateShader( GL_FRAGMENT_SHADER );
-    glShaderSource( fragShader, 1, &fragsrc, NULL );
+    unsigned int fragShader = gl::CreateShader( gl::FRAGMENT_SHADER );
+    gl::ShaderSource( fragShader, 1, &fragsrc, NULL );
     err = compile( fragShader, errortxt );
     if ( err ) {
         std::string errstring = "Failed to compile shader `" + frag + "`:\n" + errortxt;
         throw new std::runtime_error(errstring);
-        glDeleteShader( vertShader );
-        glDeleteShader( fragShader );
+        gl::DeleteShader( vertShader );
+        gl::DeleteShader( fragShader );
         return;
     }
 
@@ -68,19 +68,19 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
     if ( err ) {
         std::string errstring = "Failed to link shader `" + vert + "` and  `" + frag + "`:\n" + errortxt;
         throw new std::runtime_error(errstring);
-        glDeleteShader( vertShader );
-        glDeleteShader( fragShader );
+        gl::DeleteShader( vertShader );
+        gl::DeleteShader( fragShader );
         return;
     }
 
     // Clean up :)
-    glDeleteShader( vertShader );
-    glDeleteShader( fragShader );
-    glUseProgram( 0 );
+    gl::DeleteShader( vertShader );
+    gl::DeleteShader( fragShader );
+    gl::UseProgram( 0 );
 }
 
 slop::Shader::~Shader() {
-    glDeleteProgram( program );
+    gl::DeleteProgram( program );
 }
 
 unsigned int slop::Shader::getProgram() {
@@ -88,20 +88,20 @@ unsigned int slop::Shader::getProgram() {
 }
 
 void slop::Shader::bind() {
-    glUseProgram( program );
+    gl::UseProgram( program );
 }
 
 int slop::Shader::compile( unsigned int shader, std::string& error ) {
-    glCompileShader( shader );
+    gl::CompileShader( shader );
 
     // Compiling the shader is the easy part, all this junk down here is for printing the error it might generate.
-    int result = GL_FALSE;
+    int result;
     int logLength;
-    glGetShaderiv( shader, GL_COMPILE_STATUS, &result );
-    glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &logLength );
-    if ( result == GL_FALSE ) {
+    gl::GetShaderiv( shader, gl::COMPILE_STATUS, &result );
+    gl::GetShaderiv( shader, gl::INFO_LOG_LENGTH, &logLength );
+    if ( result == false ) {
         char* errormsg = new char[ logLength ];
-        glGetShaderInfoLog( shader, logLength, NULL, errormsg );
+        gl::GetShaderInfoLog( shader, logLength, NULL, errormsg );
         error = errormsg;
         delete[] errormsg;
         return 1;
@@ -110,18 +110,18 @@ int slop::Shader::compile( unsigned int shader, std::string& error ) {
 }
 
 int slop::Shader::link( unsigned int vertshader, unsigned int fragshader, std::string& error ) {
-    glAttachShader( program, vertshader );
-    glAttachShader( program, fragshader );
-    glLinkProgram( program );
+    gl::AttachShader( program, vertshader );
+    gl::AttachShader( program, fragshader );
+    gl::LinkProgram( program );
 
     // Linking the shader is the easy part, all this junk down here is for printing the error it might generate.
-    int result = GL_FALSE;
+    int result = false;
     int logLength;
-    glGetProgramiv( program, GL_LINK_STATUS, &result);
-    glGetProgramiv( program, GL_INFO_LOG_LENGTH, &logLength);
-    if ( result == GL_FALSE ) {
+    gl::GetProgramiv( program, gl::LINK_STATUS, &result);
+    gl::GetProgramiv( program, gl::INFO_LOG_LENGTH, &logLength);
+    if ( result == false ) {
         char* errormsg = new char[ logLength ];
-        glGetProgramInfoLog( program, logLength, NULL, errormsg );
+        gl::GetProgramInfoLog( program, logLength, NULL, errormsg );
         error = errormsg;
         delete[] errormsg;
         return 1;
@@ -130,47 +130,47 @@ int slop::Shader::link( unsigned int vertshader, unsigned int fragshader, std::s
 }
 
 unsigned int slop::Shader::getUniformLocation( std::string name ) {
-    glUseProgram( program );
-    return glGetUniformLocation( program, name.c_str() );
+    gl::UseProgram( program );
+    return gl::GetUniformLocation( program, name.c_str() );
 }
 
 bool slop::Shader::hasParameter( std::string name ) {
-    glUseProgram( program );
-    return glGetUniformLocation( program, name.c_str() ) != -1;
+    gl::UseProgram( program );
+    return gl::GetUniformLocation( program, name.c_str() ) != -1;
 }
 
 void slop::Shader::setParameter( std::string name, int foo ) {
-    glUniform1i( getUniformLocation( name ), foo );
+    gl::Uniform1i( getUniformLocation( name ), foo );
 }
 
 void slop::Shader::setParameter( std::string name, float foo ) {
-    glUniform1f( getUniformLocation( name ), foo );
+    gl::Uniform1f( getUniformLocation( name ), foo );
 }
 
 void slop::Shader::setParameter( std::string name, glm::mat4& foo ) {
-    glUniformMatrix4fv( getUniformLocation( name ), 1, GL_FALSE, glm::value_ptr( foo ) );
+    gl::UniformMatrix4fv( getUniformLocation( name ), 1, false, glm::value_ptr( foo ) );
 }
 
 void slop::Shader::setParameter( std::string name, glm::vec4 foo ) {
-    glUniform4f( getUniformLocation( name ), foo.x, foo.y, foo.z, foo.w );
+    gl::Uniform4f( getUniformLocation( name ), foo.x, foo.y, foo.z, foo.w );
 }
 
 void slop::Shader::setParameter( std::string name, glm::vec2 foo ) {
-    glUniform2f( getUniformLocation( name ), foo.x, foo.y );
+    gl::Uniform2f( getUniformLocation( name ), foo.x, foo.y );
 }
 
 void slop::Shader::setAttribute( std::string name, unsigned int buffer, unsigned int stepsize ) {
-    unsigned int a = glGetAttribLocation( program, name.c_str() );
-    glEnableVertexAttribArray( a );
-    glBindBuffer( GL_ARRAY_BUFFER, buffer );
-    glVertexAttribPointer( a, stepsize, GL_FLOAT, GL_FALSE, 0, NULL );
+    unsigned int a = gl::GetAttribLocation( program, name.c_str() );
+    gl::EnableVertexAttribArray( a );
+    gl::BindBuffer( gl::ARRAY_BUFFER, buffer );
+    gl::VertexAttribPointer( a, stepsize, gl::FLOAT, false, 0, NULL );
     activeAttributes.push_back( a );
 }
 
 void slop::Shader::unbind() {
     for ( unsigned int i=0; i<activeAttributes.size(); i++ ) {
-        glDisableVertexAttribArray( activeAttributes[i] );
+        gl::DisableVertexAttribArray( activeAttributes[i] );
     }
     activeAttributes.clear();
-    glUseProgram( 0 );
+    gl::UseProgram( 0 );
 }

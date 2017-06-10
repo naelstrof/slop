@@ -21,19 +21,19 @@ endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_definitions(-DSLOP_VERSION="v6.3.44")
+add_definitions(-DSLOP_VERSION="v6.3.45")
 
 # The names have to be unique unfortunately.
 set(EXECUTABLE_NAME "slop")
 set(LIBRARY_NAME "slopy")
 
 add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
+                                    src/gl_core_3_0.cpp
                                     src/keyboard.cpp
                                     src/x.cpp
                                     src/slopstates.cpp
                                     src/framebuffer.cpp
                                     src/resource.cpp
-                                    src/gl_core_3_0.c
                                     src/shader.cpp
                                     src/window.cpp
                                     src/slop.cpp
@@ -72,7 +72,16 @@ target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES}
                                       ${XRENDER_LIBRARY}
                                       ${XEXT_LIBRARIES})
 
-target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME})
+target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME} )
+
+set( SLOP_UNICODE TRUE CACHE BOOL "To enable or disable unicode support, really should be left to TRUE since old nvidia drivers crash with it off." )
+if ( SLOP_UNICODE )
+    # ICU is required for old nvidia drivers to work for whatever reason.
+    find_package(ICU REQUIRED COMPONENTS uc)
+    add_definitions(-DCXXOPTS_USE_UNICODE)
+    include_directories( ${ICU_INCLUDE_DIR} )
+    target_link_libraries(${EXECUTABLE_NAME} ${ICU_UC_LIBRARIES} )
+endif()
 
 install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
 install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )

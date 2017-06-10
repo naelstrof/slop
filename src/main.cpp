@@ -24,8 +24,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "cxxopts.hpp"
 #include "slop.hpp"
+#include "cxxopts.hpp"
 
 using namespace slop;
 
