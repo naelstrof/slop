@@ -11,7 +11,6 @@ slop::SlopWindow::SlopWindow() {
                                    GLX_GREEN_SIZE, 1,
                                    GLX_BLUE_SIZE, 1,
                                    GLX_ALPHA_SIZE, 1,
-                                   GLX_DEPTH_SIZE, 1,
                                    None };
     int nelements;
     int render_event_base, render_error_base;
@@ -31,15 +30,21 @@ slop::SlopWindow::SlopWindow() {
         vi = glXGetVisualFromFBConfig(x11->display, fbc[i]);
         if (!vi) { continue; }
         pictFormat = XRenderFindVisualFormat(x11->display, vi->visual);
-        if (!pictFormat) { continue; }
+        if (!pictFormat) {
+          XFree( vi );
+          continue;
+        }
         if(pictFormat->direct.alphaMask > 0) {
             fbconfig = fbc[i];
             break;
+        } else { 
+          XFree( vi );
         }
     }
     if (i == nelements ) {
         throw new std::runtime_error( "No matching visuals available" );
     }
+    XFree( fbc );
 
     XSetWindowAttributes attributes;
     attributes.colormap = XCreateColormap(x11->display, RootWindow(x11->display, vi->screen), vi->visual, AllocNone);
@@ -56,6 +61,7 @@ slop::SlopWindow::SlopWindow() {
     window = XCreateWindow( x11->display, x11->root, 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ),
                             0, vi->depth, InputOutput,
                             vi->visual, valueMask, &attributes );
+    XFree( vi );
 
     if ( !window ) {
         throw new std::runtime_error( "Couldn't create a GL window!" );
@@ -120,6 +126,7 @@ slop::SlopWindow::~SlopWindow() {
     glXDestroyContext( x11->display, context );
     XUnmapWindow( x11->display, window );
     XDestroyWindow( x11->display, window );
+    glXMakeCurrent( x11->display, None, NULL );
 }
 
 void slop::SlopWindow::display() {
@@ -128,5 +135,5 @@ void slop::SlopWindow::display() {
 }
 
 void slop::SlopWindow::setCurrent() {
-    glXMakeCurrent( x11->display, window, context ) ;
+    glXMakeCurrent( x11->display, window, context );
 }

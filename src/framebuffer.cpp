@@ -61,7 +61,6 @@ slop::Framebuffer::~Framebuffer() {
     glDeleteTextures(1, &image);
     glDeleteFramebuffers(1,&fbuffer);
     glDeleteBuffers(2,buffers);
-    delete shader;
 }
 
 void slop::Framebuffer::resize( int w, int h ) {

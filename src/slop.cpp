@@ -294,6 +294,10 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
     glClear (GL_COLOR_BUFFER_BIT);
     window->display();
     // Then we clean up.
+    for( int i=0;i<shaders.size();i++ ) {
+      delete shaders[i];
+    }
+    delete pingpong;
     delete window;
     delete slop::mouse;
     Window selectedWindow = memory->selectedWindow;
