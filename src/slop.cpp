@@ -1,3 +1,6 @@
+#include "gl_core_3_0.hpp"
+#include <GL/gl.h>
+
 #include <chrono>
 #include <thread>
 
@@ -86,6 +89,10 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
         // If we have a compositor, we try using OpenGL
         try {
             window = new SlopWindow();
+	    if (!gl::sys::IsVersionGEQ(3,0)) {
+		delete window;
+                throw new std::runtime_error( "OpenGL version is not high enough, slop requires OpenGL 3.0!\nOpenGL accelleration is disabled. Use -o or -q to suppress this message." );
+	    }
             success = true;
         } catch( std::exception* e ) {
             errorstring += std::string(e->what()) + "\n";
