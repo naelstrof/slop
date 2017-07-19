@@ -1,4 +1,4 @@
-#include "gl_core_3_0.hpp"
+#include <GL/glew.h>
 #include <GL/gl.h>
 
 #include <chrono>
@@ -89,10 +89,10 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
         // If we have a compositor, we try using OpenGL
         try {
             window = new SlopWindow();
-	    if (!gl::sys::IsVersionGEQ(3,0)) {
-		delete window;
+            if (!GLEW_VERSION_3_0) {
+                delete window;
                 throw new std::runtime_error( "OpenGL version is not high enough, slop requires OpenGL 3.0!\nOpenGL accelleration is disabled. Use -o or -q to suppress this message." );
-	    }
+            }
             success = true;
         } catch( std::exception* e ) {
             errorstring += std::string(e->what()) + "\n";
@@ -224,8 +224,8 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         // Then we draw our junk to a framebuffer.
         window->framebuffer->setShader( textured );
         window->framebuffer->bind();
-        gl::ClearColor (0.0, 0.0, 0.0, 0.0);
-        gl::Clear (gl::COLOR_BUFFER_BIT);
+        glClearColor (0.0, 0.0, 0.0, 0.0);
+        glClear (GL_COLOR_BUFFER_BIT);
         memory->draw( window->camera );
         window->framebuffer->unbind();
 
@@ -233,32 +233,32 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         
         int i;
         // We have our clean buffer, now to slather it with some juicy shader chains.
-        gl::Enable( gl::BLEND );
-        gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+        glEnable( GL_BLEND );
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         for (i=0;i<=(int)shaders.size()-2;i+=2) {
             pingpong->bind();
-            gl::ClearColor (0.0, 0.0, 0.0, 0.0);
-            gl::Clear (gl::COLOR_BUFFER_BIT);
+            glClearColor (0.0, 0.0, 0.0, 0.0);
+            glClear (GL_COLOR_BUFFER_BIT);
             window->framebuffer->setShader( shaders[i] );
             window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
             pingpong->unbind();
 
             window->framebuffer->bind();
-            gl::ClearColor (0.0, 0.0, 0.0, 0.0);
-            gl::Clear (gl::COLOR_BUFFER_BIT);
+            glClearColor (0.0, 0.0, 0.0, 0.0);
+            glClear (GL_COLOR_BUFFER_BIT);
             pingpong->setShader( shaders[i+1] );
             pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
             window->framebuffer->unbind();
         }
         for (;i<shaders.size();i++) {
             pingpong->bind();
-            gl::ClearColor (0.0, 0.0, 0.0, 0.0);
-            gl::Clear (gl::COLOR_BUFFER_BIT);
+            glClearColor (0.0, 0.0, 0.0, 0.0);
+            glClear (GL_COLOR_BUFFER_BIT);
             window->framebuffer->setShader( shaders[i] );
             window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
             pingpong->unbind();
         }
-        gl::Disable( gl::BLEND );
+        glDisable( GL_BLEND );
         if ( i%2 != 0 ) {
             window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
         } else {
@@ -268,15 +268,15 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         window->display();
         // Here we sleep just to prevent our CPU usage from going to 100%.
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        GLenum err = gl::GetError();
-        if ( err != gl::NO_ERROR_ ) {
+        GLenum err = glGetError();
+        if ( err != GL_NO_ERROR ) {
             std::string error;
             switch(err) {
-		case gl::INVALID_OPERATION: error="INVALID_OPERATION"; break;
-		case gl::INVALID_ENUM: error="INVALID_ENUM"; break;
-		case gl::INVALID_VALUE: error="INVALID_VALUE"; break;
-		case gl::OUT_OF_MEMORY: error="OUT_OF_MEMORY"; break;
-		case gl::INVALID_FRAMEBUFFER_OPERATION: error="INVALID_FRAMEBUFFER_OPERATION"; break;
+                case GL_INVALID_OPERATION: error="INVALID_OPERATION"; break;
+                case GL_INVALID_ENUM: error="INVALID_ENUM"; break;
+                case GL_INVALID_VALUE: error="INVALID_VALUE"; break;
+                case GL_OUT_OF_MEMORY: error="OUT_OF_MEMORY"; break;
+                case GL_INVALID_FRAMEBUFFER_OPERATION: error="INVALID_FRAMEBUFFER_OPERATION"; break;
             }
             throw new std::runtime_error( "OpenGL threw an error: " + error );
         }
@@ -295,10 +295,10 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
 
     // Lets now clear both front and back buffers before closing.
     // hopefully it'll be completely transparent while closing!
-    gl::ClearColor (0.0, 0.0, 0.0, 0.0);
-    gl::Clear (gl::COLOR_BUFFER_BIT);
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glClear (GL_COLOR_BUFFER_BIT);
     window->display();
-    gl::Clear (gl::COLOR_BUFFER_BIT);
+    glClear (GL_COLOR_BUFFER_BIT);
     window->display();
     // Then we clean up.
     for( int i=0;i<shaders.size();i++ ) {

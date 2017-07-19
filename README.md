@@ -55,7 +55,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 
 ### Install using CMake (Requires CMake)
 
-*Note: Dependencies should be installed first: libxext, OpenGL, and glm.*
+*Note: Dependencies should be installed first: libxext, glew, and glm.*
 
 ```bash
 git clone https://github.com/naelstrof/slop.git

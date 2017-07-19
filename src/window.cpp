@@ -101,14 +101,14 @@ slop::SlopWindow::SlopWindow() {
     }
     setCurrent();
     // Finally we grab some OpenGL 3.3 stuffs.
-    gl::exts::LoadTest didLoad = gl::sys::LoadFunctions();
-    if(!didLoad)
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
     {
-        throw new std::runtime_error("Failed to load function pointers for OpenGL.");
+      throw new std::runtime_error((char*)glewGetErrorString(err));
     }
     framebuffer = new Framebuffer( WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
 
-    gl::Viewport( 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
+    glViewport( 0, 0, WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
     camera = glm::ortho( 0.0f, (float)WidthOfScreen( x11->screen ), (float)HeightOfScreen( x11->screen ), 0.0f, -1.0f, 1.0f);
 
     // Last, we actually display the window <:o)
@@ -118,11 +118,11 @@ slop::SlopWindow::SlopWindow() {
 slop::SlopWindow::~SlopWindow() {
     delete framebuffer;
     // Try to erase the window before destroying it.
-    gl::ClearColor( 0, 0, 0, 0 );
-    gl::Clear( gl::COLOR_BUFFER_BIT );
+    glClearColor( 0, 0, 0, 0 );
+    glClear( GL_COLOR_BUFFER_BIT );
     display();
-    gl::ClearColor( 0, 0, 0, 0 );
-    gl::Clear( gl::COLOR_BUFFER_BIT );
+    glClearColor( 0, 0, 0, 0 );
+    glClear( GL_COLOR_BUFFER_BIT );
     display();
     glXDestroyContext( x11->display, context );
     XUnmapWindow( x11->display, window );

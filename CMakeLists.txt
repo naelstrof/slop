@@ -21,14 +21,13 @@ endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_definitions(-DSLOP_VERSION="v6.3.46")
+add_definitions(-DSLOP_VERSION="v6.3.47")
 
 # The names have to be unique unfortunately.
 set(EXECUTABLE_NAME "slop")
 set(LIBRARY_NAME "slopy")
 
 add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
-                                    src/gl_core_3_0.cpp
                                     src/keyboard.cpp
                                     src/x.cpp
                                     src/slopstates.cpp
@@ -51,14 +50,18 @@ set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD 11)
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules" )
 
+find_package(GLEW REQUIRED)
 find_package(GLM REQUIRED)
 find_package(X11 REQUIRED)
 find_package(XExt REQUIRED)
 find_package(GLX REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(XRender REQUIRED)
+# Ahhhh, finally this eliminates the segfault on preload.
+find_package(Threads REQUIRED)
 
 include_directories(${X11_INCLUDE_DIR}
+                    ${GLEW_INCLUDE_DIR}
                     ${GLM_INCLUDE_DIR}
                     ${XEXT_INCLUDE_DIR}
                     ${GLX_INCLUDE_DIR}
@@ -66,11 +69,13 @@ include_directories(${X11_INCLUDE_DIR}
                     ${OPENGL_INCLUDE_DIR})
 
 target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES}
+				      ${CMAKE_THREAD_LIBS_INIT} 
                                       ${GLM_LIBRARIES}
                                       ${OPENGL_LIBRARIES}
                                       ${GLX_LIBRARY}
                                       ${XRENDER_LIBRARY}
-                                      ${XEXT_LIBRARIES})
+                                      ${XEXT_LIBRARIES}
+                                      ${GLEW_LIBRARIES})
 
 target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME} )
 

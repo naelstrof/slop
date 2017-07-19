@@ -188,21 +188,21 @@ void slop::GLRectangle::generateBuffers() {
     center_verts.push_back( br );
     center_uvs.push_back( glm::vec2(1, 0) );
 
-    gl::GenBuffers( 6, (GLuint*)&buffer );
-    gl::BindBuffer( gl::ARRAY_BUFFER, buffer.corner_verts );
-    gl::BufferData( gl::ARRAY_BUFFER, corner_verts.size() * sizeof( glm::vec2 ), &corner_verts[0], gl::STATIC_DRAW );
-    gl::BindBuffer( gl::ARRAY_BUFFER, buffer.corner_uvs );
-    gl::BufferData( gl::ARRAY_BUFFER, corner_uvs.size() * sizeof( glm::vec2 ), &corner_uvs[0], gl::STATIC_DRAW );
+    glGenBuffers( 6, (GLuint*)&buffer );
+    glBindBuffer( GL_ARRAY_BUFFER, buffer.corner_verts );
+    glBufferData( GL_ARRAY_BUFFER, corner_verts.size() * sizeof( glm::vec2 ), &corner_verts[0], GL_STATIC_DRAW );
+    glBindBuffer( GL_ARRAY_BUFFER, buffer.corner_uvs );
+    glBufferData( GL_ARRAY_BUFFER, corner_uvs.size() * sizeof( glm::vec2 ), &corner_uvs[0], GL_STATIC_DRAW );
 
-    gl::BindBuffer( gl::ARRAY_BUFFER, buffer.rectangle_verts );
-    gl::BufferData( gl::ARRAY_BUFFER, rectangle_verts.size() * sizeof( glm::vec2 ), &rectangle_verts[0], gl::STATIC_DRAW );
-    gl::BindBuffer( gl::ARRAY_BUFFER, buffer.rectangle_uvs );
-    gl::BufferData( gl::ARRAY_BUFFER, rectangle_uvs.size() * sizeof( glm::vec2 ), &rectangle_uvs[0], gl::STATIC_DRAW );
+    glBindBuffer( GL_ARRAY_BUFFER, buffer.rectangle_verts );
+    glBufferData( GL_ARRAY_BUFFER, rectangle_verts.size() * sizeof( glm::vec2 ), &rectangle_verts[0], GL_STATIC_DRAW );
+    glBindBuffer( GL_ARRAY_BUFFER, buffer.rectangle_uvs );
+    glBufferData( GL_ARRAY_BUFFER, rectangle_uvs.size() * sizeof( glm::vec2 ), &rectangle_uvs[0], GL_STATIC_DRAW );
 
-    gl::BindBuffer( gl::ARRAY_BUFFER, buffer.center_verts );
-    gl::BufferData( gl::ARRAY_BUFFER, center_verts.size() * sizeof( glm::vec2 ), &center_verts[0], gl::STATIC_DRAW );
-    gl::BindBuffer( gl::ARRAY_BUFFER, buffer.rectangle_uvs );
-    gl::BufferData( gl::ARRAY_BUFFER, center_uvs.size() * sizeof( glm::vec2 ), &center_uvs[0], gl::STATIC_DRAW );
+    glBindBuffer( GL_ARRAY_BUFFER, buffer.center_verts );
+    glBufferData( GL_ARRAY_BUFFER, center_verts.size() * sizeof( glm::vec2 ), &center_verts[0], GL_STATIC_DRAW );
+    glBindBuffer( GL_ARRAY_BUFFER, buffer.rectangle_uvs );
+    glBufferData( GL_ARRAY_BUFFER, center_uvs.size() * sizeof( glm::vec2 ), &center_uvs[0], GL_STATIC_DRAW );
     corner_vertCount = corner_verts.size();
     rectangle_vertCount = rectangle_verts.size();
     center_vertCount = center_verts.size();
@@ -210,35 +210,35 @@ void slop::GLRectangle::generateBuffers() {
 
 slop::GLRectangle::~GLRectangle() {
     delete shader;
-    gl::DeleteBuffers( 6, (GLuint*)&buffer );
+    glDeleteBuffers( 6, (GLuint*)&buffer );
 }
 
 void slop::GLRectangle::draw( glm::mat4& matrix ) {
-    gl::Enable( gl::BLEND );
-    gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+    glEnable( GL_BLEND );
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     shader->bind();
     shader->setParameter( "projection", matrix );
     if ( highlight ) {
         // Draw the center of the highlight
         shader->setParameter( "color", color );
         shader->setAttribute( "position", buffer.center_verts, 2 );
-        gl::DrawArrays(gl::TRIANGLES, 0, center_vertCount );
+        glDrawArrays(GL_TRIANGLES, 0, center_vertCount );
         // Set the color to have no alpha, then draw the borders.
         glm::vec4 fullAlpha = glm::vec4(color.r,color.g,color.b,1);
         shader->setParameter( "color", fullAlpha );
         shader->setAttribute( "position", buffer.corner_verts, 2 );
-        gl::DrawArrays(gl::TRIANGLES, 0, corner_vertCount );
+        glDrawArrays(GL_TRIANGLES, 0, corner_vertCount );
         shader->setAttribute( "position", buffer.rectangle_verts, 2 );
-        gl::DrawArrays(gl::TRIANGLES, 0, rectangle_vertCount );
+        glDrawArrays(GL_TRIANGLES, 0, rectangle_vertCount );
     } else {
         shader->setParameter( "color", color );
         shader->setAttribute( "position", buffer.corner_verts, 2 );
-        gl::DrawArrays(gl::TRIANGLES, 0, corner_vertCount );
+        glDrawArrays(GL_TRIANGLES, 0, corner_vertCount );
         shader->setAttribute( "position", buffer.rectangle_verts, 2 );
-        gl::DrawArrays(gl::TRIANGLES, 0, rectangle_vertCount );
+        glDrawArrays(GL_TRIANGLES, 0, rectangle_vertCount );
     }
     shader->unbind();
-    gl::Disable( gl::BLEND );
+    glDisable( GL_BLEND );
 }
 
 glm::vec4 slop::GLRectangle::getRect() {

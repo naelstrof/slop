@@ -21,10 +21,10 @@
 #ifndef N_GLRECTANGLE_H_
 #define N_GLRECTANGLE_H_
 
-#include "gl_core_3_0.hpp"
 #include <iostream>
-#include <glm/glm.hpp>
+#include <GL/glew.h>
 #include <GL/gl.h>
+#include <glm/glm.hpp>
 #include <vector>
 
 #include "shader.hpp"

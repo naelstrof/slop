@@ -21,10 +21,10 @@
 #ifndef N_FRAMEBUFFER_H_
 #define N_FRAMEBUFFER_H_
 
-#include "gl_core_3_0.hpp"
-#include <glm/glm.hpp>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <vector>
+#include <glm/glm.hpp>
 
 #include "shader.hpp"
 

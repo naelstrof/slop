@@ -25,7 +25,7 @@
 #include <exception>
 
 #include <iostream>
-#include "gl_core_3_0.hpp"
+#include <GL/glew.h>
 #include <GL/gl.h>
 #define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
