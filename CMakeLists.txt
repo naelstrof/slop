@@ -69,7 +69,7 @@ include_directories(${X11_INCLUDE_DIR}
                     ${OPENGL_INCLUDE_DIR})
 
 target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES}
-				      ${CMAKE_THREAD_LIBS_INIT} 
+                                      ${CMAKE_THREAD_LIBS_INIT} 
                                       ${GLM_LIBRARIES}
                                       ${OPENGL_LIBRARIES}
                                       ${GLX_LIBRARY}

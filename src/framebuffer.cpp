@@ -105,7 +105,7 @@ void slop::Framebuffer::draw(glm::vec2 mouse, float time, glm::vec4 color){
     glActiveTexture(GL_TEXTURE0);
     glBindTexture( GL_TEXTURE_2D, image );
     if ( shader->hasParameter( "desktop" ) ) {
-		shader->setParameter( "desktop", 1 );
+        shader->setParameter( "desktop", 1 );
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture( GL_TEXTURE_2D, desktopImage );
     }

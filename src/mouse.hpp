@@ -40,8 +40,8 @@ private:
     int nodecorations;
     Window ignoreWindow;
 public:
-	Window hoverWindow;
-	void update();
+    Window hoverWindow;
+    void update();
     Mouse( X11* x11, int nodecorations, Window ignoreWindow );
     ~Mouse();
     void setCursor( int cursor );

@@ -55,7 +55,7 @@ void slop::XShapeRectangle::createWindow() {
     if ( createdWindow ) {
         return;
     }
-	XMapWindow( x11->display, window );
+    XMapWindow( x11->display, window );
     createdWindow = true;
 }
 

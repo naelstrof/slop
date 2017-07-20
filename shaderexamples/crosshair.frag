@@ -34,7 +34,7 @@ void main()
             vec2 upsideDown = c/magnifyNerf*t*t+b;
 
             vec4 textureColor = texture2D( texture, upsideDown );
-            color = texture2D( desktop, vec2(upsideDown.x, -upsideDown.y) )*(1-textureColor.a) + textureColor;
+            color = mix( texture2D( desktop, vec2(upsideDown.x, -upsideDown.y) ), textureColor, textureColor.a );
         }
     } else if ( dr < circleSize+borderSize ) {
         color = borderColor;

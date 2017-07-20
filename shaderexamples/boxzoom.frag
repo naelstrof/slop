@@ -43,7 +43,8 @@ void main()
         // The desktop texture is upside-down due to X11
         vec2 zoomedUVFlipped = vec2( zoomedUV.x, -zoomedUV.y );
         // Then change the color to the desktop color to draw, then add on our rectangle on top.
-        color = texture2D( desktop, zoomedUVFlipped ) + texture2D( texture, zoomedUV );
+        vec4 rectColor = texture2D( texture, zoomedUV );
+        color = mix( texture2D( desktop, zoomedUVFlipped ), rectColor, rectColor.a );
       }
     // Then check if we're in our border size.
     } else if( uvCoord.x <= mpos.x+boxOffset.x+boxSize.x+borderSize.x &&

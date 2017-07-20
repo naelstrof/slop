@@ -66,27 +66,27 @@ slop::Mouse::Mouse(X11* x11, int nodecorations, Window ignoreWindow ) {
 }
 
 slop::Mouse::~Mouse() {
-	XUngrabPointer( x11->display, CurrentTime );
+    XUngrabPointer( x11->display, CurrentTime );
 }
 
 void slop::Mouse::update() {
     XEvent event;
     while ( XCheckTypedEvent( x11->display, ButtonPress, &event ) ) {
 		setButton( event.xbutton.button, 1 );
-	}
+    }
     bool findNewWindow = false;
     while ( XCheckTypedEvent( x11->display, MotionNotify, &event ) ) {
         findNewWindow = true;
-	}
+    }
     if ( findNewWindow ) {
         hoverWindow = findWindow(x11->root);
     }
     while ( XCheckTypedEvent( x11->display, ButtonRelease, &event ) ) {
 		setButton( event.xbutton.button, 0 );
-	}
+    }
     while ( XCheckTypedEvent( x11->display, EnterNotify, &event ) ) {
         hoverWindow = event.xcrossing.window;
-	}
+    }
 }
 
 Window slop::Mouse::findWindow( Window foo ) {
