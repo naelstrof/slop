@@ -60,6 +60,7 @@ glm::vec4 slop::getWindowGeometry( Window win, bool removeDecoration ) {
         height += ldata[2] + ldata[3];
         x -= ldata[0];
         y -= ldata[2];
+        XFree( data );
         return glm::vec4( x, y, width, height );
     } else {
         // Either the WM is malfunctioning, or the window specified isn't a window manager frame.

@@ -79,10 +79,10 @@ target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES}
 
 target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME} )
 
-set( SLOP_UNICODE TRUE CACHE BOOL "To enable or disable unicode support, really should be left to TRUE since old nvidia drivers crash with it off." )
-if ( SLOP_UNICODE )
+find_package(ICU COMPONENTS uc)
+set( SLOP_UNICODE TRUE CACHE BOOL "To enable or disable unicode support." )
+if ( SLOP_UNICODE AND ICU_FOUND )
     # ICU is required for old nvidia drivers to work for whatever reason.
-    find_package(ICU REQUIRED COMPONENTS uc)
     add_definitions(-DCXXOPTS_USE_UNICODE)
     include_directories( ${ICU_INCLUDE_DIR} )
     target_link_libraries(${EXECUTABLE_NAME} ${ICU_UC_LIBRARIES} )
