@@ -342,3 +342,57 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
     // Finally return the data.
     return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow, cancelled );
 }
+
+extern "C" struct slop_options slop_options_default() {
+    struct slop_options options;
+    options.border = 1;
+    options.nokeyboard = false;
+    options.noopengl = false;
+    options.nodecorations = false;
+    options.tolerance = 2;
+    options.padding = 0;
+    options.shaders = slop_default_shaders;
+    options.highlight = false;
+    options.r = 0.5;
+    options.g = 0.5;
+    options.b = 0.5;
+    options.a = 1;
+    options.quiet = false;
+
+    char* envdisplay = getenv("DISPLAY");
+    if (envdisplay == NULL) {
+        options.xdisplay = slop_default_xdisplay;
+    } else {
+        options.xdisplay = envdisplay;
+    }
+    return options;
+}
+
+extern "C" struct slop_selection slop_select( struct slop_options* options ) {
+    slop::SlopOptions realOptions = slop::SlopOptions();
+    if ( options != NULL ) {
+        realOptions.border = options->border;
+        realOptions.nokeyboard = options->nokeyboard;
+        realOptions.noopengl = options->noopengl;
+        realOptions.nodecorations = options->nodecorations;
+        realOptions.tolerance = options->tolerance;
+        realOptions.padding = options->padding;
+        realOptions.shaders = options->shaders;
+        realOptions.highlight = options->highlight;
+        realOptions.r = options->r;
+        realOptions.g = options->g;
+        realOptions.b = options->b;
+        realOptions.a = options->a;
+        realOptions.quiet = options->quiet;
+        realOptions.xdisplay = options->xdisplay;
+    }
+    slop::SlopSelection select = SlopSelect( &realOptions );
+    slop_selection realSelect;
+    realSelect.x = select.x;
+    realSelect.y = select.y;
+    realSelect.w = select.w;
+    realSelect.h = select.h;
+    realSelect.id = select.id;
+    realSelect.cancelled = select.cancelled;
+    return realSelect;
+}

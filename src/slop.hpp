@@ -1,4 +1,4 @@
-/* glslop.hpp: exposes an opengl selection interface
+/* slop.hpp: exposes a selection interface
  *
  * Copyright (C) 2014: Dalton Nell, Slop Contributors (https://github.com/naelstrof/slop/graphs/contributors).
  *
@@ -21,6 +21,39 @@
 #ifndef N_SLOP_H_
 #define N_SLOP_H_
 
+// Here we make some C-styled structs and function definitions, 
+// allows other people to have a pure C interface to slop.
+
+struct slop_options {
+    //SlopOptions();
+    int quiet;
+    float border;
+    float padding;
+    float tolerance;
+    int highlight;
+    int noopengl;
+    int nokeyboard;
+    int nodecorations;
+    char* shaders;
+    float r;
+    float g;
+    float b;
+    float a;
+    char* xdisplay;
+};
+
+struct slop_selection {
+    //SlopSelection( float x, float y, float w, float h, int id, bool cancelled );
+    int cancelled;
+    float x;
+    float y;
+    float w;
+    float h;
+// This is an X11 Window ID
+    int id;
+};
+
+#ifdef __cplusplus
 namespace slop {
 
 class SlopOptions {
@@ -33,7 +66,7 @@ public:
     bool highlight;
     bool noopengl;
     bool nokeyboard;
-    int nodecorations;
+    bool nodecorations;
     char* shaders;
     float r;
     float g;
@@ -57,5 +90,15 @@ public:
 SlopSelection SlopSelect( SlopOptions* options = NULL );
 
 }
+
+extern "C" struct slop_options slop_options_default();
+extern "C" struct slop_selection slop_select( struct slop_options* options );
+
+#else // __cplusplus
+
+struct slop_options slop_options_default();
+struct slop_selection slop_select( struct slop_options* options );
+
+#endif
 
 #endif // N_SLOP_H_
