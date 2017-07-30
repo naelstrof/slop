@@ -3,6 +3,8 @@
 
 #include <chrono>
 #include <thread>
+#include <string>
+#include <vector>
 
 #include <stdlib.h>
 
@@ -25,8 +27,8 @@ Mouse* mouse;
 Keyboard* keyboard;
 Resource* resource;
 
-SlopSelection GLSlopSelect( slop::SlopOptions* options, bool* cancelled, slop::SlopWindow* window );
-SlopSelection XShapeSlopSelect( slop::SlopOptions* options, bool* cancelled);
+SlopSelection GLSlopSelect( slop::SlopOptions* options, slop::SlopWindow* window );
+SlopSelection XShapeSlopSelect( slop::SlopOptions* options );
 
 static int TmpXError(Display * d, XErrorEvent * ev) {
     return 0;
@@ -34,40 +36,63 @@ static int TmpXError(Display * d, XErrorEvent * ev) {
 
 }
 
+template<typename Out>
+static void split(const std::string &s, char delim, Out result) {
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        *(result++) = item;
+    }
+}
+
+static std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+
 using namespace slop;
+
+char slop_default_xdisplay[] = ":0";
+char slop_default_shaders[] = "textured";
 
 // Defaults!
 slop::SlopOptions::SlopOptions() {
-    borderSize = 1;
+    border = 1;
     nokeyboard = false;
     noopengl = false;
     nodecorations = false;
     tolerance = 2;
     padding = 0;
-    shaders.push_back("textured");
+    shaders = slop_default_shaders;
     highlight = false;
     r = 0.5;
     g = 0.5;
     b = 0.5;
     a = 1;
+    quiet = false;
 
-    char * envdisplay = getenv("DISPLAY");
-    if (envdisplay == NULL)
-        xdisplay = ":0";
-    else
+    char* envdisplay = getenv("DISPLAY");
+    if (envdisplay == NULL) {
+        xdisplay = slop_default_xdisplay;
+    } else {
         xdisplay = envdisplay;
+    }
 }
 
-slop::SlopSelection::SlopSelection( float x, float y, float w, float h, int id ) {
+slop::SlopSelection::SlopSelection( float x, float y, float w, float h, int id, bool cancelled ) {
     this->x = x;
     this->y = y;
     this->w = w;
     this->h = h;
     this->id = id;
+    this->cancelled = cancelled;
 }
 
-slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelled, bool quiet) {
-    slop::SlopSelection returnval(0,0,0,0,0);
+slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options ) {
+    slop::SlopSelection returnval(0,0,0,0,0,true);
     bool deleteOptions = false;
     if ( !options ) {
         deleteOptions = true;
@@ -105,7 +130,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
     }
     if ( !success ) {
         // If we fail, we launch the XShape version of slop.
-        if ( !quiet && !options->noopengl ) {
+        if ( !options->quiet && !options->noopengl ) {
             if ( errorstring.length() <= 0 ) {
                 errorstring += "Failed to launch OpenGL context, --shader parameter will be ignored.\n";
                 std::cerr << errorstring;
@@ -113,9 +138,9 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
                 std::cerr << errorstring;
             }
         }
-        returnval = slop::XShapeSlopSelect( options, cancelled );
+        returnval = slop::XShapeSlopSelect( options );
     } else {
-        returnval = slop::GLSlopSelect( options, cancelled, window );
+        returnval = slop::GLSlopSelect( options, window );
     }
     delete x11;
     delete slop::resource;
@@ -125,9 +150,10 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options, bool* cancelle
     return returnval;
 }
 
-slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* cancelled ) {
+slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options ) {
     // Init our little state machine, memory is a tad of a misnomer
-    slop::SlopMemory* memory = new slop::SlopMemory( options, new XShapeRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
+    bool cancelled = false;
+    slop::SlopMemory* memory = new slop::SlopMemory( options, new XShapeRectangle(glm::vec2(0,0), glm::vec2(0,0), options->border, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
     slop::mouse = new slop::Mouse( x11, options->nodecorations, ((XShapeRectangle*)memory->rectangle)->window );
 
     // We have no GL context, so the matrix is useless...
@@ -156,11 +182,7 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
         // Then we draw the framebuffer to the screen
         if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
             memory->running = false;
-            if ( cancelled ) {
-                *cancelled = true;
-            }
-        } else {
-            *cancelled = false;
+            cancelled = true;
         }
     }
 
@@ -184,18 +206,20 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options, bool* ca
         tries++;
     }
     // Finally return the data.
-    return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow );
+    return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow, cancelled );
 }
 
-slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancelled, SlopWindow* window ) {
+slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* window ) {
+    bool cancelled = false;
     slop::mouse = new slop::Mouse( x11, options->nodecorations, window->window );
 
     std::string vert = "#version 120\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 uvCoord;\nvoid main()\n{\nuvCoord = uv;\ngl_Position = vec4(position,0,1);\n}\n";
     std::string frag = "#version 120\nuniform sampler2D texture;\nvarying vec2 uvCoord;\nvoid main()\n {\ngl_FragColor = texture2D( texture, uvCoord );\n}\n";
     slop::Shader* textured = new slop::Shader( vert, frag, false );
     std::vector<slop::Shader*> shaders;
-    for( int i=0;i<options->shaders.size();i++ ) {
-        std::string sn = options->shaders[i];
+    std::vector<std::string> stringShaders = split( options->shaders, ',' );
+    for( int i=0;i<stringShaders.size();i++ ) {
+        std::string sn = stringShaders[i];
         if ( sn != "textured" ) {
             shaders.push_back( new slop::Shader( sn + ".vert", sn + ".frag" ) );
         } else {
@@ -203,7 +227,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         }
     }
     // Init our little state machine, memory is a tad of a misnomer
-    slop::SlopMemory* memory = new slop::SlopMemory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->borderSize, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
+    slop::SlopMemory* memory = new slop::SlopMemory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->border, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
 
     slop::Framebuffer* pingpong = new slop::Framebuffer(WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
 
@@ -282,11 +306,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         }
         if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
             memory->running = false;
-            if ( cancelled ) {
-                *cancelled = true;
-            }
-        } else {
-            *cancelled = false;
+            cancelled = true;
         }
     }
 
@@ -320,5 +340,5 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, bool* cancel
         tries++;
     }
     // Finally return the data.
-    return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow );
+    return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow, cancelled );
 }

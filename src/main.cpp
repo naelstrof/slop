@@ -29,22 +29,6 @@
 
 using namespace slop;
 
-template<typename Out>
-static void split(const std::string &s, char delim, Out result) {
-    std::stringstream ss;
-    ss.str(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        *(result++) = item;
-    }
-}
-
-static std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, std::back_inserter(elems));
-    return elems;
-}
-
 glm::vec4 parseColor( std::string value ) {
     std::string valuecopy = value;
     glm::vec4 found;
@@ -73,7 +57,7 @@ glm::vec4 parseColor( std::string value ) {
 SlopOptions* getOptions( cxxopts::Options& options ) {
     slop::SlopOptions* foo = new slop::SlopOptions();
     if ( options.count( "bordersize" ) > 0 ) {
-        foo->borderSize = options["bordersize"].as<float>();
+        foo->border = options["bordersize"].as<float>();
     }
     if ( options.count( "padding" ) > 0 ) {
         foo->padding = options["padding"].as<float>();
@@ -93,18 +77,27 @@ SlopOptions* getOptions( cxxopts::Options& options ) {
         foo->nokeyboard = options["nokeyboard"].as<bool>();
     }
     if ( options.count( "xdisplay" ) > 0 ) {
-        foo->xdisplay = options["xdisplay"].as<std::string>();
+        std::string xdisplay = options["xdisplay"].as<std::string>();
+        char* cxdisplay = new char[xdisplay.length()+1];
+        memcpy( cxdisplay, xdisplay.c_str(), xdisplay.length() );
+        cxdisplay[xdisplay.length()]='\0';
+        foo->xdisplay = cxdisplay;
     }
-    std::string shaders = "textured";
     if ( options.count( "shader" ) > 0 ) {
-        shaders = options["shader"].as<std::string>();
+        std::string shaders = options["shader"].as<std::string>();
+        char* cshaders = new char[shaders.length()+1];
+        memcpy( cshaders, shaders.c_str(), shaders.length() );
+        cshaders[shaders.length()]='\0';
+        foo->shaders = cshaders;
     }
-    foo->shaders = split( shaders, ',' );
     if ( options.count( "noopengl" ) > 0 ) {
         foo->noopengl = options["noopengl"].as<bool>();
     }
     if ( options.count( "highlight" ) > 0 ) {
         foo->highlight = options["highlight"].as<bool>();
+    }
+    if ( options.count( "quiet" ) > 0 ) {
+        foo->quiet = options["quiet"].as<bool>();
     }
     if ( options.count( "nodecorations" ) > 0 ) {
         foo->nodecorations = options["nodecorations"].as<int>();
@@ -115,7 +108,7 @@ SlopOptions* getOptions( cxxopts::Options& options ) {
     return foo;
 }
 
-std::string formatOutput( std::string input, SlopSelection selection, bool cancelled ) {
+std::string formatOutput( std::string input, SlopSelection selection ) {
     std::stringstream output;
     for( unsigned int i=0;i<input.length();i++) {
         if ( input[i] == '%' ) {
@@ -130,7 +123,7 @@ std::string formatOutput( std::string input, SlopSelection selection, bool cance
                 case 'w':
                 case 'W': output << round(selection.w); break;
                 case 'c':
-                case 'C': output << cancelled; break;
+                case 'C': output << selection.cancelled; break;
                 case 'h':
                 case 'H': output << round(selection.h); break;
                 case 'g':
@@ -247,10 +240,6 @@ int app( int argc, char** argv ) {
     options.parse_positional("positional");
     options.parse(argc, argv);
     // Options just validates all of our input from argv
-    bool quiet = false;
-    if ( options.count( "quiet" ) > 0 ) {
-        quiet = options["quiet"].as<bool>();
-    }
     auto& positional = options["positional"].as<std::vector<std::string>>();
     if ( positional.size() > 0 ) {
         throw new std::invalid_argument("Unexpected positional argument: " + positional[0]);
@@ -276,33 +265,32 @@ int app( int argc, char** argv ) {
 
     // We want to validate our format option if we got one, we do that by just doing a dry run
     // on a fake selection.
-    SlopSelection selection(0,0,0,0,0);
+    SlopSelection selection(0,0,0,0,0,true);
     std::string format;
     bool gotFormat = options.count( "format" ) > 0;
     if ( gotFormat ) {
         format = options["format"].as<std::string>();
-        formatOutput( format, selection, false );
+        formatOutput( format, selection );
     }
 
     // Finally we do the real selection.
-    bool cancelled = false;
-    selection = SlopSelect(parsedOptions, &cancelled, quiet);
+    selection = SlopSelect(parsedOptions);
     
     // Here we're done with the parsed option data.
     delete parsedOptions;
     // We know if we cancelled or not
-    if ( cancelled ) {
-        if ( !quiet ) {
+    if ( selection.cancelled ) {
+        if ( !parsedOptions->quiet ) {
             std::cerr << "Selection was cancelled by keystroke or right-click.\n";
         }
         return 1;
     }
     // If we recieved a format option, we output the specified output.
     if ( gotFormat ) {
-        std::cout << formatOutput( format, selection, cancelled );
+        std::cout << formatOutput( format, selection );
         return 0;
     }
-    std::cout << formatOutput( "%g\n", selection, cancelled );
+    std::cout << formatOutput( "%g\n", selection );
     return 0;
 }
 

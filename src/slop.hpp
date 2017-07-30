@@ -21,32 +21,31 @@
 #ifndef N_SLOP_H_
 #define N_SLOP_H_
 
-#include <string>
-#include <vector>
-
 namespace slop {
 
 class SlopOptions {
 public:
     SlopOptions();
-    float borderSize;
+    bool quiet;
+    float border;
     float padding;
     float tolerance;
     bool highlight;
     bool noopengl;
     bool nokeyboard;
     int nodecorations;
-    std::vector<std::string> shaders;
+    char* shaders;
     float r;
     float g;
     float b;
     float a;
-    std::string xdisplay;
+    char* xdisplay;
 };
 
 class SlopSelection {
 public:
-    SlopSelection( float x, float y, float w, float h, int id );
+    SlopSelection( float x, float y, float w, float h, int id, bool cancelled );
+    bool cancelled;
     float x;
     float y;
     float w;
@@ -55,7 +54,7 @@ public:
     int id;
 };
 
-SlopSelection SlopSelect( SlopOptions* options = NULL, bool* cancelled = NULL, bool quiet = false );
+SlopSelection SlopSelect( SlopOptions* options = NULL );
 
 }
 
