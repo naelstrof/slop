@@ -1,5 +1,7 @@
+#ifdef SLOP_OPENGL
 #include <GL/glew.h>
 #include <GL/gl.h>
+#endif
 
 #include <chrono>
 #include <thread>
@@ -13,10 +15,13 @@
 #include "resource.hpp"
 #include "keyboard.hpp"
 
+#ifdef SLOP_OPENGL
 #include "window.hpp"
 #include "shader.hpp"
 #include "framebuffer.hpp"
 #include "glrectangle.hpp"
+#endif
+
 #include "xshaperectangle.hpp"
 #include "slop.hpp"
 
@@ -27,7 +32,9 @@ Mouse* mouse;
 Keyboard* keyboard;
 Resource* resource;
 
+#ifdef SLOP_OPENGL
 SlopSelection GLSlopSelect( slop::SlopOptions* options, slop::SlopWindow* window );
+#endif
 SlopSelection XShapeSlopSelect( slop::SlopOptions* options );
 
 static int TmpXError(Display * d, XErrorEvent * ev) {
@@ -106,6 +113,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options ) {
         keyboard = new Keyboard( x11 );
         XSetErrorHandler(ph);
     }
+#ifdef SLOP_OPENGL
     bool success = false;
     std::string errorstring = "";
     SlopWindow* window;
@@ -138,10 +146,13 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options ) {
                 std::cerr << errorstring;
             }
         }
+#endif // SLOP_OPENGL
         returnval = slop::XShapeSlopSelect( options );
+#ifdef SLOP_OPENGL
     } else {
         returnval = slop::GLSlopSelect( options, window );
     }
+#endif
     delete x11;
     delete slop::resource;
     if ( deleteOptions ) {
@@ -209,6 +220,7 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options ) {
     return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow, cancelled );
 }
 
+#ifdef SLOP_OPENGL
 slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* window ) {
     bool cancelled = false;
     slop::mouse = new slop::Mouse( x11, options->nodecorations, window->window );
@@ -342,6 +354,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
     // Finally return the data.
     return slop::SlopSelection( output.x, output.y, output.z, output.w, selectedWindow, cancelled );
 }
+#endif
 
 extern "C" struct slop_options slop_options_default() {
     struct slop_options options;
