@@ -20,14 +20,6 @@ endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/")
 
-set( CMAKE_COMPRESS_MAN TRUE CACHE BOOL "Whether or not to compress the man pages for install." )
-
-if ( CMAKE_COMPRESS_MAN )
-    set( MANTARGET "slop.1.gz" )
-else()
-    set( MANTARGET "slop.1" )
-endif()
-
 include_directories("${PROJECT_BINARY_DIR}")
 
 add_definitions(-DSLOP_VERSION="v${PROJECT_VERSION}")
@@ -123,4 +115,4 @@ endif()
 install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_BINDIR}" )
 install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_LIBDIR}" )
 install( FILES ${CMAKE_SOURCE_DIR}/src/slop.hpp DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT development )
-install( FILES "${CMAKE_SOURCE_DIR}/${MANTARGET}" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1" COMPONENT doc )
+install( FILES ${CMAKE_SOURCE_DIR}/slop.1 DESTINATION "${CMAKE_INSTALL_MANDIR}/man1" COMPONENT doc )
