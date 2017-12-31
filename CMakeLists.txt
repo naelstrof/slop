@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.1.3)
 
+project(slop VERSION 7.3.49 LANGUAGES CXX)
+
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)")
 
-if ( NOT CMAKE_INSTALL_PREFIX )
-    set(CMAKE_INSTALL_PREFIX "/usr")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "..." FORCE)
 endif()
+
+include(GNUInstallDirs)
 
 # This should really never be disabled. The pure-X mode of slop is very expensive and buggy.
 # It also doesn't work on Wayland. Though if a system is never running a compositor, or
@@ -14,23 +18,11 @@ if ( SLOP_OPENGL )
   add_definitions(-DSLOP_OPENGL="True")
 endif()
 
-project(slop)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/")
-
-set( CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Directory where man pages reside. (/usr/share/man, /usr/local/share/man, etc.)" )
-
-set( CMAKE_COMPRESS_MAN TRUE CACHE BOOL "Whether or not to compress the man pages for install." )
-
-if ( CMAKE_COMPRESS_MAN )
-    set( MANTARGET "slop.1.gz" )
-else()
-    set( MANTARGET "slop.1" )
-endif()
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_definitions(-DSLOP_VERSION="v7.3.49")
+add_definitions(-DSLOP_VERSION="v${PROJECT_VERSION}")
 
 # The names have to be unique unfortunately.
 set(EXECUTABLE_NAME "slop")
@@ -63,11 +55,13 @@ endif()
 
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_EXTENSIONS OFF)
 
 add_executable(${EXECUTABLE_NAME} src/main.cpp)
 
 set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_EXTENSIONS OFF)
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules" )
 
@@ -118,15 +112,7 @@ else()
   endif()
 endif()
 
-get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-
-if ("${LIB64}" STREQUAL "TRUE")
-  set(LIBSUFFIX 64)
-else()
-  set(LIBSUFFIX "")
-endif()
-
-install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
-install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIBSUFFIX}" )
-install( FILES ${CMAKE_SOURCE_DIR}/src/slop.hpp DESTINATION "${CMAKE_INSTALL_PREFIX}/include" COMPONENT development )
-install( FILES "${CMAKE_SOURCE_DIR}/${MANTARGET}" DESTINATION  "${CMAKE_INSTALL_MANDIR}/man1" COMPONENT doc )
+install( TARGETS ${EXECUTABLE_NAME} DESTINATION "${CMAKE_INSTALL_BINDIR}" )
+install( TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_INSTALL_LIBDIR}" )
+install( FILES ${CMAKE_SOURCE_DIR}/src/slop.hpp DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT development )
+install( FILES ${CMAKE_SOURCE_DIR}/slop.1 DESTINATION "${CMAKE_INSTALL_MANDIR}/man1" COMPONENT doc )
