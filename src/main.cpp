@@ -43,13 +43,13 @@ glm::vec4 parseColor( std::string value ) {
             value = value.substr(sz+1);
             found[3] = std::stof(value,&sz);
             if ( value.size() != sz ) {
-                throw "dur";
+                throw std::runtime_error("dur");
             }
         } else {
             found[3] = 1;
         }
     } catch ( ... ) {
-        throw new std::invalid_argument("Unable to parse value `" + valuecopy + "` as a color. Should be in the format r,g,b or r,g,b,a. Like 1,1,1,1.");
+        throw std::invalid_argument("Unable to parse value `" + valuecopy + "` as a color. Should be in the format r,g,b or r,g,b,a. Like 1,1,1,1.");
     }
     return found;
 }
@@ -102,7 +102,7 @@ SlopOptions* getOptions( cxxopts::Options& options ) {
     if ( options.count( "nodecorations" ) > 0 ) {
         foo->nodecorations = options["nodecorations"].as<int>();
         if ( foo->nodecorations < 0 || foo->nodecorations > 2 ) {
-            throw new std::invalid_argument( "--nodecorations must be between 0 and 2. Or be used as a flag." );
+            throw std::invalid_argument( "--nodecorations must be between 0 and 2. Or be used as a flag." );
         }
     }
     return foo;
@@ -113,7 +113,7 @@ std::string formatOutput( std::string input, SlopSelection selection ) {
     for( unsigned int i=0;i<input.length();i++) {
         if ( input[i] == '%' ) {
             if ( input.length() <= i+1 ) {
-                throw new std::invalid_argument( "Expected character after `%`, got END." );
+                throw std::invalid_argument( "Expected character after `%`, got END." );
             }
             switch( input[i+1] ) {
                 case 'x':
@@ -132,7 +132,7 @@ std::string formatOutput( std::string input, SlopSelection selection ) {
                 case 'i':
                 case 'I': output << selection.id; break;
                 case '%': output << "%"; break;
-                default: throw new std::invalid_argument( std::string()+"Expected x, y, w, h, g, i, c, or % after % in format. Got `" + input[i+1] + "`." );
+                default: throw std::invalid_argument( std::string()+"Expected x, y, w, h, g, i, c, or % after % in format. Got `" + input[i+1] + "`." );
              }
             i++;
             continue;
@@ -242,7 +242,7 @@ int app( int argc, char** argv ) {
     // Options just validates all of our input from argv
     auto& positional = options["positional"].as<std::vector<std::string>>();
     if ( positional.size() > 0 ) {
-        throw new std::invalid_argument("Unexpected positional argument: " + positional[0]);
+        throw std::invalid_argument("Unexpected positional argument: " + positional[0]);
     }
     bool help = false;
     if ( options.count( "help" ) > 0 ) {
@@ -297,8 +297,8 @@ int app( int argc, char** argv ) {
 int main( int argc, char** argv ) {
     try {
         return app( argc, argv );
-    } catch( std::exception* e ) {
-        std::cerr << "Slop encountered an error:\n" << e->what() << "\n";
+    } catch( std::exception& e ) {
+        std::cerr << "Slop encountered an error:\n" << e.what() << "\n";
         return 1;
     } // let the operating system handle any other kind of exception.
     return 1;

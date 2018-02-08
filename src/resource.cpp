@@ -39,7 +39,7 @@ std::string slop::Resource::getRealPath( std::string localpath ) {
         return usrconfig + localpath;
     }
     std::string err = "The file or folder " + localpath + " was not found in " + usrconfig + "\n";
-    throw new std::runtime_error(err);
+    throw std::runtime_error(err);
     return localpath;
 }
 

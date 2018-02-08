@@ -124,11 +124,11 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options ) {
             window = new SlopWindow();
             if (!GLEW_VERSION_3_0) {
                 delete window;
-                throw new std::runtime_error( "OpenGL version is not high enough, slop requires OpenGL 3.0!\nOpenGL accelleration is disabled. Use -o or -q to suppress this message." );
+                throw std::runtime_error( "OpenGL version is not high enough, slop requires OpenGL 3.0!\nOpenGL accelleration is disabled. Use -o or -q to suppress this message." );
             }
             success = true;
-        } catch( std::exception* e ) {
-            errorstring += std::string(e->what()) + "\n";
+        } catch( std::exception& e ) {
+            errorstring += std::string(e.what()) + "\n";
             success = false;
         } catch (...) {
             success = false;
@@ -314,7 +314,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
                 case GL_OUT_OF_MEMORY: error="OUT_OF_MEMORY"; break;
                 case GL_INVALID_FRAMEBUFFER_OPERATION: error="INVALID_FRAMEBUFFER_OPERATION"; break;
             }
-            throw new std::runtime_error( "OpenGL threw an error: " + error );
+            throw std::runtime_error( "OpenGL threw an error: " + error );
         }
         if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
             memory->running = false;

@@ -8,13 +8,13 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
         frag = resource->getRealPath(frag);
         std::ifstream v( vert.c_str() );
         if (!v.is_open()) {
-            throw new std::runtime_error( "Failed to open " + vert );
+            throw std::runtime_error( "Failed to open " + vert );
         }
         vert_contents = std::string((std::istreambuf_iterator<char>(v)),
                                    std::istreambuf_iterator<char>());
         std::ifstream f( frag.c_str() );
         if (!f.is_open()) {
-            throw new std::runtime_error( "Failed to open " + frag );
+            throw std::runtime_error( "Failed to open " + frag );
         }
         frag_contents = std::string((std::istreambuf_iterator<char>(f)),
                                   std::istreambuf_iterator<char>());
@@ -31,12 +31,12 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
     
     if ( vert_contents.length() <= 0 ) {
         std::string errstring = "Failed to open file (or is empty) `" + vert + "`.\n";
-        throw new std::runtime_error(errstring);
+        throw std::runtime_error(errstring);
     }
 
     if ( frag_contents.length() <= 0 ) {
         std::string errstring = "Failed to open file (or is empty) `" + frag + "`.\n";
-        throw new std::runtime_error(errstring);
+        throw std::runtime_error(errstring);
     }
 
     // Compile both shaders.
@@ -47,7 +47,7 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
 
     if ( err ) {
         std::string errstring = "Failed to compile shader `" + vert + "`:\n" + errortxt;
-        throw new std::runtime_error(errstring);
+        throw std::runtime_error(errstring);
         glDeleteShader( vertShader );
         return;
     }
@@ -57,7 +57,7 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
     err = compile( fragShader, errortxt );
     if ( err ) {
         std::string errstring = "Failed to compile shader `" + frag + "`:\n" + errortxt;
-        throw new std::runtime_error(errstring);
+        throw std::runtime_error(errstring);
         glDeleteShader( vertShader );
         glDeleteShader( fragShader );
         return;
@@ -67,7 +67,7 @@ slop::Shader::Shader( std::string vert, std::string frag, bool file ) {
     err = link( vertShader, fragShader, errortxt );
     if ( err ) {
         std::string errstring = "Failed to link shader `" + vert + "` and  `" + frag + "`:\n" + errortxt;
-        throw new std::runtime_error(errstring);
+        throw std::runtime_error(errstring);
         glDeleteShader( vertShader );
         glDeleteShader( fragShader );
         return;
