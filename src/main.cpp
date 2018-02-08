@@ -43,7 +43,7 @@ glm::vec4 parseColor( std::string value ) {
             value = value.substr(sz+1);
             found[3] = std::stof(value,&sz);
             if ( value.size() != sz ) {
-                throw "dur";
+                throw std::runtime_error("dur");
             }
         } else {
             found[3] = 1;
