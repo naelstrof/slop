@@ -137,7 +137,7 @@ XColor slop::XShapeRectangle::convertColor( glm::vec4 color ) {
     xc.blue = blue;
     int err = XAllocColor( x11->display, DefaultColormap( x11->display, XScreenNumberOfScreen( x11->screen ) ), &xc );
     if ( err == BadColor ) {
-        throw new std::runtime_error(std::string("Couldn't allocate a color"));
+        throw std::runtime_error(std::string("Couldn't allocate a color"));
     }
     return xc;
 }

@@ -58,7 +58,7 @@ slop::Mouse::Mouse(X11* x11, int nodecorations, Window ignoreWindow ) {
         tries++;
     }
     if ( err != GrabSuccess ) {
-        throw new std::runtime_error( "Couldn't grab the mouse after 10 tries." );
+        throw std::runtime_error( "Couldn't grab the mouse after 10 tries." );
     }
     this->nodecorations = nodecorations;
     this->ignoreWindow = ignoreWindow;

@@ -15,13 +15,13 @@ slop::SlopWindow::SlopWindow() {
     int nelements;
     int render_event_base, render_error_base;
     if(!XRenderQueryExtension(x11->display, &render_event_base, &render_error_base)) {
-        throw new std::runtime_error("No XRENDER extension found\n");
+        throw std::runtime_error("No XRENDER extension found\n");
     }
 
     GLXFBConfig* fbc = glXChooseFBConfig(x11->display, DefaultScreen(x11->display), attributeList, &nelements);
     GLXFBConfig fbconfig;
     if ( !fbc ) {
-        throw new std::runtime_error("No matching visuals available.\n");
+        throw std::runtime_error("No matching visuals available.\n");
     }
     XVisualInfo* vi ;
     XRenderPictFormat *pictFormat;
@@ -42,7 +42,7 @@ slop::SlopWindow::SlopWindow() {
         }
     }
     if (i == nelements ) {
-        throw new std::runtime_error( "No matching visuals available" );
+        throw std::runtime_error( "No matching visuals available" );
     }
     XFree( fbc );
 
@@ -64,7 +64,7 @@ slop::SlopWindow::SlopWindow() {
     XFree( vi );
 
     if ( !window ) {
-        throw new std::runtime_error( "Couldn't create a GL window!" );
+        throw std::runtime_error( "Couldn't create a GL window!" );
     }
 
     // Prep some hints for the window
@@ -97,14 +97,14 @@ slop::SlopWindow::SlopWindow() {
 
     context = glXCreateNewContext( x11->display, fbconfig, GLX_RGBA_TYPE, 0, True );
     if ( !context ) {
-        throw new std::runtime_error( "Failed to create an OpenGL context." );
+        throw std::runtime_error( "Failed to create an OpenGL context." );
     }
     setCurrent();
     // Finally we grab some OpenGL 3.3 stuffs.
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
-      throw new std::runtime_error((char*)glewGetErrorString(err));
+      throw std::runtime_error((char*)glewGetErrorString(err));
     }
     framebuffer = new Framebuffer( WidthOfScreen( x11->screen ), HeightOfScreen( x11->screen ) );
 

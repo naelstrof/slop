@@ -64,7 +64,7 @@ slop::Keyboard::Keyboard( X11* x11 ) {
     }
     // Non-fatal.
     if ( err != GrabSuccess ) {
-        //throw new std::runtime_error( "Couldn't grab the keyboard after 10 tries." );
+        //throw std::runtime_error( "Couldn't grab the keyboard after 10 tries." );
     }
     XQueryKeymap( x11->display, deltaState );
     keyDown = false;
