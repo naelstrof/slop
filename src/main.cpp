@@ -191,8 +191,12 @@ void printHelp() {
     std::cout << "  -r, --shader=STRING           Sets the shader to load and use from\n";
     std::cout << "                                  ~/.config/slop/\n";
     std::cout << "  -f, --format=STRING           Set the output format string. Format specifiers\n";
-    std::cout << "                                  are %x, %y, %w, %h, %i, %g, and %c.\n";
-    std::cout << "                                  (default=`%g\n')\n";
+    std::cout << "                                  are %x (x offset), %y (y offset), %w (width),\n";
+    std::cout << "                                  %h (height), %i (window id),\n";
+    std::cout << "                                  %g (geometry - `%wx%h+%x+%y\'),\n";
+    std::cout << "                                  %c (1 if cancelled, 0 otherwise),\n";
+    std::cout << "                                  and %% for a literal percent sign.\n";
+    std::cout << "                                  (default=`%g')\n";
     std::cout << "  -o, --noopengl                Disable graphics acceleration.\n";
     std::cout << "Examples\n";
     std::cout << "    $ # Gray, thick, transparent border for maximum visiblity.\n";
