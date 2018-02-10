@@ -34,7 +34,7 @@ Sets the selection rectangle's color. Supports RGB or RGBA input. Depending on t
 This sets the vertex shader, and fragment shader combo to use when drawing the final framebuffer to the screen. This obviously only works when OpenGL is enabled. The shaders are loaded from ~/.config/slop. See https://github.com/naelstrof/slop for more information on how to create your own shaders.
 .TP
 .BR \-f ", " \-\-format=\fISTRING\fR
-Sets the output format for slop. Format specifiers are %x, %y, %w, %h, %i, %c, and %g. If actual percentage signs are desired in output, use a double percentage sign like so `%%`.
+Sets the output format for slop. Format specifiers are %x (x offset), %y (y offset), %w (width), %h (height), %i (window id), %c (1 if cancelled, 0 otherwise), %g (geometry - `%wx%h+%x+%y'), and %% for a literal percent sign.
 .TP
 .BR \-n ", " \-\-nodecorations=INT
 Sets the level of aggressiveness when trying to remove window decorations. `0' is off, `1' will try lightly to remove decorations, and `2' will recursively descend into the root tree until it gets the deepest available visible child under the mouse. Defaults to `0'. Supplying slop with just `-n` is equivalent to supplying `-n1`.
