@@ -10,6 +10,8 @@ endif()
 
 include(GNUInstallDirs)
 
+set( BUILD_SHARED_LIBS ON CACHE BOOL "Build all libraries as shared" )
+
 # This should really never be disabled. The pure-X mode of slop is very expensive and buggy.
 # It also doesn't work on Wayland. Though if a system is never running a compositor, or
 # doesn't have OpenGL, this could remove some linking dependencies I suppose.
@@ -28,29 +30,26 @@ add_definitions(-DSLOP_VERSION="v${PROJECT_VERSION}")
 set(EXECUTABLE_NAME "slop")
 set(LIBRARY_NAME "slopy")
 
+add_library(${LIBRARY_NAME}
+  src/mouse.cpp
+  src/keyboard.cpp
+  src/x.cpp
+  src/slopstates.cpp
+  src/resource.cpp
+  src/slop.cpp
+  src/rectangle.cpp
+  src/xshaperectangle.cpp)
+set_target_properties(${LIBRARY_NAME}
+  PROPERTIES
+  VERSION ${PROJECT_VERSION}
+  SOVERSION ${PROJECT_VERSION})
 
 if ( SLOP_OPENGL )
-  add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
-                                      src/keyboard.cpp
-                                      src/x.cpp
-                                      src/slopstates.cpp
-                                      src/resource.cpp
-                                      src/slop.cpp
-                                      src/rectangle.cpp
-                                      src/xshaperectangle.cpp
-                                      src/shader.cpp
-                                      src/window.cpp
-                                      src/framebuffer.cpp
-                                      src/glrectangle.cpp)
-else()
-  add_library(${LIBRARY_NAME} SHARED  src/mouse.cpp
-                                      src/keyboard.cpp
-                                      src/x.cpp
-                                      src/slopstates.cpp
-                                      src/resource.cpp
-                                      src/slop.cpp
-                                      src/rectangle.cpp
-                                      src/xshaperectangle.cpp)
+  target_sources(${LIBRARY_NAME} PRIVATE
+    src/shader.cpp
+    src/window.cpp
+    src/framebuffer.cpp
+    src/glrectangle.cpp)
 endif()
 
 set_property(TARGET ${LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
