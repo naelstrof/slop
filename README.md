@@ -18,14 +18,16 @@ slop (Select Operation) is an application that queries for a selection from the 
 slop can be used to create a video recording script in only two lines of code.
 ```bash
 #!/bin/bash
-read -r X Y W H G ID < <(slop -f "%x %y %w %h %g %i")
+slop=$(slop -f "%x %y %w %h %g %i") || exit 1
+read -r X Y W H G ID < <(echo $slop)
 ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
 ```
 
 You can also take images using imagemagick like so:
 ```bash
 #!/bin/bash
-read -r G < <(slop -f "%g")
+slop=$(slop -f "%g") || exit 1
+read -r G < <(echo $slop)
 import -window root -crop $G ~/myimage.png
 ```
 If you don't like ImageMagick's import: Check out [maim](https://github.com/naelstrof/maim) for a better screenshot utility.
