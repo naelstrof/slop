@@ -48,6 +48,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 * [Arch Linux: community/slop](https://www.archlinux.org/packages/community/x86_64/slop/)
 * [Void Linux: slop](https://github.com/voidlinux/void-packages/blob/24ac22af44018e2598047e5ef7fd3522efa79db5/srcpkgs/slop/template)
 * [FreeBSD: x11/slop](http://www.freshports.org/x11/slop/)
+* [NetBSD: x11/slop](http://pkgsrc.se/x11/slop)
 * [OpenBSD: graphics/slop](http://openports.se/graphics/slop)
 * [CRUX: 6c37/slop](https://github.com/6c37/crux-ports/tree/3.2/slop)
 * [Gentoo: x11-misc/slop](https://packages.gentoo.org/packages/x11-misc/slop)
