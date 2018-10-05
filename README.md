@@ -56,6 +56,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 * [GNU Guix: slop](https://www.gnu.org/software/guix/packages/#slop)
 * [Debian: slop](https://packages.debian.org/sid/slop)
 * [Fedora: slop](https://src.fedoraproject.org/rpms/slop)
+* [Ravenports: slop](http://www.ravenports.com/catalog/bucket_CB/slop/standard/)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
 
 ### Install using CMake (Requires CMake)
