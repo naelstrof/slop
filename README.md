@@ -15,7 +15,7 @@ slop (Select Operation) is an application that queries for a selection from the 
 * Supports custom programmable shaders.
 
 ## Practical Applications
-slop can be used to create a video recording script in only two lines of code.
+slop can be used to create a video recording script in only three lines of code.
 ```bash
 #!/bin/bash
 slop=$(slop -f "%x %y %w %h %g %i") || exit 1
