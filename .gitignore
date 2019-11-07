@@ -4,3 +4,6 @@ Makefile
 bin/
 cmake_install.cmake
 libslopy.so
+.vscode
+libslopy.so*
+install_manifest.txt

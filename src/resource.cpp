@@ -34,7 +34,10 @@ slop::Resource::Resource() {
     usrconfig += "/slop/";
 }
 
-std::string slop::Resource::getRealPath( std::string localpath ) {
+std::string slop::Resource::getRealPath( const std::string& localpath ) {
+    if (localpath[0] == '/' && validatePath(dirname(localpath))) {
+        return localpath;
+    }
     if ( validatePath( usrconfig + localpath ) ) {
         return usrconfig + localpath;
     }
@@ -43,7 +46,12 @@ std::string slop::Resource::getRealPath( std::string localpath ) {
     return localpath;
 }
 
-bool slop::Resource::validatePath( std::string path ) {
+std::string slop::Resource::dirname(const std::string& localpath) {
+    size_t i = localpath.find_last_of("/");
+    return (i != std::string::npos ? localpath.substr(0, i) : localpath);
+}
+
+bool slop::Resource::validatePath( const std::string& path ) {
     struct stat st;
     const char* dirname = path.c_str();
     if ( stat( dirname, &st ) != 0 ) {
