@@ -38,9 +38,10 @@ namespace slop {
 class Resource {
 public:
     Resource();
-    std::string getRealPath( std::string localpath );
+    std::string getRealPath( const std::string& localpath );
 private:
-    bool validatePath( std::string path );
+    std::string dirname(const std::string& localpath);
+    bool validatePath( const std::string& path );
     std::string usrconfig;
 };
 
