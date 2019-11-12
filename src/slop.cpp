@@ -124,7 +124,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options ) {
             window = new SlopWindow();
             if (!GLEW_VERSION_3_0) {
                 delete window;
-                throw std::runtime_error( "OpenGL version is not high enough, slop requires OpenGL 3.0!\nOpenGL accelleration is disabled. Use -o or -q to suppress this message." );
+                throw std::runtime_error( "OpenGL version is not high enough, slop requires OpenGL 3.0!\nOpenGL acceleration is disabled. Use -o or -q to suppress this message." );
             }
             success = true;
         } catch( std::exception& e ) {
@@ -134,7 +134,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options ) {
             success = false;
         }
     } else {
-        errorstring += "Failed to detect a compositor, OpenGL hardware-accelleration disabled...\n";
+        errorstring += "Failed to detect a compositor, OpenGL hardware-acceleration disabled...\n";
     }
     if ( !success ) {
         // If we fail, we launch the XShape version of slop.
