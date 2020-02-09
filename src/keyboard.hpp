@@ -22,6 +22,7 @@
 #define N_KEYBOARD_H_
 
 #define XK_MISCELLANY
+#define XK_LATIN1 // for XK_space
 #include <X11/keysymdef.h>
 
 #include "x.hpp"
