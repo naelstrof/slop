@@ -223,7 +223,7 @@ void slop::SlopStartMove::onEnter( SlopMemory& memory ) {
     //compensation comp = determineCompensation();
     //setPoints( memory, comp );
 
-    mouse->setCursor( XC_crosshair );
+    mouse->setCursor( XC_fleur );
 }
 void slop::SlopStartMove::update( SlopMemory& memory, double dt ) {
     // Unclear why it has to be - and not +
