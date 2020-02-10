@@ -21,6 +21,8 @@
 #ifndef N_SLOPSTATES_H_
 #define N_SLOPSTATES_H_
 
+#include <array>
+
 #include "mouse.hpp"
 #include "keyboard.hpp"
 #include "slop.hpp"
@@ -33,6 +35,14 @@ class SlopMemory;
 class SlopOptions;
 
 class SlopState {
+protected:
+    glm::vec2 startPoint;
+    struct compensation {
+        glm::vec2 Start;
+        glm::vec2 Mouse;
+    };
+    virtual compensation determineCompensation();
+    virtual void setPoints( SlopMemory& memory, compensation comp );
 public:
     virtual ~SlopState();
     virtual void onEnter( SlopMemory& memory );
@@ -41,27 +51,24 @@ public:
     virtual void draw( SlopMemory& memory, glm::mat4 matrix );
 };
 
-class SlopStart : protected SlopState {
+class SlopStart : SlopState {
 private:
     bool setStartPos;
-    glm::vec2 startPos;
 public:
     virtual void onEnter( SlopMemory& memory );
     virtual void update( SlopMemory& memory, double dt );
     virtual void draw( SlopMemory& memory, glm::mat4 matrix );
 };
 
-class SlopStartDrag : protected SlopState {
-protected:
-    glm::vec2 startPoint;
+class SlopStartDrag : SlopState {
+private:
     float repeatTimer;
     float multiplier;
-    virtual void setCursorAndPoints( SlopMemory& memory );
+    virtual void setAngleCursor();
 public:
     SlopStartDrag( glm::vec2 point );
     virtual void onEnter( SlopMemory& memory );
     virtual void update( SlopMemory& memory, double dt );
-    virtual void draw( SlopMemory& memory, glm::mat4 matrix );
 };
 
 class SlopEndDrag : SlopState {
@@ -71,26 +78,13 @@ public:
 
 class SlopStartMove : SlopState {
 private:
-    glm::vec2 startPoint;
     glm::vec2 diagonal;
-    virtual void setCursorAndPoints( SlopMemory& memory );
 public:
     SlopStartMove( glm::vec2 oldPoint, glm::vec2 newPoint );
     virtual void onEnter( SlopMemory& memory );
-    virtual void update( SlopMemory& memory, double dt );  
-    virtual void draw( SlopMemory& memory, glm::mat4 matrix );
+    virtual void update( SlopMemory& memory, double dt );
 };
 
-class SlopEndMove : SlopState {
-
-};
-/*
-class SlopResumeDrag : SlopStartDrag {
-public:
-    SlopResumeDrag( glm::vec2 startPoint );
-    virtual void onEnter( SlopMemory& memory );
-};
-*/
 class SlopMemory {
 private:
     SlopState* state;

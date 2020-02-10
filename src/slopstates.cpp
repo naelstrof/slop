@@ -43,7 +43,6 @@ void slop::SlopMemory::draw( glm::mat4& matrix ) {
     state->draw( *this, matrix );
 }
 
-
 slop::SlopState::~SlopState() {
 }
 void slop::SlopState::onEnter( SlopMemory& memory ) {
@@ -53,6 +52,67 @@ void slop::SlopState::onExit( SlopMemory& memory ) {
 void slop::SlopState::update( SlopMemory& memory, double dt ) {
 }
 void slop::SlopState::draw( SlopMemory& memory, glm::mat4 matrix ) {
+    memory.rectangle->draw( matrix );
+}
+void slop::SlopState::setPoints( SlopMemory& memory, compensation comp ) {
+    memory.rectangle->setPoints( startPoint + comp.Start,
+                                 mouse->getMousePos() + comp.Mouse );
+}
+slop::SlopState::compensation slop::SlopState::determineCompensation(){
+    /*
+     Determines compensation for the rectangle according to
+     the following visualization. S is the starting point
+     and each quadrant represents the 4 different positions
+     of the cursor respective to the starting point.
+
+        +--------------+--------------+
+        |              |              |
+        | Start.x = xm | Start.x = 0  |
+        | Start.y = ym | Start.y = ym |
+        | Mouse.x = 0  | Mouse.x = xm |
+        | Mouse.y = 0  | Mouse.y = 0  |
+        |              |              |
+        +--------------S--------------+
+        |              |              |
+        | Start.x = 0  | Start.x = 0  |
+        | Start.y = 0  | Start.y = 0  |
+        | Mouse.x = xm | Mouse.x = xm |
+        | Mouse.y = ym | Mouse.y = ym |
+        |              |              |
+        +--------------+--------------+
+
+     xm and ym are 1 if the cursor is on either
+     edge of the screen for each dimension
+    */
+
+    //these are true when on the edges of the screen
+    bool xm = (mouse->getMousePos().x == 0 || mouse->getMousePos().x == WidthOfScreen(x11->screen)-1);
+    bool ym = (mouse->getMousePos().y == 0 || mouse->getMousePos().y == HeightOfScreen(x11->screen)-1);
+    
+    // determine relative cursor position
+    bool cursorAbove = startPoint.y > mouse->getMousePos().y;
+    bool cursorLeft = startPoint.x > mouse->getMousePos().x;
+
+    // intialize compensation vectors
+    glm::vec2 cStart = glm::vec2(0, 0);
+    glm::vec2 cMouse = glm::vec2(0, 0);
+
+    // apply accordingly
+    if ( cursorAbove ) {
+        cStart.y = ym ? 0 : 1 ;
+        if ( cursorLeft ) {
+            cStart.x = xm ? 0 : 1 ;
+        }
+        else {
+            cMouse.x = xm ? 0 : 1 ;
+        }
+    }
+    else { // cursor below
+        cMouse.x = xm ? 0 : 1 ;
+        cMouse.y = ym ? 0 : 1 ;
+    }
+    compensation comp = { cStart, cMouse };
+    return comp;
 }
 
 void slop::SlopStart::onEnter( SlopMemory& memory ) {
@@ -60,11 +120,11 @@ void slop::SlopStart::onEnter( SlopMemory& memory ) {
 }
 void slop::SlopStart::update( SlopMemory& memory, double dt ) {
     if ( mouse->getButton( 1 ) && !setStartPos ) {
-        startPos = mouse->getMousePos();
+        startPoint = mouse->getMousePos();
         setStartPos = true;
     }
-    if ( setStartPos && glm::distance( startPos, mouse->getMousePos() ) >= memory.tolerance ) {
-        memory.setState( (SlopState*)new SlopStartDrag( startPos ) );
+    if ( setStartPos && glm::distance( startPoint, mouse->getMousePos() ) >= memory.tolerance ) {
+        memory.setState( (SlopState*)new SlopStartDrag( startPoint ) );
     }
     if ( mouse->hoverWindow != None ) {
         glm::vec4 rect = getWindowGeometry( mouse->hoverWindow, memory.nodecorations );
@@ -75,7 +135,6 @@ void slop::SlopStart::update( SlopMemory& memory, double dt ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
 }
-
 void slop::SlopStart::draw( SlopMemory& memory, glm::mat4 matrix ) {
     if ( memory.tolerance > 0 ) {
         memory.rectangle->draw( matrix );
@@ -85,14 +144,16 @@ void slop::SlopStart::draw( SlopMemory& memory, glm::mat4 matrix ) {
 slop::SlopStartDrag::SlopStartDrag( glm::vec2 point ) {
     startPoint = point;
 }
-
 void slop::SlopStartDrag::onEnter( SlopMemory& memory ) {
-    memory.rectangle->setPoints(startPoint, startPoint);
+    // redundant because it happens in upate() anyway
+    //compensation comp = determineCompensation();
+    //setPoints( memory, comp );
 }
-
 void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
 
-    setCursorAndPoints( memory );
+    compensation comp = determineCompensation();
+    setPoints( memory, comp );
+    setAngleCursor();
 
     if ( !mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
@@ -123,44 +184,31 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
         }
     }
 }
-
-void slop::SlopStartDrag::draw( SlopMemory& memory, glm::mat4 matrix ) {
-    memory.rectangle->draw( matrix );
-}
-
-void slop::SlopEndDrag::onEnter( SlopMemory& memory ) {
-    memory.running = false;
-}
-
-void slop::SlopStartDrag::setCursorAndPoints( SlopMemory& memory ) {
-    
-    //these are true when on the edges of the screen
-    int xm = (mouse->getMousePos().x == 0 || mouse->getMousePos().x == WidthOfScreen(x11->screen)-1);
-    int ym = (mouse->getMousePos().y == 0 || mouse->getMousePos().y == HeightOfScreen(x11->screen)-1);
-    
-    // set angle cursor and compensate edges somehow
+void slop::SlopStartDrag::setAngleCursor() {
+    // determine relative cursor position
     bool cursorAbove = startPoint.y > mouse->getMousePos().y;
     bool cursorLeft = startPoint.x > mouse->getMousePos().x;
 
     if ( cursorAbove ) {
         if ( cursorLeft ) {
             mouse->setCursor( XC_ul_angle );
-            memory.rectangle->setPoints(startPoint+glm::vec2(1*xm,1*ym), mouse->getMousePos()+glm::vec2(0,0));        }
+        }
         else {
             mouse->setCursor( XC_ur_angle );
-            memory.rectangle->setPoints(startPoint+glm::vec2(0,1*ym), mouse->getMousePos()+glm::vec2(1*xm,0));
         }
     }
     else {
         if ( cursorLeft ) {
             mouse->setCursor( XC_ll_angle );
-            memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1*xm,1*ym));
         }
         else {
             mouse->setCursor( XC_lr_angle );
-            memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1*xm,1*ym));
        }
     }
+}
+
+void slop::SlopEndDrag::onEnter( SlopMemory& memory ) {
+    memory.running = false;
 }
 
 slop::SlopStartMove::SlopStartMove( glm::vec2 oldPoint, glm::vec2 newPoint ) {
@@ -170,70 +218,23 @@ slop::SlopStartMove::SlopStartMove( glm::vec2 oldPoint, glm::vec2 newPoint ) {
     // it will be used to move the startPoint along with mousePos
     diagonal = newPoint - oldPoint;
 }
-
 void slop::SlopStartMove::onEnter( SlopMemory& memory ) {
+    // redundant because of update()
+    //compensation comp = determineCompensation();
+    //setPoints( memory, comp );
 
-    memory.rectangle->setPoints( startPoint, mouse->getMousePos() );
+    mouse->setCursor( XC_crosshair );
 }
-
 void slop::SlopStartMove::update( SlopMemory& memory, double dt ) {
-
     // Unclear why it has to be - and not +
     startPoint = mouse->getMousePos() - diagonal;
 
-    setCursorAndPoints( memory );
+    compensation comp = determineCompensation();
+    setPoints( memory, comp );
 
     // space or mouse1 released, return to drag
     // if mouse1 is released then drag will end also
     if ( !keyboard->getKey(XK_space) or !mouse->getButton( 1) ) {
         memory.setState( (SlopState*) new SlopStartDrag(startPoint) );
- //       memory.setState( (SlopState*)new SlopEndDrag() );
     }
-
 }
-
-void slop::SlopStartMove::draw( SlopMemory& memory, glm::mat4 matrix ) {
-    memory.rectangle->draw( matrix );
-}
-
-
-void slop::SlopStartMove::setCursorAndPoints( SlopMemory& memory ) {
-    
-    // set cursor
-    mouse->setCursor( XC_cross );
-
-    // these are true when on the edges of the screen
-    int xm = (mouse->getMousePos().x == 0 || mouse->getMousePos().x == WidthOfScreen(x11->screen)-1);
-    int ym = (mouse->getMousePos().y == 0 || mouse->getMousePos().y == HeightOfScreen(x11->screen)-1);
-    
-    // compensate edges somehow
-    bool cursorAbove = startPoint.y > mouse->getMousePos().y;
-    bool cursorLeft = startPoint.x > mouse->getMousePos().x;
-
-    if ( cursorAbove ) {
-        if ( cursorLeft ) {
-            memory.rectangle->setPoints(startPoint+glm::vec2(1*xm,1*ym), mouse->getMousePos()+glm::vec2(0,0));        }
-        else {
-            memory.rectangle->setPoints(startPoint+glm::vec2(0,1*ym), mouse->getMousePos()+glm::vec2(1*xm,0));
-        }
-    }
-    else {
-        if ( cursorLeft ) {
-            memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1*xm,1*ym));
-        }
-        else {
-            memory.rectangle->setPoints(startPoint+glm::vec2(0,0), mouse->getMousePos()+glm::vec2(1*xm,1*ym));
-       }
-    }
-
-}
-
-/*
-slop::SlopResumeDrag::SlopResumeDrag( glm::vec2 point ) {
-    startPoint = point;
-}
-
-slop::SlopResumeDrag::onEnter( SlopMemory& memory ){
-}
-
-*/
