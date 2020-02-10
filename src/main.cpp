@@ -217,6 +217,7 @@ void printHelp() {
     std::cout << "Tips\n";
     std::cout << "    * If you don't like a selection: you can cancel it by right-clicking\n";
     std::cout << "regardless of which options are enabled or disabled for slop.\n";
+    std::cout << "    * You can move the selection by holding down the space bar!\n";
     std::cout << "    * If slop doesn't seem to select a window accurately, the problem could be\n";
     std::cout << "because of decorations getting in the way. Try enabling the --nodecorations\n";
     std::cout << "flag.\n";
