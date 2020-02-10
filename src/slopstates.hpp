@@ -21,8 +21,6 @@
 #ifndef N_SLOPSTATES_H_
 #define N_SLOPSTATES_H_
 
-#include <array>
-
 #include "mouse.hpp"
 #include "keyboard.hpp"
 #include "slop.hpp"
