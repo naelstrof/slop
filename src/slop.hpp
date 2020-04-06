@@ -63,6 +63,7 @@ public:
     float border;
     float padding;
     float tolerance;
+    bool nodrag;
     bool highlight;
     bool noopengl;
     bool nokeyboard;
