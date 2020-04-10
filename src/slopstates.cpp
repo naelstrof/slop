@@ -103,7 +103,6 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
     if ( memory.nodrag && memory.up && mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
-    if ( !memory.nodrag && !mouse->getButton( 1 ) ) {
     int lx = mouse->getMousePos().x < startPoint.x;
     int ly = mouse->getMousePos().y < startPoint.y;
 
@@ -121,7 +120,7 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
                 break;
     }
     memory.rectangle->setPoints(startPoint+glm::vec2(1*lx,1*ly), mouse->getMousePos()+glm::vec2(1*(!lx), 1*(!ly)));
-    if ( !mouse->getButton( 1 ) ) {
+    if ( !memory.nodrag && !mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
     if ( keyboard ) {
