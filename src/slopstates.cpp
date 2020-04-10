@@ -179,7 +179,7 @@ void slop::SlopStartMove::update( SlopMemory& memory, double dt ) {
 
     // space or mouse1 released, return to drag
     // if mouse1 is released then drag will end also
-    if ( !keyboard->getKey(XK_space) or !mouse->getButton( 1 ) ) {
+    if ( !keyboard->getKey(XK_space) or (!mouse->getButton( 1 ) && !memory.nodrag) ) {
         // clip rectangle on edges of screen.
         startPoint.x = glm::min((int)startPoint.x, WidthOfScreen(x11->screen));
         startPoint.x = glm::max((int)startPoint.x, 0);
