@@ -35,6 +35,9 @@ void slop::Keyboard::update() {
     keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
     keycode = XKeysymToKeycode( x11->display, XK_Down );
     keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+    // Also deleting Space for move operation
+    keycode = XKeysymToKeycode( x11->display, XK_space );
+    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
     keyDown = false;
     for ( int i=0;i<32;i++ ) {
         if ( deltaState[i] == keys[i] ) {

@@ -13,6 +13,7 @@ slop (Select Operation) is an application that queries for a selection from the 
     * Set the color of the selection rectangles to match your theme! (Even supports transparency!)
     * Remove window decorations from selections.
 * Supports custom programmable shaders.
+* Move started selection by holding down the space bar.
 
 ## Practical Applications
 slop can be used to create a video recording script in only three lines of code.

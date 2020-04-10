@@ -33,18 +33,19 @@ class SlopMemory;
 class SlopOptions;
 
 class SlopState {
+protected:
+    glm::vec2 startPoint;
 public:
-    virtual ~SlopState();
     virtual void onEnter( SlopMemory& memory );
     virtual void onExit( SlopMemory& memory );
     virtual void update( SlopMemory& memory, double dt );
     virtual void draw( SlopMemory& memory, glm::mat4 matrix );
+    virtual ~SlopState();
 };
 
 class SlopStart : SlopState {
 private:
     bool setStartPos;
-    glm::vec2 startPos;
 public:
     virtual void onEnter( SlopMemory& memory );
     virtual void update( SlopMemory& memory, double dt );
@@ -53,19 +54,26 @@ public:
 
 class SlopStartDrag : SlopState {
 private:
-    glm::vec2 startPoint;
     float repeatTimer;
     float multiplier;
 public:
     SlopStartDrag( glm::vec2 point );
     virtual void onEnter( SlopMemory& memory );
     virtual void update( SlopMemory& memory, double dt );
-    virtual void draw( SlopMemory& memory, glm::mat4 matrix );
 };
 
 class SlopEndDrag : SlopState {
 public:
     virtual void onEnter( SlopMemory& memory );
+};
+
+class SlopStartMove : SlopState {
+private:
+    glm::vec2 diagonal;
+public:
+    SlopStartMove( glm::vec2 oldPoint, glm::vec2 newPoint );
+    virtual void onEnter( SlopMemory& memory );
+    virtual void update( SlopMemory& memory, double dt );
 };
 
 class SlopMemory {
