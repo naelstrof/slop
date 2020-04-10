@@ -3,6 +3,7 @@
 using namespace slop;
 
 slop::SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
+    up = false;
     running = true;
     state = (SlopState*)new SlopStart();
     nextState = NULL;
@@ -44,7 +45,6 @@ void slop::SlopMemory::draw( glm::mat4& matrix ) {
     state->draw( *this, matrix );
 }
 
-
 slop::SlopState::~SlopState() {
 }
 void slop::SlopState::onEnter( SlopMemory& memory ) {
@@ -71,9 +71,14 @@ void slop::SlopStart::update( SlopMemory& memory, double dt ) {
         glm::vec4 rect = getWindowGeometry( mouse->hoverWindow, memory.nodecorations );
         memory.rectangle->setPoints( glm::vec2( (float)rect.x, (float)rect.y ), glm::vec2( (float)rect.x+rect.z, (float)rect.y+rect.w ) );
     }
-    if ( setStartPos && !mouse->getButton( 1 ) && !memory.nodrag ) {
+    if ( (setStartPos && !mouse->getButton( 1 ) && !memory.nodrag) ||
+         (setStartPos && memory.nodrag && memory.up && mouse->getButton( 1 ) )
+       ) {
         memory.selectedWindow = mouse->hoverWindow;
         memory.setState( (SlopState*)new SlopEndDrag() );
+    }
+    if ( setStartPos && memory.nodrag && !mouse->getButton( 1 )) {
+        memory.up = true;
     }
 }
 
@@ -111,10 +116,10 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
                 memory.rectangle->setPoints(startPoint+glm::vec2(1*xm,1*ym), mouse->getMousePos()+glm::vec2(0,0));
                 break;
     }
-    if ( memory.nodrag && !up && !mouse->getButton( 1 ) ) {
-        up = true;
+    if ( memory.nodrag && !memory.up && !mouse->getButton( 1 ) ) {
+        memory.up = true;
     }
-    if ( memory.nodrag && up && mouse->getButton( 1 ) ) {
+    if ( memory.nodrag && memory.up && mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
     if ( !memory.nodrag && !mouse->getButton( 1 ) ) {

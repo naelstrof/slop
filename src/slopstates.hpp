@@ -56,7 +56,6 @@ private:
     glm::vec2 startPoint;
     float repeatTimer;
     float multiplier;
-    bool up;
 public:
     SlopStartDrag( glm::vec2 point );
     virtual void onEnter( SlopMemory& memory );
@@ -81,6 +80,7 @@ public:
     float tolerance;
     bool nodecorations;
     bool nodrag;
+    bool up;
     Rectangle* rectangle;
     void setState( SlopState* state );
     void update( double dt );

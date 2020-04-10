@@ -187,6 +187,8 @@ void printHelp() {
     std::cout << "                                  Supplying slop with just `-n` is\n";
     std::cout << "                                  equivalent to supplying `-n1`.\n";
     std::cout << "                                  (default=`0')\n";
+    std::cout << "  -D, --nodrag       	          Allows you to click twice to indicate a \n";
+    std::cout << "                                  selection, rather than click-dragging.\n";
     std::cout << "  -q, --quiet                   Disable any unnecessary cerr output. Any\n";
     std::cout << "                                  warnings simply won't print.\n";
     std::cout << "  -l, --highlight               Instead of outlining selections, slop\n";
