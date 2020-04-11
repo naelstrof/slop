@@ -70,6 +70,7 @@ slop::SlopOptions::SlopOptions() {
     border = 1;
     nokeyboard = false;
     noopengl = false;
+    nodrag = false;
     nodecorations = false;
     tolerance = 2;
     padding = 0;

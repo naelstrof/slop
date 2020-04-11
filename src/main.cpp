@@ -96,6 +96,9 @@ SlopOptions* getOptions( cxxopts::Options& options ) {
     if ( options.count( "highlight" ) > 0 ) {
         foo->highlight = options["highlight"].as<bool>();
     }
+    if ( options.count( "nodrag" ) > 0 ) {
+        foo->nodrag = options["nodrag"].as<bool>();
+    }
     if ( options.count( "quiet" ) > 0 ) {
         foo->quiet = options["quiet"].as<bool>();
     }
@@ -170,6 +173,8 @@ void printHelp() {
     std::cout << "                                  Alternatively setting it to 999999 would.\n";
     std::cout << "                                  only allow for window selections.\n";
     std::cout << "                                  (default=`2')\n";
+    std::cout << "  -D, --nodrag                  Select region with two clicks instead of\n";
+    std::cout << "                                  click and drag\n";
     std::cout << "  -c, --color=FLOAT,FLOAT,FLOAT,FLOAT\n";
     std::cout << "                                Set the selection rectangle's color. Supports\n";
     std::cout << "                                  RGB or RGBA values.\n";
@@ -232,6 +237,7 @@ int app( int argc, char** argv ) {
     ("b,bordersize", "Sets the selection rectangle's thickness.", cxxopts::value<float>())
     ("p,padding", "Sets the padding size for the selection, this can be negative.", cxxopts::value<float>())
     ("t,tolerance", "How far in pixels the mouse can move after clicking, and still be detected as a normal click instead of a click-and-drag. Setting this to 0 will disable window selections. Alternatively setting it to 9999999 would force a window selection.", cxxopts::value<float>())
+    ("D,nodrag", "Select region with two clicks instead of click and drag")
     ("c,color", "Sets  the  selection  rectangle's  color.  Supports  RGB or RGBA input. Depending on the system's window manager/OpenGL  support, the opacity may be ignored.", cxxopts::value<std::string>())
     ("r,shader", "This  sets  the  vertex shader, and fragment shader combo to use when drawing the final framebuffer to the screen. This obviously only  works  when OpenGL is enabled. The shaders are loaded from ~/.config/maim. See https://github.com/naelstrof/slop for more information on how to create your own shaders.", cxxopts::value<std::string>())
     ("n,nodecorations", "Sets the level of aggressiveness when trying to remove window decorations. `0' is off, `1' will try lightly to remove decorations, and `2' will recursively descend into the root tree until it gets the deepest available visible child under the mouse. Defaults to `0'.", cxxopts::value<int>()->implicit_value("1"))

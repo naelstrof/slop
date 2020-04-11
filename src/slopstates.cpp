@@ -7,6 +7,7 @@ slop::SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
     state = (SlopState*)new SlopStart();
     nextState = NULL;
     tolerance = options->tolerance;
+    nodrag = options->nodrag;
     nodecorations = options->nodecorations;
     rectangle = rect;
     selectedWindow = x11->root;
@@ -70,7 +71,7 @@ void slop::SlopStart::update( SlopMemory& memory, double dt ) {
         glm::vec4 rect = getWindowGeometry( mouse->hoverWindow, memory.nodecorations );
         memory.rectangle->setPoints( glm::vec2( (float)rect.x, (float)rect.y ), glm::vec2( (float)rect.x+rect.z, (float)rect.y+rect.w ) );
     }
-    if ( setStartPos && !mouse->getButton( 1 ) ) {
+    if ( setStartPos && !mouse->getButton( 1 ) && !memory.nodrag ) {
         memory.selectedWindow = mouse->hoverWindow;
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
@@ -110,7 +111,13 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
                 memory.rectangle->setPoints(startPoint+glm::vec2(1*xm,1*ym), mouse->getMousePos()+glm::vec2(0,0));
                 break;
     }
-    if ( !mouse->getButton( 1 ) ) {
+    if ( memory.nodrag && !up && !mouse->getButton( 1 ) ) {
+        up = true;
+    }
+    if ( memory.nodrag && up && mouse->getButton( 1 ) ) {
+        memory.setState( (SlopState*)new SlopEndDrag() );
+    }
+    if ( !memory.nodrag && !mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
     if ( keyboard ) {
