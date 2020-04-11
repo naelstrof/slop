@@ -287,12 +287,13 @@ int app( int argc, char** argv ) {
 
     // Finally we do the real selection.
     selection = SlopSelect(parsedOptions);
-    
+
+    bool quiet = parsedOptions->quiet;
     // Here we're done with the parsed option data.
     delete parsedOptions;
     // We know if we cancelled or not
     if ( selection.cancelled ) {
-        if ( !parsedOptions->quiet ) {
+        if ( !quiet ) {
             std::cerr << "Selection was cancelled by keystroke or right-click.\n";
         }
         return 1;
