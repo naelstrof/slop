@@ -56,6 +56,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 * [NixOS: slop](https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/misc/slop/default.nix)
 * [GNU Guix: slop](https://www.gnu.org/software/guix/packages/#slop)
 * [Debian: slop](https://packages.debian.org/sid/slop)
+* [Ubuntu: slop](https://packages.ubuntu.com/slop)
 * [Fedora: slop](https://src.fedoraproject.org/rpms/slop)
 * [Ravenports: slop](http://www.ravenports.com/catalog/bucket_CB/slop/standard/)
 * [Alpine Linux: testing/slop](https://pkgs.alpinelinux.org/package/edge/testing/x86_64/slop)
