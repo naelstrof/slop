@@ -177,6 +177,19 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
 }
 
 void slop::SlopEndDrag::onEnter( SlopMemory& memory ) {
+        // Clip rectangle on edges of screen.
+        // p1(x,y), p2(z,w) with default format as p2_x x p2_y+p1_x+p1_y
+        glm::vec4 rect = memory.rectangle->getRect();
+        glm::vec2 p1, p2;
+        printf("%d x %d\n", WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
+        p1.x = glm::min(int(rect.x), WidthOfScreen(x11->screen));
+        p1.x = glm::max(int(rect.x), 0);
+        p1.y = glm::min(int(rect.y), HeightOfScreen(x11->screen));
+        p1.y = glm::max(int(rect.y), 0);
+        p2.x = glm::min(int(rect.x + rect.z), WidthOfScreen(x11->screen));
+        p2.y = glm::min(int(rect.y + rect.w), HeightOfScreen(x11->screen));
+        memory.rectangle->setPoints(p1, p2);
+
     memory.running = false;
 }
 
@@ -206,11 +219,6 @@ void slop::SlopStartMove::update( SlopMemory& memory, double dt ) {
     // space or mouse1 released, return to drag
     // if mouse1 is released then drag will end also
     if ( !keyboard->getKey(XK_space) or (!mouse->getButton( 1 ) && !memory.nodrag) ) {
-        // Clip rectangle on edges of screen.
-        startPoint.x = glm::min((int)startPoint.x, WidthOfScreen(x11->screen));
-        startPoint.x = glm::max((int)startPoint.x, 0);
-        startPoint.y = glm::min((int)startPoint.y, HeightOfScreen(x11->screen));
-        startPoint.y = glm::max((int)startPoint.y, 0);
         memory.setState( (SlopState*) new SlopStartDrag(startPoint) );
     }
 }
