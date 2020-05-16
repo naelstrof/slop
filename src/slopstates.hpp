@@ -84,6 +84,7 @@ public:
     SlopMemory( SlopOptions* options, Rectangle* rect );
     ~SlopMemory();
     Window selectedWindow;
+    glm::vec2 aspectRatio;
     bool running;
     float tolerance;
     bool nodecorations;

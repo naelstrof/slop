@@ -8,6 +8,8 @@ slop::SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
     state = (SlopState*)new SlopStart();
     nextState = NULL;
     tolerance = options->tolerance;
+    // FIXME: parametrize this via cmd args
+    aspectRatio = glm::vec2(16.0, 10.0);
     nodrag = options->nodrag;
     nodecorations = options->nodecorations;
     rectangle = rect;
@@ -103,24 +105,47 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
     }
 
+    // Query X server once only during update function
+    glm::vec2 mousePos = mouse->getMousePos();
+
     // Determine which cursor to use
-    char a = startPoint.y > mouse->getMousePos().y;
-    char b = startPoint.x > mouse->getMousePos().x;
+    char a = startPoint.y > mousePos.y;
+    char b = startPoint.x > mousePos.x;
     char c = (a << 1) | b;
+
+    // -1 to invert, 1 to leave as is
+    glm::vec2 invert;
     switch ( c ) {
         case 0: mouse->setCursor( XC_lr_angle );
+                invert = glm::vec2(1, 1);
                 break;
         case 1: mouse->setCursor( XC_ll_angle );
+                invert = glm::vec2(-1, 1);
                 break;
         case 2: mouse->setCursor( XC_ur_angle );
+                invert = glm::vec2(1, -1);
                 break;
         case 3: mouse->setCursor( XC_ul_angle );
+                invert = glm::vec2(-1, -1);
                 break;
     }
+
+    glm::vec2 widthHeight = mousePos - startPoint;
+    float scale = glm::max(glm::abs(widthHeight.x) / memory.aspectRatio.x,
+                           glm::abs(widthHeight.y) / memory.aspectRatio.y);
+
+    glm::vec2 rectEndPoint;
+    if (memory.aspectRatio == glm::vec2(0, 0)) {
+        rectEndPoint = glm::vec2(mousePos);
+    } else {
+        rectEndPoint = glm::vec2(startPoint + memory.aspectRatio*scale*invert);
+    }
+
     // Compensate for edges of screen, depending on the mouse position in relation to the start point.
-    int lx = mouse->getMousePos().x < startPoint.x;
-    int ly = mouse->getMousePos().y < startPoint.y;
-    memory.rectangle->setPoints(startPoint+glm::vec2(1*lx,1*ly), mouse->getMousePos()+glm::vec2(1*(!lx), 1*(!ly)));
+    int lx = mousePos.x < startPoint.x;
+    int ly = mousePos.y < startPoint.y;
+
+    memory.rectangle->setPoints(startPoint+glm::vec2(1*lx,1*ly), rectEndPoint+glm::vec2(1*(!lx), 1*(!ly)));
 
     if ( !memory.nodrag && !mouse->getButton( 1 ) ) {
         memory.setState( (SlopState*)new SlopEndDrag() );
@@ -129,7 +154,7 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
 
     if ( keyboard ) {
         if ( keyboard->getKey(XK_space) ) {
-            memory.setState( (SlopState*)new SlopStartMove( startPoint, mouse->getMousePos() ) );
+            memory.setState( (SlopState*)new SlopStartMove(startPoint, rectEndPoint) );
             return;
         }
         int arrows[2];
@@ -173,14 +198,15 @@ void slop::SlopStartMove::update( SlopMemory& memory, double dt ) {
     // Unclear why it has to be - and not +
     startPoint = mouse->getMousePos() - diagonal;
 
+
     int lx = mouse->getMousePos().x < startPoint.x;
     int ly = mouse->getMousePos().y < startPoint.y;
-    memory.rectangle->setPoints(startPoint+glm::vec2(1*lx,1*ly), mouse->getMousePos()+glm::vec2(1*(!lx), 1*(!ly)));
+    memory.rectangle->setPoints(startPoint+glm::vec2(1*lx,1*ly), startPoint+diagonal+glm::vec2(1*(!lx), 1*(!ly)));
 
     // space or mouse1 released, return to drag
     // if mouse1 is released then drag will end also
     if ( !keyboard->getKey(XK_space) or (!mouse->getButton( 1 ) && !memory.nodrag) ) {
-        // clip rectangle on edges of screen.
+        // Clip rectangle on edges of screen.
         startPoint.x = glm::min((int)startPoint.x, WidthOfScreen(x11->screen));
         startPoint.x = glm::max((int)startPoint.x, 0);
         startPoint.y = glm::min((int)startPoint.y, HeightOfScreen(x11->screen));
