@@ -8,8 +8,7 @@ slop::SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
     state = (SlopState*)new SlopStart();
     nextState = NULL;
     tolerance = options->tolerance;
-    // FIXME: parametrize this via cmd args
-    aspectRatio = glm::vec2(16.0, 10.0);
+    aspectRatio = glm::vec2(options->x_ratio, options->y_ratio);
     nodrag = options->nodrag;
     nodecorations = options->nodecorations;
     rectangle = rect;
@@ -181,7 +180,6 @@ void slop::SlopEndDrag::onEnter( SlopMemory& memory ) {
         // p1(x,y), p2(z,w) with default format as p2_x x p2_y+p1_x+p1_y
         glm::vec4 rect = memory.rectangle->getRect();
         glm::vec2 p1, p2;
-        printf("%d x %d\n", WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
         p1.x = glm::min(int(rect.x), WidthOfScreen(x11->screen));
         p1.x = glm::max(int(rect.x), 0);
         p1.y = glm::min(int(rect.y), HeightOfScreen(x11->screen));

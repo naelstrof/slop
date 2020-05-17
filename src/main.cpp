@@ -29,6 +29,23 @@
 
 using namespace slop;
 
+glm::vec2 parseAspectRatio( std::string value ) {
+    std::string valuecopy = value;
+    glm::vec2 found;
+    std::string::size_type sz;
+    try {
+        found[0] = std::stof(value,&sz);
+        value = value.substr(sz+1);
+        found[1] = std::stof(value,&sz);
+        if (value.size() != sz) {
+            throw std::runtime_error("dur");
+        }
+    } catch ( ... ) {
+        throw std::invalid_argument("Unable to parse value `" + valuecopy + "` as a aspect ratio. Should be in the format width,height. Like 16,9.");
+    }
+    return found;
+}
+
 glm::vec4 parseColor( std::string value ) {
     std::string valuecopy = value;
     glm::vec4 found;
@@ -65,6 +82,15 @@ SlopOptions* getOptions( cxxopts::Options& options ) {
     if ( options.count( "tolerance" ) > 0 ) {
         foo->tolerance = options["tolerance"].as<float>();
     }
+    glm::vec2 aspectRatio = glm::vec2(foo->x_ratio, foo->y_ratio);
+    if ( options.count( "aspectratio" ) > 0) {
+        aspectRatio = parseAspectRatio( options["aspectratio"].as<std::string>() );
+        if (aspectRatio.x == 0 || aspectRatio.y == 0) {
+            throw std::invalid_argument("--aspectratio must not contain zero values");
+        }
+    }
+    foo->x_ratio = aspectRatio.x;
+    foo->y_ratio = aspectRatio.y;
     glm::vec4 color = glm::vec4( foo->r, foo->g, foo->b, foo->a );
     if ( options.count( "color" ) > 0 ) {
         color = parseColor( options["color"].as<std::string>() );
@@ -173,6 +199,8 @@ void printHelp() {
     std::cout << "                                  Alternatively setting it to 999999 would.\n";
     std::cout << "                                  only allow for window selections.\n";
     std::cout << "                                  (default=`2')\n";
+    std::cout << "  -a, --aspectratio=FLOAT,FLOAT Sets  the  selection  rectangle's aspect ratio.\n";
+    std::cout << "                                  click and drag\n";
     std::cout << "  -D, --nodrag                  Select region with two clicks instead of\n";
     std::cout << "                                  click and drag\n";
     std::cout << "  -c, --color=FLOAT,FLOAT,FLOAT,FLOAT\n";
@@ -240,6 +268,7 @@ int app( int argc, char** argv ) {
     ("b,bordersize", "Sets the selection rectangle's thickness.", cxxopts::value<float>())
     ("p,padding", "Sets the padding size for the selection, this can be negative.", cxxopts::value<float>())
     ("t,tolerance", "How far in pixels the mouse can move after clicking, and still be detected as a normal click instead of a click-and-drag. Setting this to 0 will disable window selections. Alternatively setting it to 9999999 would force a window selection.", cxxopts::value<float>())
+    ("a,aspectratio", "Sets  the  selection  rectangle's  aspect ratio.", cxxopts::value<std::string>())
     ("D,nodrag", "Select region with two clicks instead of click and drag")
     ("c,color", "Sets  the  selection  rectangle's  color.  Supports  RGB or RGBA input. Depending on the system's window manager/OpenGL  support, the opacity may be ignored.", cxxopts::value<std::string>())
     ("r,shader", "This  sets  the  vertex shader, and fragment shader combo to use when drawing the final framebuffer to the screen. This obviously only  works  when OpenGL is enabled. The shaders are loaded from ~/.config/maim. See https://github.com/naelstrof/slop for more information on how to create your own shaders.", cxxopts::value<std::string>())
