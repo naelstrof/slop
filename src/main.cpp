@@ -199,8 +199,7 @@ void printHelp() {
     std::cout << "                                  Alternatively setting it to 999999 would.\n";
     std::cout << "                                  only allow for window selections.\n";
     std::cout << "                                  (default=`2')\n";
-    std::cout << "  -a, --aspectratio=FLOAT,FLOAT Sets  the  selection  rectangle's aspect ratio.\n";
-    std::cout << "                                  click and drag\n";
+    std::cout << "  -a, --aspectratio=FLOAT,FLOAT Set the  selection  rectangle's aspect ratio.\n";
     std::cout << "  -D, --nodrag                  Select region with two clicks instead of\n";
     std::cout << "                                  click and drag\n";
     std::cout << "  -c, --color=FLOAT,FLOAT,FLOAT,FLOAT\n";
