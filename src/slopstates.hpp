@@ -70,6 +70,7 @@ public:
 class SlopStartMove : SlopState {
 private:
     glm::vec2 diagonal;
+    glm::vec2 mouseDiagonal;
 public:
     SlopStartMove( glm::vec2 oldPoint, glm::vec2 newPoint );
     virtual void onEnter( SlopMemory& memory );

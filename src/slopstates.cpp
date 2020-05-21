@@ -195,8 +195,11 @@ slop::SlopStartMove::SlopStartMove( glm::vec2 oldPoint, glm::vec2 newPoint ) {
     // oldPoint is where drag was started and newPoint where move was
     startPoint = oldPoint;
     // This vector is the diagonal of the rectangle
-    // it will be used to move the startPoint along with mousePos
     diagonal = newPoint - oldPoint;
+    // This vector is the diagonal of the rectangle between mouse and oldPoint.
+    // It will be used to move the startPoint along with mousePos.
+    // Cause of aspect ratio feature, it isn't necessarily the same as diagonal.
+    mouseDiagonal = mouse->getMousePos() - oldPoint;
 }
 void slop::SlopStartMove::onEnter( SlopMemory& memory ) {
     // redundant because of update()
@@ -206,13 +209,20 @@ void slop::SlopStartMove::onEnter( SlopMemory& memory ) {
     mouse->setCursor( XC_fleur );
 }
 void slop::SlopStartMove::update( SlopMemory& memory, double dt ) {
-    // Unclear why it has to be - and not +
-    startPoint = mouse->getMousePos() - diagonal;
+    glm::vec2 mousePos = mouse->getMousePos();
+    
+    // It needs to be - instead + because:
+    //   - left upper corner of screen is (x,y) = (0,0);
+    //   - y axis is inverted  (0,0)  x
+    //                           +---->
+    //                           |   + (4,1)
+    //                         y v
+    startPoint = mousePos - mouseDiagonal;
 
-
-    int lx = mouse->getMousePos().x < startPoint.x;
-    int ly = mouse->getMousePos().y < startPoint.y;
-    memory.rectangle->setPoints(startPoint+glm::vec2(1*lx,1*ly), startPoint+diagonal+glm::vec2(1*(!lx), 1*(!ly)));
+    int lx = mousePos.x < startPoint.x;
+    int ly = mousePos.y < startPoint.y;
+    memory.rectangle->setPoints(startPoint+glm::vec2(1*lx,1*ly),
+                                startPoint+diagonal+glm::vec2(1*(!lx), 1*(!ly)));
 
     // space or mouse1 released, return to drag
     // if mouse1 is released then drag will end also
