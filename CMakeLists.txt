@@ -87,14 +87,14 @@ target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES}
 
 if ( SLOP_OPENGL )
   include_directories( ${XEXT_INCLUDE_DIR}
-                       ${GLEW_INCLUDE_DIR}
+                       GLEW::GLEW
                        ${XRENDER_INCLUDE_DIR}
                        ${OPENGL_INCLUDE_DIR} )
   target_link_libraries(${LIBRARY_NAME} ${OPENGL_LIBRARIES}
                                         ${XRENDER_LIBRARY}
                                         ${CMAKE_THREAD_LIBS_INIT} 
                                         ${GLX_LIBRARY}
-                                        ${GLEW_LIBRARIES})
+                                        GLEW::GLEW)
 endif()
 
 target_link_libraries(${EXECUTABLE_NAME} ${LIBRARY_NAME} )
