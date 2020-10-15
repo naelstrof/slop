@@ -295,12 +295,14 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
             window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
             pingpong->unbind();
         }
-        glDisable( GL_BLEND );
+        glClearColor (0.0, 0.0, 0.0, 0.0);
+        glClear (GL_COLOR_BUFFER_BIT);
         if ( i%2 != 0 ) {
             window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
         } else {
             pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
         }
+        glDisable( GL_BLEND );
 
         window->display();
         // Here we sleep just to prevent our CPU usage from going to 100%.
