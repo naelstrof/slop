@@ -24,6 +24,7 @@
 #define XK_MISCELLANY
 #define XK_LATIN1 // for XK_space
 #include <X11/keysymdef.h>
+#include <X11/XKBlib.h>
 
 #include "x.hpp"
 
@@ -34,6 +35,8 @@ private:
     char deltaState[32];
     X11* x11;
     bool keyDown;
+    bool mouseKeys;
+    void zeroKey( char keys[32], KeySym key );
 public:
     Keyboard( X11* x11 );
     ~Keyboard();

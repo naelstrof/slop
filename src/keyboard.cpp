@@ -22,22 +22,43 @@ bool slop::Keyboard::anyKeyDown() {
     return keyDown;
 }
 
+void slop::Keyboard::zeroKey( char keys[32], KeySym key ) {
+    KeyCode keycode = XKeysymToKeycode( x11->display, key );
+    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+}
+
 void slop::Keyboard::update() {
     char keys[32];
     XQueryKeymap( x11->display, keys );
     // We first delete the arrow key buttons from the mapping.
     // This allows the user to press the arrow keys without triggering anyKeyDown
-    KeyCode keycode = XKeysymToKeycode( x11->display, XK_Left );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
-    keycode = XKeysymToKeycode( x11->display, XK_Right );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
-    keycode = XKeysymToKeycode( x11->display, XK_Up );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
-    keycode = XKeysymToKeycode( x11->display, XK_Down );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+    zeroKey(keys, XK_Left);
+    zeroKey(keys, XK_Right);
+    zeroKey(keys, XK_Up);
+    zeroKey(keys, XK_Down);
     // Also deleting Space for move operation
-    keycode = XKeysymToKeycode( x11->display, XK_space );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+    zeroKey(keys, XK_space);
+
+    if ( mouseKeys ) {
+        zeroKey(keys, XK_KP_0);
+        zeroKey(keys, XK_KP_1);
+        zeroKey(keys, XK_KP_2);
+        zeroKey(keys, XK_KP_3);
+        zeroKey(keys, XK_KP_4);
+        zeroKey(keys, XK_KP_5);
+        zeroKey(keys, XK_KP_6);
+        zeroKey(keys, XK_KP_7);
+        zeroKey(keys, XK_KP_8);
+        zeroKey(keys, XK_KP_9);
+        zeroKey(keys, XK_KP_Add);
+        zeroKey(keys, XK_KP_Subtract);
+        zeroKey(keys, XK_KP_Multiply);
+        zeroKey(keys, XK_KP_Divide);
+        zeroKey(keys, XK_KP_Insert);
+        zeroKey(keys, XK_KP_Delete);
+        zeroKey(keys, XK_KP_Decimal);
+    }
+
     keyDown = false;
     for ( int i=0;i<32;i++ ) {
         if ( deltaState[i] == keys[i] ) {
@@ -69,6 +90,18 @@ slop::Keyboard::Keyboard( X11* x11 ) {
     if ( err != GrabSuccess ) {
         //throw std::runtime_error( "Couldn't grab the keyboard after 10 tries." );
     }
+
+    // Ignore any failures while checking for Mouse Keys
+    XkbDescPtr xkb = XkbGetKeyboard( x11->display, XkbControlsMask, XkbUseCoreKbd );
+    if ( xkb != 0 ) {
+        Status status = XkbGetControls( x11->display, XkbAllControlsMask, xkb );
+        if ( status == Success ) {
+            mouseKeys = xkb->ctrls->enabled_ctrls & XkbMouseKeysMask;
+            XkbFreeControls( xkb, XkbAllControlsMask, true );
+        }
+        XkbFreeKeyboard( xkb, XkbControlsMask, true );
+    }
+
     XQueryKeymap( x11->display, deltaState );
     keyDown = false;
 }
