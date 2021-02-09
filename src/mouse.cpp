@@ -12,6 +12,22 @@ void slop::Mouse::setButton( int button, int state ) {
     buttons.push_back(glm::ivec2(button,state));
 }
 
+int slop::Mouse::getScroll() {
+    return scroll;
+}
+
+void slop::Mouse::setScroll(int s) {
+    scroll = s;
+}
+
+void slop::Mouse::updateScroll(int button) {
+    switch (button) {
+        case Button4: { scroll += 1; } break;
+        case Button5: { scroll -= 1; } break;
+        case Button2: { scroll  = 0; } break;
+    }
+}
+
 int slop::Mouse::getButton( int button ) {
     for (unsigned int i=0;i<buttons.size();i++ ) {
         if ( buttons[i].x == button ) {
@@ -62,6 +78,7 @@ slop::Mouse::Mouse(X11* x11, int nodecorations, Window ignoreWindow ) {
     }
     this->nodecorations = nodecorations;
     this->ignoreWindow = ignoreWindow;
+    this->scroll = 0;
     hoverWindow = findWindow(x11->root);
 }
 
@@ -72,7 +89,8 @@ slop::Mouse::~Mouse() {
 void slop::Mouse::update() {
     XEvent event;
     while ( XCheckTypedEvent( x11->display, ButtonPress, &event ) ) {
-		setButton( event.xbutton.button, 1 );
+        setButton( event.xbutton.button, 1 );
+        updateScroll( event.xbutton.button );
     }
     bool findNewWindow = false;
     while ( XCheckTypedEvent( x11->display, MotionNotify, &event ) ) {
@@ -82,7 +100,7 @@ void slop::Mouse::update() {
         hoverWindow = findWindow(x11->root);
     }
     while ( XCheckTypedEvent( x11->display, ButtonRelease, &event ) ) {
-		setButton( event.xbutton.button, 0 );
+        setButton( event.xbutton.button, 0 );
     }
     while ( XCheckTypedEvent( x11->display, EnterNotify, &event ) ) {
         hoverWindow = event.xcrossing.window;
@@ -105,7 +123,7 @@ Window slop::Mouse::findWindow( Window foo ) {
             continue;
         }
         // We need to make sure the window is mapped.
-        XWindowAttributes attr;         
+        XWindowAttributes attr;
         XGetWindowAttributes( x11->display, children[i], &attr );
         if ( attr.map_state != IsViewable ) {
             continue;
