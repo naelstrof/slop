@@ -279,14 +279,14 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
             glClearColor (0.0, 0.0, 0.0, 0.0);
             glClear (GL_COLOR_BUFFER_BIT);
             pong->setShader( shaders[i] );
-            pong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+            pong->draw(slop::mouse->getScroll(), slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
             ping->unbind();
             std::swap(ping, pong);
         }
         glClearColor (0.0, 0.0, 0.0, 0.0);
         glClear (GL_COLOR_BUFFER_BIT);
         pong->setShader( shaders[shaders.size() - 1] );
-        pong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+        pong->draw(slop::mouse->getScroll(), slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
         glDisable( GL_BLEND );
 
         window->display();
