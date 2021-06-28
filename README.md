@@ -43,7 +43,6 @@ You need to have tesseract with support for the specific language, xclip and oth
 
 ```bash
 #!/bin/env bash
-#!/bin/env bash
 
 imagefile="/tmp/sloppy.$RANDOM.png"
 text="/tmp/translation"
@@ -56,7 +55,7 @@ cat $text".txt" | xclip -selection c
 
 ```
 
-![GIF Example of tesseract](https://imgur.com/a/C5gFOTz)
+![GIF Example of tesseract](https://media.giphy.com/media/fYP0sFWaB0XUEcYDoI/giphy.gif)
 
 If you don't like ImageMagick's import: Check out [maim](https://github.com/naelstrof/maim) for a better screenshot utility.
 
