@@ -1,22 +1,26 @@
 # slop
+
 slop (Select Operation) is an application that queries for a selection from the user and prints the region to stdout.
 
 ## Features
+
 * Hovering over a window will cause a selection rectangle to appear over it.
 * Clicking on a window makes slop return the dimensions of the window, and it's ID.
 * OpenGL accelerated graphics where possible.
 * Supports simple arguments:
-    * Change selection rectangle border size.
-    * Select X display.
-    * Set padding size.
-    * Force window, or pixel selections with the tolerance flag.
-    * Set the color of the selection rectangles to match your theme! (Even supports transparency!)
-    * Remove window decorations from selections.
+  * Change selection rectangle border size.
+  * Select X display.
+  * Set padding size.
+  * Force window, or pixel selections with the tolerance flag.
+  * Set the color of the selection rectangles to match your theme! (Even supports transparency!)
+  * Remove window decorations from selections.
 * Supports custom programmable shaders.
 * Move started selection by holding down the space bar.
 
 ## Practical Applications
+
 slop can be used to create a video recording script in only three lines of code.
+
 ```bash
 #!/bin/bash
 slop=$(slop -f "%x %y %w %h %g %i") || exit 1
@@ -25,15 +29,38 @@ ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
 ```
 
 You can also take images using imagemagick like so:
+
 ```bash
 #!/bin/bash
 slop=$(slop -f "%g") || exit 1
 read -r G < <(echo $slop)
 import -window root -crop $G ~/myimage.png
 ```
+
+Furthermore, if you are adventurous, you can create a simple script to copy things from an image itself, unselectable pdf, or just VERY quick rectangular selection or for places where there is no columnar selection (very useful for dataoperators)
+
+You need to have tesseract with support for the specific language, xclip and others are nice if you just want them in clipboard. 
+
+```bash
+#!/bin/env bash
+
+imagefile="/tmp/sloppy.$RANDOM.png"
+text="/tmp/translation"
+echo "$imagefile"
+slop=$(slop -f "%g") || exit 1
+read -r G < <(echo $slop)
+import -window root -crop $G $imagefile
+tesseract $imagefile $text 2>/dev/null 
+cat $text".txt" | xclip -selection c
+
+```
+
+![GIF Example of tesseract](https://media.giphy.com/media/fYP0sFWaB0XUEcYDoI/giphy.gif)
+
 If you don't like ImageMagick's import: Check out [maim](https://github.com/naelstrof/maim) for a better screenshot utility.
 
 ## Lets see some action
+
 Ok. Here's a comparison between 'scrot -s's selection and slop's:
 
 ![scrotbad](http://farmpolice.com/content/images/2014-10-14-12:08:24.png)
@@ -78,7 +105,7 @@ make && sudo make install
 Slop allows for chained post-processing shaders. Shaders are written in a language called GLSL, and have access to the following data from slop:
 
 | GLSL Name  | Data Type      | Bound to                                                                                        |
-|------------|----------------|-------------------------------------------------------------------------------------------------|
+| ---------- | -------------- | ----------------------------------------------------------------------------------------------- |
 | mouse      | vec2           | The mouse position on the screen.                                                               |
 | desktop    | sampler2D      | An upside-down snapshot of the desktop, this doesn't update as the screen changes.              |
 | texture    | sampler2D      | The current pixel values of slop's frame buffer. Usually just contains the selection rectangle. |
@@ -95,6 +122,7 @@ Shaders are loaded from the `--shader` flag in slop. They are delimited by comma
 Enough chatting about it though, here's some example shaders you can copy from [shaderexamples](https://github.com/naelstrof/slop/tree/master/shaderexamples) to `~/.config/slop` to try out!
 
 The files listed to the right of the `|` are the required files for the command to the left to work correctly.
+
 * `slop -r blur1,blur2 -b 100` | `~/.config/slop/{blur1,blur2}{.frag,.vert}`
 
 ![slop blur](https://my.mixtape.moe/bvsrzr.png)
@@ -104,11 +132,13 @@ The files listed to the right of the `|` are the required files for the command 
 ![slop animation](http://i.giphy.com/12vjSbFZ0CWDW8.gif)
 
 And all together now...
+
 * `slop -r blur1,blur2,wiggle -b 50 -c 1,1,1` | `~/.config/slop/{blur1,blur2,wiggle}{.frag,.vert}`
 
 ![slop animation](http://i.giphy.com/kfBLafeJfLs2Y.gif)
 
 Finally here's an example of a magnifying glass.
+
 * `slop -r crosshair` | `~/.config/slop/crosshair{.frag,.vert}`
 
 ![slop animation](http://i.giphy.com/2xy0fC2LOFQfm.gif)
