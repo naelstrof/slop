@@ -63,8 +63,8 @@ If you don't like ImageMagick's import: Check out [maim](https://github.com/nael
 
 Ok. Here's a comparison between 'scrot -s's selection and slop's:
 
-![scrotbad](http://farmpolice.com/content/images/2014-10-14-12:08:24.png)
-![slopgood](http://farmpolice.com/content/images/2014-10-14-12:14:51.png)
+![scrotbad](scrotbad.png)
+![slopgood](slopgood.png)
 
 You can see scrot leaves garbage lines over the things you're trying to screenshot!
 While slop not only looks nicer, it's impossible for it to end up in screenshots or recordings because it waits for DestroyNotify events before completely shutting down. Only after the window is completely destroyed can anything take a screenshot.
