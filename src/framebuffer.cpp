@@ -1,3 +1,4 @@
+#include <X11/Xutil.h>
 #include "framebuffer.hpp"
 
 slop::Framebuffer::Framebuffer( int w, int h ) {
