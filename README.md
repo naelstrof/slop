@@ -24,7 +24,7 @@ slop can be used to create a video recording script in only three lines of code.
 ```bash
 #!/bin/bash
 slop=$(slop -f "%x %y %w %h %g %i") || exit 1
-read -r X Y W H G ID < <(echo $slop)
+read -r X Y W H G ID <<< $slop
 ffmpeg -f x11grab -s "$W"x"$H" -i :0.0+$X,$Y -f alsa -i pulse ~/myfile.webm
 ```
 
@@ -33,7 +33,7 @@ You can also take images using imagemagick like so:
 ```bash
 #!/bin/bash
 slop=$(slop -f "%g") || exit 1
-read -r G < <(echo $slop)
+read -r G <<< $slop
 import -window root -crop $G ~/myimage.png
 ```
 
@@ -48,7 +48,7 @@ imagefile="/tmp/sloppy.$RANDOM.png"
 text="/tmp/translation"
 echo "$imagefile"
 slop=$(slop -f "%g") || exit 1
-read -r G < <(echo $slop)
+read -r G <<< $slop
 import -window root -crop $G $imagefile
 tesseract $imagefile $text 2>/dev/null 
 cat $text".txt" | xclip -selection c
