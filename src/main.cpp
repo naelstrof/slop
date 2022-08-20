@@ -270,6 +270,11 @@ void printHelp() {
     std::cout << "                                  and %% for a literal percent sign.\n";
     std::cout << "                                  (default=`%g')\n";
     std::cout << "  -o, --noopengl                Disable graphics acceleration.\n";
+    std::cout << "  -m, --keymove=KEYSYM          Set move key, hold move key while selecting\n";
+    std::cout << "                                  to move selection box.\n";
+    std::cout << "  -a, --keyadjust=KEYSYM,KEYSYM,KEYSYM,KEYSYM\n";
+    std::cout << "                                Set adjustment key, moves the corner\n";
+    std::cout << "                                  opposite to the mouse corner.\n";
     std::cout << "Examples\n";
     std::cout << "    $ # Gray, thick, transparent border for maximum visiblity.\n";
     std::cout << "    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n";
