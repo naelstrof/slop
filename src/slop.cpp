@@ -244,7 +244,8 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
     // Init our little state machine, memory is a tad of a misnomer
     slop::SlopMemory* memory = new slop::SlopMemory( options, new GLRectangle(glm::vec2(0,0), glm::vec2(0,0), options->border, options->padding, glm::vec4( options->r, options->g, options->b, options->a ), options->highlight) );
 
-    slop::Framebuffer* pingpong = new slop::Framebuffer(WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
+    slop::Framebuffer *ball = new slop::Framebuffer(WidthOfScreen(x11->screen), HeightOfScreen(x11->screen));
+    slop::Framebuffer *ping, *pong;
 
     // This is where we'll run through all of our stuffs
     auto start = std::chrono::high_resolution_clock::now();
@@ -269,40 +270,26 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
         window->framebuffer->unbind();
 
         std::chrono::duration<double, std::milli> elapsed = current-start;
-        
-        int i;
+        ping=ball;
+        pong=window->framebuffer;
+
         // We have our clean buffer, now to slather it with some juicy shader chains.
         glEnable( GL_BLEND );
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        for (i=0;i<=(int)shaders.size()-2;i+=2) {
-            pingpong->bind();
+        for (int i=0; i < shaders.size() - 1; i++) {
+            ping->bind();
             glClearColor (0.0, 0.0, 0.0, 0.0);
             glClear (GL_COLOR_BUFFER_BIT);
-            window->framebuffer->setShader( shaders[i] );
-            window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-            pingpong->unbind();
-
-            window->framebuffer->bind();
-            glClearColor (0.0, 0.0, 0.0, 0.0);
-            glClear (GL_COLOR_BUFFER_BIT);
-            pingpong->setShader( shaders[i+1] );
-            pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-            window->framebuffer->unbind();
+            pong->setShader( shaders[i] );
+            pong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
+            ping->unbind();
+            std::swap(ping, pong);
         }
-        for (;i<shaders.size();i++) {
-            pingpong->bind();
-            glClearColor (0.0, 0.0, 0.0, 0.0);
-            glClear (GL_COLOR_BUFFER_BIT);
-            window->framebuffer->setShader( shaders[i] );
-            window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-            pingpong->unbind();
-        }
+        glClearColor (0.0, 0.0, 0.0, 0.0);
+        glClear (GL_COLOR_BUFFER_BIT);
+        pong->setShader( shaders[shaders.size() - 1] );
+        pong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
         glDisable( GL_BLEND );
-        if ( i%2 != 0 ) {
-            window->framebuffer->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-        } else {
-            pingpong->draw(slop::mouse->getMousePos(), elapsed.count()/1000.f, glm::vec4( options->r, options->g, options->b, options->a ) );
-        }
 
         window->display();
         // Here we sleep just to prevent our CPU usage from going to 100%.
@@ -339,7 +326,7 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
     for( int i=0;i<shaders.size();i++ ) {
       delete shaders[i];
     }
-    delete pingpong;
+    delete ball;
     delete window;
     delete slop::mouse;
     Window selectedWindow = memory->selectedWindow;
