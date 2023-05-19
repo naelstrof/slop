@@ -85,6 +85,8 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 * [Debian: slop](https://packages.debian.org/sid/slop)
 * [Ubuntu: slop](https://packages.ubuntu.com/slop)
 * [Fedora: slop](https://src.fedoraproject.org/rpms/slop)
+* [Red Hat Enterprise Linux (via EPEL): slop](https://src.fedoraproject.org/rpms/slop)
+* [CentOS Stream and similar (via EPEL): slop](https://src.fedoraproject.org/rpms/slop)
 * [Ravenports: slop](http://www.ravenports.com/catalog/bucket_CB/slop/standard/)
 * [Alpine Linux: testing/slop](https://pkgs.alpinelinux.org/package/edge/testing/x86_64/slop)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
