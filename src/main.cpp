@@ -135,6 +135,8 @@ std::string formatOutput( std::string input, SlopSelection selection ) {
                 case 'i':
                 case 'I': output << selection.id; break;
                 case '%': output << "%"; break;
+                case 'm': output << round(selection.w / 2.0) * 2; break;
+                case 'n': output << round(selection.h / 2.0) * 2; break;
                 default: throw std::invalid_argument( std::string()+"Expected x, y, w, h, g, i, c, or % after % in format. Got `" + input[i+1] + "`." );
              }
             i++;
