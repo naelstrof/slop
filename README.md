@@ -73,12 +73,11 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 
 ### Install using your Package Manager (Preferred)
 
-* [Arch Linux: community/slop](https://www.archlinux.org/packages/community/x86_64/slop/)
-* [Void Linux: slop](https://github.com/voidlinux/void-packages/blob/24ac22af44018e2598047e5ef7fd3522efa79db5/srcpkgs/slop/template)
+* [Arch Linux: extra/slop](https://www.archlinux.org/packages/extra/x86_64/slop/)
+* [Void Linux: slop](https://github.com/void-linux/void-packages/blob/master/srcpkgs/slop/template)
 * [FreeBSD: x11/slop](http://www.freshports.org/x11/slop/)
 * [NetBSD: x11/slop](http://pkgsrc.se/x11/slop)
-* [OpenBSD: graphics/slop](http://openports.se/graphics/slop)
-* [CRUX: 6c37/slop](https://github.com/6c37/crux-ports/tree/3.2/slop)
+* [OpenBSD: graphics/slop](https://openports.pl/path/graphics/slop)
 * [Gentoo: x11-misc/slop](https://packages.gentoo.org/packages/x11-misc/slop)
 * [NixOS: slop](https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/misc/slop/default.nix)
 * [GNU Guix: slop](https://www.gnu.org/software/guix/packages/#slop)
@@ -88,7 +87,7 @@ While slop not only looks nicer, it's impossible for it to end up in screenshots
 * [Red Hat Enterprise Linux (via EPEL): slop](https://src.fedoraproject.org/rpms/slop)
 * [CentOS Stream and similar (via EPEL): slop](https://src.fedoraproject.org/rpms/slop)
 * [Ravenports: slop](http://www.ravenports.com/catalog/bucket_CB/slop/standard/)
-* [Alpine Linux: testing/slop](https://pkgs.alpinelinux.org/package/edge/testing/x86_64/slop)
+* [Alpine Linux: community/slop](https://pkgs.alpinelinux.org/package/edge/community/x86_64/slop)
 * Please make a package for slop on your favorite system, and make a pull request to add it to this list.
 
 ### Install using CMake (Requires CMake)
