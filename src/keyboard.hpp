@@ -23,8 +23,10 @@
 
 #define XK_MISCELLANY
 #define XK_LATIN1 // for XK_space
-#include <X11/keysymdef.h>
+#define XK_MISCELLANY // for modifier KeySyms
 
+#include <vector>
+#include <X11/keysymdef.h>
 #include "x.hpp"
 
 namespace slop {
@@ -34,8 +36,15 @@ private:
     char deltaState[32];
     X11* x11;
     bool keyDown;
+
+    // KeySym to move the selection window
+    KeySym keyMove;
+
+    // KeySyms to adjust selection window
+    //  in the order of Left Down Up Right
+    std::vector<KeySym> keyAdjust;
 public:
-    Keyboard( X11* x11 );
+    Keyboard( X11* x11 , KeySym keyMove, std::vector<KeySym> keyAdjust);
     ~Keyboard();
     void update();
     bool getKey( KeySym key );
