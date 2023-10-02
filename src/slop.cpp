@@ -76,6 +76,8 @@ slop::SlopOptions::SlopOptions() {
     padding = 0;
     shaders = slop_default_shaders;
     highlight = false;
+    x_ratio = 0;
+    y_ratio = 0;
     r = 0.5;
     g = 0.5;
     b = 0.5;
@@ -354,6 +356,8 @@ extern "C" struct slop_options slop_options_default() {
     options.padding = 0;
     options.shaders = slop_default_shaders;
     options.highlight = false;
+    options.x_ratio = 0;
+    options.y_ratio = 0;
     options.r = 0.5;
     options.g = 0.5;
     options.b = 0.5;
@@ -380,6 +384,8 @@ extern "C" struct slop_selection slop_select( struct slop_options* options ) {
         realOptions.padding = options->padding;
         realOptions.shaders = options->shaders;
         realOptions.highlight = options->highlight;
+        realOptions.x_ratio = options->x_ratio;
+        realOptions.y_ratio = options->y_ratio;
         realOptions.r = options->r;
         realOptions.g = options->g;
         realOptions.b = options->b;
