@@ -1,5 +1,7 @@
+#include <X11/Xlib.h>
 #include <chrono>
 #include <thread>
+#include <vector>
 #include "keyboard.hpp"
 
 bool slop::Keyboard::getKey( KeySym key ) {
@@ -24,20 +26,19 @@ bool slop::Keyboard::anyKeyDown() {
 
 void slop::Keyboard::update() {
     char keys[32];
+    KeyCode keycode;
     XQueryKeymap( x11->display, keys );
+
     // We first delete the arrow key buttons from the mapping.
     // This allows the user to press the arrow keys without triggering anyKeyDown
-    KeyCode keycode = XKeysymToKeycode( x11->display, XK_Left );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
-    keycode = XKeysymToKeycode( x11->display, XK_Right );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
-    keycode = XKeysymToKeycode( x11->display, XK_Up );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
-    keycode = XKeysymToKeycode( x11->display, XK_Down );
-    keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+    for ( size_t i = 0; i < 4; i++) {
+        keycode = XKeysymToKeycode( x11->display, keyAdjust.at(i));
+        keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+    }
     // Also deleting Space for move operation
-    keycode = XKeysymToKeycode( x11->display, XK_space );
+    keycode = XKeysymToKeycode( x11->display, keyMove );
     keys[ keycode / 8 ] = keys[ keycode / 8 ] & ~( 1 << ( keycode % 8 ) );
+
     keyDown = false;
     for ( int i=0;i<32;i++ ) {
         if ( deltaState[i] == keys[i] ) {
@@ -56,8 +57,10 @@ void slop::Keyboard::update() {
     }
 }
 
-slop::Keyboard::Keyboard( X11* x11 ) {
+slop::Keyboard::Keyboard( X11* x11 , KeySym keyMove, std::vector<KeySym> keyAdjust) {
     this->x11 = x11;
+    this->keyMove = keyMove;
+    this->keyAdjust = keyAdjust;
     int err = XGrabKeyboard( x11->display, x11->root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
     int tries = 0;
     while( err != GrabSuccess && tries < 5 ) {
