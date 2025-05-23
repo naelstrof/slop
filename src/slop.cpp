@@ -188,8 +188,7 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options ) {
         memory->draw( fake );
 
         // X11 explodes if we update as fast as possible, here's a tiny sleep.
-        XFlush(x11->display);
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        XSync(x11->display, False);
 
         // Then we draw the framebuffer to the screen
         if ( (!options->nokeyboard && slop::keyboard->anyKeyDown()) || slop::mouse->getButton( 3 ) ) {
