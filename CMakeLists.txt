@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.5.0)
 
 project(slop VERSION 7.6 LANGUAGES CXX)
 
@@ -18,6 +18,7 @@ set( BUILD_SHARED_LIBS ON CACHE BOOL "Build all libraries as shared" )
 set( SLOP_OPENGL TRUE CACHE BOOL "To enable or disable OpenGL support." )
 if ( SLOP_OPENGL )
   add_definitions(-DSLOP_OPENGL="True")
+  set(OpenGL_GL_PREFERENCE "GLVND")
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/")
