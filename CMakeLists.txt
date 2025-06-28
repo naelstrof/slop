@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5.0)
 
-project(slop VERSION 7.6 LANGUAGES CXX)
+project(slop VERSION 7.7 LANGUAGES CXX)
 
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)")
 
