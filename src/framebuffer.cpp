@@ -86,11 +86,14 @@ void slop::Framebuffer::unbind() {
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 }
 
-void slop::Framebuffer::draw(glm::vec2 mouse, float time, glm::vec4 color){
+void slop::Framebuffer::draw(int mouseScroll, glm::vec2 mouse, float time, glm::vec4 color){
     shader->bind();
     shader->setParameter( "texture", 0 );
     shader->setAttribute( "position", buffers[0], 2 );
     shader->setAttribute( "uv", buffers[1], 2 );
+    if ( shader->hasParameter( "scroll" ) ) {
+        shader->setParameter( "scroll", mouseScroll );
+    }
     if ( shader->hasParameter( "mouse" ) ) {
         shader->setParameter( "mouse", mouse );
     }

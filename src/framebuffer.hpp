@@ -43,7 +43,7 @@ public:
     Framebuffer( int w, int h );
     ~Framebuffer();
     void setShader( slop::Shader* shader );
-    void draw(glm::vec2 mouse, float time, glm::vec4 color);
+    void draw(int mouseScroll, glm::vec2 mouse, float time, glm::vec4 color);
     void resize( int w, int h );
     void bind();
     void unbind();
