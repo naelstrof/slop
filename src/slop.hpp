@@ -35,6 +35,8 @@ struct slop_options {
     int nokeyboard;
     int nodecorations;
     char* shaders;
+    float x_ratio;
+    float y_ratio;
     float r;
     float g;
     float b;
@@ -69,6 +71,8 @@ public:
     bool nokeyboard;
     bool nodecorations;
     char* shaders;
+    float x_ratio;
+    float y_ratio;
     float r;
     float g;
     float b;
