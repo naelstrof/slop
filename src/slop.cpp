@@ -111,7 +111,7 @@ slop::SlopSelection slop::SlopSelect( slop::SlopOptions* options ) {
     x11 = new X11(options->xdisplay);
     if ( !options->nokeyboard ) {
         XErrorHandler ph = XSetErrorHandler(slop::TmpXError);
-        keyboard = new Keyboard( x11 );
+        keyboard = new Keyboard( x11, options->keyMove, options->keyAdjust );
         XSetErrorHandler(ph);
     }
 #ifdef SLOP_OPENGL

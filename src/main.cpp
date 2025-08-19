@@ -27,7 +27,60 @@
 #include "slop.hpp"
 #include "cxxopts.hpp"
 
+#include <X11/keysymdef.h>
+#include "x.hpp"
+
 using namespace slop;
+
+std::vector<KeySym> parseAdjustKeys( std::string value ) {
+    std::string valuecopy = value;
+    std::vector<KeySym> found;
+    std::string delimiter = ",";
+    std::string::size_type sz;
+    std::string keysymString;
+    char* keysymChars;
+    KeySym keysym;
+    bool validity = true;
+    try {
+        sz = value.find(delimiter);
+        keysymString = value.substr(0, sz);
+        keysymChars = &keysymString[0];
+        keysym = XStringToKeysym(keysymChars);
+        found.push_back(keysym);
+        value = value.substr(sz + delimiter.size());
+        validity = validity && keysym;
+
+        sz = value.find(delimiter);
+        keysymString = value.substr(0, sz);
+        keysymChars = &keysymString[0];
+        keysym = XStringToKeysym(keysymChars);
+        found.push_back(keysym);
+        value = value.substr(sz + delimiter.size());
+        validity = validity && keysym;
+
+        sz = value.find(delimiter);
+        keysymString = value.substr(0, sz);
+        keysymChars = &keysymString[0];
+        keysym = XStringToKeysym(keysymChars);
+        found.push_back(keysym);
+        value = value.substr(sz + delimiter.size());
+        validity = validity && keysym;
+
+        keysymString = value;
+        keysymChars = &keysymString[0];
+        keysym = XStringToKeysym(keysymChars);
+        found.push_back(keysym);
+        validity = validity && keysym;
+
+        if ( !validity ) throw std::runtime_error("dur");
+    } catch ( ... ) {
+        throw std::invalid_argument("Unable to parse value `" 
+                + valuecopy 
+                + "` as a series of keysyms. Should be something like Left,Down,Up,Right");
+    }
+
+    return found;
+}
 
 glm::vec4 parseColor( std::string value ) {
     std::string valuecopy = value;
@@ -108,6 +161,20 @@ SlopOptions* getOptions( cxxopts::Options& options ) {
             throw std::invalid_argument( "--nodecorations must be between 0 and 2. Or be used as a flag." );
         }
     }
+    if ( options.count( "movekey" ) > 0 ) {
+        const char* keyMove = &options["movekey"].as<std::string>()[0];
+        KeySym keysym = XStringToKeysym(keyMove);
+        foo->keyMove = keysym;
+        if ( keysym == 0 )
+            throw std::invalid_argument("Unable to parse value `" 
+                    + options["movekey"].as<std::string>()
+                    + "` as a keysym.");
+    }
+    std::vector<KeySym> keyAdjust { XK_Up, XK_Down, XK_Up, XK_Right };
+    if ( options.count( "adjustkey" ) > 0 ) {
+        keyAdjust = parseAdjustKeys( options["adjustkey"].as<std::string>() );
+    }
+    foo->keyAdjust = keyAdjust;
     return foo;
 }
 
@@ -203,6 +270,11 @@ void printHelp() {
     std::cout << "                                  and %% for a literal percent sign.\n";
     std::cout << "                                  (default=`%g')\n";
     std::cout << "  -o, --noopengl                Disable graphics acceleration.\n";
+    std::cout << "  -m, --keymove=KEYSYM          Set move key, hold move key while selecting\n";
+    std::cout << "                                  to move selection box.\n";
+    std::cout << "  -a, --keyadjust=KEYSYM,KEYSYM,KEYSYM,KEYSYM\n";
+    std::cout << "                                Set adjustment key, moves the corner\n";
+    std::cout << "                                  opposite to the mouse corner.\n";
     std::cout << "Examples\n";
     std::cout << "    $ # Gray, thick, transparent border for maximum visiblity.\n";
     std::cout << "    $ slop -b 20 -c 0.5,0.5,0.5,0.8\n";
@@ -246,6 +318,8 @@ int app( int argc, char** argv ) {
     ("q,quiet", "Disable any unnecessary cerr output. Any warnings or info simply won't print.")
     ("k,nokeyboard", "Disables the ability to cancel selections with the keyboard.")
     ("o,noopengl", "Disables graphics hardware acceleration.")
+    ("m,movekey", "Set move key, hold move key while selecting to move selection box", cxxopts::value<std::string>())
+    ("a,adjustkey", "Set adjustment key, moves the corner opposite to the mouse corner", cxxopts::value<std::string>())
     ("positional", "Positional parameters", cxxopts::value<std::vector<std::string>>())
     ;
     options.parse_positional("positional");

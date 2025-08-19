@@ -27,6 +27,10 @@
 
 #include "rectangle.hpp"
 
+#include <vector>
+#include <X11/keysymdef.h>
+#include "x.hpp"
+
 namespace slop {
 
 class SlopMemory;
@@ -57,7 +61,7 @@ private:
     float repeatTimer;
     float multiplier;
 public:
-    SlopStartDrag( glm::vec2 point );
+    SlopStartDrag( glm::vec2 point);
     virtual void onEnter( SlopMemory& memory );
     virtual void update( SlopMemory& memory, double dt );
 };
@@ -90,6 +94,8 @@ public:
     bool nodrag;
     bool up;
     Rectangle* rectangle;
+    KeySym keyMove;
+    std::vector<KeySym> keyAdjust;
     void setState( SlopState* state );
     void update( double dt );
     void draw( glm::mat4& matrix );
