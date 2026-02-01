@@ -51,7 +51,7 @@ slop::Mouse::Mouse(X11* x11, int nodecorations, Window ignoreWindow ) {
                             GrabModeAsync, GrabModeAsync, None, xcursor, CurrentTime );
     int tries = 0;
     while( err != GrabSuccess && tries < 5 ) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         err = XGrabPointer( x11->display, x11->root, True,
                                 PointerMotionMask | ButtonPressMask | ButtonReleaseMask | EnterWindowMask,
                                 GrabModeAsync, GrabModeAsync, None, xcursor, CurrentTime );

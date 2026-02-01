@@ -61,7 +61,7 @@ slop::Keyboard::Keyboard( X11* x11 ) {
     int err = XGrabKeyboard( x11->display, x11->root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
     int tries = 0;
     while( err != GrabSuccess && tries < 5 ) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         err = XGrabKeyboard( x11->display, x11->root, False, GrabModeAsync, GrabModeAsync, CurrentTime );
         tries++;
     }

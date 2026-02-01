@@ -213,7 +213,6 @@ slop::SlopSelection slop::XShapeSlopSelect( slop::SlopOptions* options ) {
         XEvent event;
         if ( XCheckTypedEvent( x11->display, UnmapNotify, &event ) ) { break; }
         if ( XCheckTypedEvent( x11->display, DestroyNotify, &event ) ) { break; }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         tries++;
     }
     // Finally return the data.
@@ -289,8 +288,6 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
         glDisable( GL_BLEND );
 
         window->display();
-        // Here we sleep just to prevent our CPU usage from going to 100%.
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         GLenum err = glGetError();
         if ( err != GL_NO_ERROR ) {
             std::string error;
@@ -335,7 +332,6 @@ slop::SlopSelection slop::GLSlopSelect( slop::SlopOptions* options, SlopWindow* 
         XEvent event;
         if ( XCheckTypedEvent( x11->display, UnmapNotify, &event ) ) { break; }
         if ( XCheckTypedEvent( x11->display, DestroyNotify, &event ) ) { break; }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         tries++;
     }
     // Finally return the data.
