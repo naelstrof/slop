@@ -38,6 +38,7 @@ private:
     int currentCursor;
     Window findWindow( Window foo );
     int nodecorations;
+    int scroll;
     Window ignoreWindow;
 public:
     Window hoverWindow;
@@ -48,6 +49,9 @@ public:
     glm::vec2 getMousePos();
     void setButton( int button, int state );
     int getButton( int button );
+    int getScroll(void);
+    void setScroll(int);
+    void updateScroll(int);
 };
 
 extern Mouse* mouse;
