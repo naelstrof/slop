@@ -3,6 +3,8 @@
 using namespace slop;
 
 slop::SlopMemory::SlopMemory( SlopOptions* options, Rectangle* rect ) {
+    this->keyMove = options->keyMove;
+    this->keyAdjust = options->keyAdjust;
     up = false;
     running = true;
     state = (SlopState*)new SlopStart();
@@ -128,13 +130,13 @@ void slop::SlopStartDrag::update( SlopMemory& memory, double dt ) {
     }
 
     if ( keyboard ) {
-        if ( keyboard->getKey(XK_space) ) {
+        if ( keyboard->getKey(memory.keyMove) ) {
             memory.setState( (SlopState*)new SlopStartMove( startPoint, mouse->getMousePos() ) );
             return;
         }
         int arrows[2];
-        arrows[0] = keyboard->getKey(XK_Down)-keyboard->getKey(XK_Up);
-        arrows[1] = keyboard->getKey(XK_Right)-keyboard->getKey(XK_Left);
+        arrows[0] = keyboard->getKey(memory.keyAdjust[1])-keyboard->getKey(memory.keyAdjust[2]);
+        arrows[1] = keyboard->getKey(memory.keyAdjust[3])-keyboard->getKey(memory.keyAdjust[0]);
         if ( arrows[0] || arrows[1] ) {
             if ( repeatTimer == 0 || repeatTimer > .4 ) {
                 startPoint.y += arrows[0]*multiplier;
@@ -179,7 +181,7 @@ void slop::SlopStartMove::update( SlopMemory& memory, double dt ) {
 
     // space or mouse1 released, return to drag
     // if mouse1 is released then drag will end also
-    if ( !keyboard->getKey(XK_space) or (!mouse->getButton( 1 ) && !memory.nodrag) ) {
+    if ( !keyboard->getKey(memory.keyMove) or (!mouse->getButton( 1 ) && !memory.nodrag) ) {
         // clip rectangle on edges of screen.
         startPoint.x = glm::min((int)startPoint.x, WidthOfScreen(x11->screen));
         startPoint.x = glm::max((int)startPoint.x, 0);

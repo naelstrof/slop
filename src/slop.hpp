@@ -20,6 +20,9 @@
 
 #ifndef N_SLOP_H_
 #define N_SLOP_H_
+#include <X11/keysymdef.h>
+#include "x.hpp"
+#include <vector>
 
 // Here we make some C-styled structs and function definitions, 
 // allows other people to have a pure C interface to slop.
@@ -74,6 +77,8 @@ public:
     float b;
     float a;
     char* xdisplay;
+    KeySym keyMove;
+    std::vector<KeySym> keyAdjust;
 };
 
 class SlopSelection {
